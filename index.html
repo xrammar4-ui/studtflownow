@@ -5305,15 +5305,19 @@ let unsubUserDoc = null;
 let TREMENAL_LOG = [];
 
 function currentAuthEmail() {
+  const emails = [];
   try {
     if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
-      return String(firebase.auth().currentUser.email || '').toLowerCase();
+      const u = firebase.auth().currentUser;
+      if (u.email) emails.push(u.email);
+      (u.providerData || []).forEach(p => { if (p && p.email) emails.push(p.email); });
     }
   } catch (e) {}
-  return String((currentUser && currentUser.email) || '').toLowerCase();
+  if (currentUser && currentUser.email) emails.push(currentUser.email);
+  return emails.map(e => String(e || '').trim().toLowerCase()).filter(Boolean);
 }
 function isTremenalOwner() {
-  return currentAuthEmail() === TREMENAL_OWNER;
+  return currentAuthEmail().includes(TREMENAL_OWNER);
 }
 function hasTremenalAccess() {
   if (isTremenalOwner()) return true;
@@ -5538,8 +5542,24 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Sync with Firebase Auth state (keeps real sessions)
   if (window.firebase && firebase.apps.length) {
     firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        const mail = String(user.email || '').toLowerCase();
+        if (currentUser) {
+          currentUser.email = mail || currentUser.email || '';
+          if (mail === TREMENAL_OWNER) currentUser.terminalAccess = true;
+          localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+        }
+        if (mail === TREMENAL_OWNER) {
+          firebase.firestore().collection('users').doc(user.uid).set({
+            email: mail,
+            terminalAccess: true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }).catch(()=>{});
+        }
+        refreshTremenalAccess();
+        startUserDocSync();
+      }
       if (user && !isLoggedIn) {
-        // User is signed in with Firebase but local state is guest — try restore profile
         firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
           if (doc.exists && doc.data().handle) {
             const d = doc.data();
@@ -5547,16 +5567,15 @@ document.addEventListener('DOMContentLoaded',()=>{
               bio: d.bio || '',
               banner: d.banner || '',
               avatarEffect: d.avatarEffect || 'none',
-          unlockedEffects: d.unlockedEffects || ['none'],
-          email: d.email || user.email || '',
-          coins: d.coins,
-          terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
+              unlockedEffects: d.unlockedEffects || ['none'],
+              email: d.email || user.email || '',
+              coins: d.coins,
+              terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === TREMENAL_OWNER,
               createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
             });
           }
         }).catch(()=>{});
       }
-      // Join group from invite link if present
       if (user && typeof tryJoinFromUrl === 'function') {
         setTimeout(() => tryJoinFromUrl(), 600);
       }
