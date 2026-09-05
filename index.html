@@ -291,23 +291,14 @@ h3 { font-size: 1.05rem; }
 }
 .avatar.online { box-shadow: none; }
 
-/* Discord-style avatar decorations */
+/* Discord-style avatar decorations (shapes + motion, not just color rings) */
 .avatar-fx {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   isolation: isolate;
-}
-.avatar-fx::before,
-.avatar-fx::after {
-  content: '';
-  position: absolute;
-  inset: -5px;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0;
+  overflow: visible;
 }
 .avatar-fx > img,
 .avatar-fx > .discord-avatar,
@@ -316,170 +307,232 @@ h3 { font-size: 1.05rem; }
   position: relative;
   z-index: 1;
 }
-.user-mini-avatar-wrap.avatar-fx::before,
-.user-mini-avatar-wrap.avatar-fx::after { inset: -4px; }
-.discord-avatar-wrap.avatar-fx::before,
-.discord-avatar-wrap.avatar-fx::after { inset: -10px; }
 .edit-avatar-fx { width: 90px; height: 90px; }
-.edit-avatar-fx::before,
-.edit-avatar-fx::after { inset: -8px; }
+.fx-layer {
+  position: absolute;
+  inset: -22%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+.fx-layer i {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+.fx-none .fx-layer { display: none; }
 
 @keyframes fxSpin { to { transform: rotate(360deg); } }
-@keyframes fxPulse { 0%,100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
-@keyframes fxGlow { 0%,100% { filter: blur(0px); opacity: .7; } 50% { filter: blur(1px); opacity: 1; } }
+@keyframes fxPulse { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes fxFloat { 0%,100% { transform: translateY(0) rotate(0deg); opacity: .9; } 50% { transform: translateY(-7px) rotate(12deg); opacity: .4; } }
+@keyframes fxRise { 0% { transform: translateY(8px) scale(.7); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(-18px) scale(.4); opacity: 0; } }
+@keyframes fxFall { 0% { transform: translateY(-10px) rotate(0deg); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(18px) rotate(80deg); opacity: 0; } }
+@keyframes fxTwinkle { 0%,100% { opacity: .2; transform: scale(.6); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes fxOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes fxFlicker { 0%,100% { transform: scaleY(1); opacity: .95; } 50% { transform: scaleY(1.18); opacity: .7; } }
+@keyframes fxRipple { 0% { transform: scale(.55); opacity: .7; } 100% { transform: scale(1.25); opacity: 0; } }
+@keyframes fxDrip { 0% { transform: translateY(0) scaleY(1); opacity: .9; } 100% { transform: translateY(10px) scaleY(1.4); opacity: .15; } }
 
-.avatar-fx.fx-nitro::before {
-  opacity: 1;
-  background: conic-gradient(from 0deg, #5865F2, #EB459E, #57F287, #5865F2);
-  animation: fxSpin 4s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+/* ---- shaped decorations ---- */
+.fx-sakura .fx-layer i {
+  width: 28%; height: 18%;
+  background: #F9A8D4;
+  border-radius: 80% 0 80% 0;
+  animation: fxFall 3.4s linear infinite;
 }
-.avatar-fx.fx-nitro::after {
-  opacity: .45;
-  inset: -10px;
-  background: radial-gradient(circle, rgba(88,101,242,.45), transparent 70%);
-  animation: fxPulse 2.6s ease-in-out infinite;
-}
+.fx-sakura .fx-layer i:nth-child(1) { left: 8%; top: 0; animation-delay: 0s; }
+.fx-sakura .fx-layer i:nth-child(2) { left: 70%; top: 4%; background: #FB7185; animation-delay: .5s; }
+.fx-sakura .fx-layer i:nth-child(3) { left: 40%; top: -6%; animation-delay: 1s; }
+.fx-sakura .fx-layer i:nth-child(4) { left: 18%; top: 10%; background: #FBCFE8; animation-delay: 1.6s; }
+.fx-sakura .fx-layer i:nth-child(5) { left: 78%; top: 16%; animation-delay: 2.1s; }
+.fx-sakura .fx-layer i:nth-child(n+6) { display: none; }
 
-.avatar-fx.fx-galaxy::before {
-  opacity: 1;
-  background: conic-gradient(#7C3AED, #2563EB, #EC4899, #7C3AED);
-  animation: fxSpin 7s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-ember .fx-layer i {
+  width: 18%; height: 28%;
+  background: radial-gradient(circle at 50% 80%, #FDE68A, #F97316 55%, #EF4444);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  bottom: -2%;
+  animation: fxFlicker .7s ease-in-out infinite;
 }
-.avatar-fx.fx-galaxy::after {
-  opacity: .55;
-  background: radial-gradient(circle at 30% 30%, rgba(167,139,250,.5), transparent 55%);
-  animation: fxGlow 3s ease-in-out infinite;
+.fx-ember .fx-layer i:nth-child(1) { left: 18%; height: 34%; }
+.fx-ember .fx-layer i:nth-child(2) { left: 40%; height: 40%; animation-delay: .15s; }
+.fx-ember .fx-layer i:nth-child(3) { left: 62%; height: 30%; animation-delay: .3s; }
+.fx-ember .fx-layer i:nth-child(4),
+.fx-ember .fx-layer i:nth-child(5) {
+  width: 8%; height: 8%; border-radius: 50%; background: #FDBA74; bottom: 30%;
+  animation: fxRise 1.6s ease-out infinite;
 }
+.fx-ember .fx-layer i:nth-child(4) { left: 30%; animation-delay: .2s; }
+.fx-ember .fx-layer i:nth-child(5) { left: 58%; animation-delay: .8s; }
+.fx-ember .fx-layer i:nth-child(n+6) { display: none; }
 
-.avatar-fx.fx-ember::before {
-  opacity: 1;
-  background: conic-gradient(#F97316, #EF4444, #FACC15, #F97316);
-  animation: fxSpin 3.2s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-frost .fx-layer i {
+  width: 10%; height: 10%;
+  background: #E0F2FE;
+  clip-path: polygon(50% 0, 61% 35%, 100% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 0 35%, 39% 35%);
+  animation: fxFall 3.8s linear infinite;
 }
-.avatar-fx.fx-ember::after {
-  opacity: .5;
-  background: radial-gradient(circle, rgba(239,68,68,.4), transparent 70%);
-  animation: fxPulse 1.6s ease-in-out infinite;
+.fx-frost .fx-layer i:nth-child(1) { left: 10%; top: 0; }
+.fx-frost .fx-layer i:nth-child(2) { left: 55%; top: -4%; animation-delay: .7s; }
+.fx-frost .fx-layer i:nth-child(3) { left: 78%; top: 8%; animation-delay: 1.4s; }
+.fx-frost .fx-layer i:nth-child(4) { left: 30%; top: 6%; width: 14%; height: 14%; animation-delay: 2s; }
+.fx-frost .fx-layer i:nth-child(5),
+.fx-frost .fx-layer i:nth-child(6) {
+  animation: none; width: 22%; height: 22%;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  background: linear-gradient(135deg, #7DD3FC, #E0F2FE);
+  opacity: .85;
 }
+.fx-frost .fx-layer i:nth-child(5) { left: -6%; top: 38%; }
+.fx-frost .fx-layer i:nth-child(6) { right: -6%; top: 42%; left: auto; }
+.fx-frost .fx-layer i:nth-child(n+7) { display: none; }
 
-.avatar-fx.fx-frost::before {
-  opacity: 1;
-  background: conic-gradient(#E0F2FE, #38BDF8, #818CF8, #E0F2FE);
-  animation: fxSpin 6s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-spark .fx-layer i {
+  width: 14%; height: 14%;
+  background: #FDE047;
+  clip-path: polygon(50% 0, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0 50%, 39% 35%);
+  animation: fxTwinkle 1.4s ease-in-out infinite;
 }
-.avatar-fx.fx-frost::after {
-  opacity: .5;
-  box-shadow: 0 0 16px rgba(56,189,248,.45);
-}
+.fx-spark .fx-layer i:nth-child(1) { left: 2%; top: 12%; }
+.fx-spark .fx-layer i:nth-child(2) { right: 4%; top: 8%; left: auto; animation-delay: .2s; background: #FACC15; }
+.fx-spark .fx-layer i:nth-child(3) { left: 8%; bottom: 10%; top: auto; animation-delay: .4s; }
+.fx-spark .fx-layer i:nth-child(4) { right: 6%; bottom: 14%; left: auto; top: auto; animation-delay: .6s; }
+.fx-spark .fx-layer i:nth-child(5) { left: 46%; top: -6%; animation-delay: .3s; width: 18%; height: 18%; }
+.fx-spark .fx-layer i:nth-child(n+6) { display: none; }
 
-.avatar-fx.fx-neon::before {
-  opacity: 1;
-  background: conic-gradient(#22D3EE, #A855F7, #F472B6, #22D3EE);
-  animation: fxSpin 2.4s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-ghost .fx-layer i {
+  background: rgba(228,228,231,.45);
+  border-radius: 50%;
+  filter: blur(0.4px);
+  animation: fxFloat 2.8s ease-in-out infinite;
 }
-.avatar-fx.fx-neon::after {
-  opacity: .55;
-  box-shadow: 0 0 18px rgba(168,85,247,.55);
-  animation: fxPulse 1.8s ease-in-out infinite;
-}
+.fx-ghost .fx-layer i:nth-child(1) { width: 28%; height: 20%; left: -4%; top: 20%; }
+.fx-ghost .fx-layer i:nth-child(2) { width: 34%; height: 22%; right: -6%; top: 46%; left: auto; animation-delay: .5s; }
+.fx-ghost .fx-layer i:nth-child(3) { width: 22%; height: 16%; left: 38%; top: -4%; animation-delay: 1s; }
+.fx-ghost .fx-layer i:nth-child(n+4) { display: none; }
 
-.avatar-fx.fx-gold::before {
-  opacity: 1;
-  background: conic-gradient(#FDE68A, #F59E0B, #B45309, #FDE68A);
-  animation: fxSpin 5s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-wave .fx-layer i { border-radius: 50%; border: 2px solid rgba(56,189,248,.7); }
+.fx-wave .fx-layer i:nth-child(1),
+.fx-wave .fx-layer i:nth-child(2) {
+  inset: 8%; width: auto; height: auto;
+  animation: fxRipple 2.2s ease-out infinite;
 }
-.avatar-fx.fx-gold::after {
-  opacity: .45;
-  box-shadow: 0 0 16px rgba(245,158,11,.45);
+.fx-wave .fx-layer i:nth-child(2) { animation-delay: 1.1s; border-color: rgba(14,165,233,.55); }
+.fx-wave .fx-layer i:nth-child(3),
+.fx-wave .fx-layer i:nth-child(4),
+.fx-wave .fx-layer i:nth-child(5) {
+  width: 10%; height: 14%; border: none;
+  background: #38BDF8; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  bottom: -4%; animation: fxRise 2s ease-out infinite;
 }
+.fx-wave .fx-layer i:nth-child(3) { left: 20%; }
+.fx-wave .fx-layer i:nth-child(4) { left: 48%; animation-delay: .4s; }
+.fx-wave .fx-layer i:nth-child(5) { left: 72%; animation-delay: .9s; }
+.fx-wave .fx-layer i:nth-child(n+6) { display: none; }
 
-.avatar-fx.fx-aurora::before {
-  opacity: 1;
-  background: conic-gradient(#34D399, #60A5FA, #C084FC, #34D399);
-  animation: fxSpin 8s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-gold .fx-layer i:nth-child(1) {
+  left: 22%; top: -10%; width: 56%; height: 28%;
+  background: linear-gradient(#FDE68A, #F59E0B);
+  clip-path: polygon(8% 80%, 20% 30%, 35% 55%, 50% 8%, 65% 55%, 80% 30%, 92% 80%, 50% 100%);
 }
-.avatar-fx.fx-aurora::after {
-  opacity: .4;
-  background: radial-gradient(circle, rgba(52,211,153,.35), transparent 70%);
-  animation: fxGlow 3.4s ease-in-out infinite;
+.fx-gold .fx-layer i:nth-child(2),
+.fx-gold .fx-layer i:nth-child(3) {
+  width: 12%; height: 12%;
+  background: #FACC15;
+  clip-path: polygon(50% 0, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0 50%, 39% 35%);
 }
+.fx-gold .fx-layer i:nth-child(2) { left: 6%; top: 18%; }
+.fx-gold .fx-layer i:nth-child(3) { right: 6%; top: 22%; left: auto; }
+.fx-gold .fx-layer i:nth-child(n+4) { display: none; }
 
-.avatar-fx.fx-sakura::before {
-  opacity: 1;
-  background: conic-gradient(#FBCFE8, #FB7185, #F9A8D4, #FBCFE8);
-  animation: fxSpin 6s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-neon .fx-layer i {
+  width: 22%; height: 22%;
+  border: 2px solid #22D3EE;
+  background: transparent;
 }
-.avatar-fx.fx-sakura::after { opacity: .4; box-shadow: 0 0 14px rgba(251,113,133,.4); }
+.fx-neon .fx-layer i:nth-child(1) { left: -2%; top: -2%; border-right: 0; border-bottom: 0; }
+.fx-neon .fx-layer i:nth-child(2) { right: -2%; top: -2%; left: auto; border-left: 0; border-bottom: 0; border-color: #A855F7; }
+.fx-neon .fx-layer i:nth-child(3) { left: -2%; bottom: -2%; top: auto; border-right: 0; border-top: 0; border-color: #F472B6; }
+.fx-neon .fx-layer i:nth-child(4) { right: -2%; bottom: -2%; left: auto; top: auto; border-left: 0; border-top: 0; }
+.fx-neon .fx-layer i:nth-child(n+5) { display: none; }
 
-.avatar-fx.fx-ghost::before {
-  opacity: 1;
-  background: conic-gradient(#E4E4E7, #A1A1AA, #FAFAFA, #E4E4E7);
-  animation: fxSpin 9s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-midnight .fx-layer i:nth-child(1) {
+  width: 26%; height: 26%; right: -4%; top: -4%; left: auto;
+  border-radius: 50%;
+  box-shadow: inset -6px 0 0 0 #FDE68A;
+  background: transparent;
 }
-.avatar-fx.fx-ghost::after { opacity: .3; box-shadow: 0 0 18px rgba(255,255,255,.25); }
+.fx-midnight .fx-layer i:nth-child(n+2) {
+  width: 7%; height: 7%; background: #F8FAFC; border-radius: 50%;
+  animation: fxTwinkle 1.8s ease-in-out infinite;
+}
+.fx-midnight .fx-layer i:nth-child(2) { left: 8%; top: 10%; }
+.fx-midnight .fx-layer i:nth-child(3) { left: 20%; top: 2%; animation-delay: .3s; }
+.fx-midnight .fx-layer i:nth-child(4) { right: 18%; top: 28%; left: auto; animation-delay: .6s; }
+.fx-midnight .fx-layer i:nth-child(5) { left: 6%; bottom: 16%; top: auto; animation-delay: .9s; }
+.fx-midnight .fx-layer i:nth-child(n+6) { display: none; }
 
-.avatar-fx.fx-midnight::before {
-  opacity: 1;
-  background: conic-gradient(#1E3A8A, #312E81, #0EA5E9, #1E3A8A);
-  animation: fxSpin 7s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-lava .fx-layer i {
+  width: 16%; height: 20%;
+  background: linear-gradient(#FACC15, #EA580C 60%, #7F1D1D);
+  border-radius: 40% 40% 50% 50%;
+  top: auto; bottom: -8%;
+  animation: fxDrip 1.5s ease-in infinite;
 }
-.avatar-fx.fx-midnight::after { opacity: .45; box-shadow: 0 0 16px rgba(30,58,138,.55); }
+.fx-lava .fx-layer i:nth-child(1) { left: 18%; }
+.fx-lava .fx-layer i:nth-child(2) { left: 42%; height: 26%; animation-delay: .3s; }
+.fx-lava .fx-layer i:nth-child(3) { left: 66%; animation-delay: .6s; }
+.fx-lava .fx-layer i:nth-child(n+4) { display: none; }
 
-.avatar-fx.fx-lava::before {
-  opacity: 1;
-  background: conic-gradient(#7F1D1D, #EA580C, #FACC15, #7F1D1D);
-  animation: fxSpin 3.6s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-aurora .fx-layer i {
+  height: 18%; width: 80%;
+  border-radius: 40%;
+  filter: blur(1px);
+  opacity: .75;
 }
-.avatar-fx.fx-lava::after { opacity: .5; box-shadow: 0 0 18px rgba(234,88,12,.5); animation: fxPulse 1.4s ease-in-out infinite; }
+.fx-aurora .fx-layer i:nth-child(1) { left: 10%; top: -4%; background: linear-gradient(90deg, transparent, #34D399, transparent); transform: rotate(-8deg); }
+.fx-aurora .fx-layer i:nth-child(2) { left: 8%; top: 6%; background: linear-gradient(90deg, transparent, #60A5FA, transparent); transform: rotate(6deg); }
+.fx-aurora .fx-layer i:nth-child(3) { left: 12%; bottom: -2%; top: auto; background: linear-gradient(90deg, transparent, #C084FC, transparent); transform: rotate(-4deg); }
+.fx-aurora .fx-layer i:nth-child(n+4) { display: none; }
 
-.avatar-fx.fx-prism::before {
-  opacity: 1;
-  background: conic-gradient(#EF4444, #F59E0B, #22C55E, #3B82F6, #A855F7, #EF4444);
-  animation: fxSpin 3s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-galaxy .fx-layer {
+  animation: fxOrbit 8s linear infinite;
 }
-.avatar-fx.fx-prism::after { opacity: .4; box-shadow: 0 0 16px rgba(168,85,247,.4); }
+.fx-galaxy .fx-layer i { border-radius: 50%; }
+.fx-galaxy .fx-layer i:nth-child(1) { width: 16%; height: 16%; left: 42%; top: -6%; background: radial-gradient(circle at 30% 30%, #FDE68A, #F59E0B); }
+.fx-galaxy .fx-layer i:nth-child(2) { width: 9%; height: 9%; left: -4%; top: 42%; background: #A78BFA; }
+.fx-galaxy .fx-layer i:nth-child(3) { width: 7%; height: 7%; right: -2%; top: 30%; left: auto; background: #60A5FA; }
+.fx-galaxy .fx-layer i:nth-child(4) { width: 6%; height: 6%; left: 20%; bottom: 0; top: auto; background: #F9A8D4; }
+.fx-galaxy .fx-layer i:nth-child(n+5) { display: none; }
 
-.avatar-fx.fx-wave::before {
-  opacity: 1;
-  background: conic-gradient(#0EA5E9, #22D3EE, #2563EB, #0EA5E9);
-  animation: fxSpin 5.5s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-prism .fx-layer i {
+  width: 18%; height: 22%;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
-.avatar-fx.fx-wave::after { opacity: .45; box-shadow: 0 0 16px rgba(14,165,233,.45); }
+.fx-prism .fx-layer i:nth-child(1) { left: -4%; top: 18%; background: #EF4444; transform: rotate(-20deg); }
+.fx-prism .fx-layer i:nth-child(2) { right: -4%; top: 16%; left: auto; background: #3B82F6; transform: rotate(18deg); }
+.fx-prism .fx-layer i:nth-child(3) { left: 8%; bottom: -6%; top: auto; background: #22C55E; }
+.fx-prism .fx-layer i:nth-child(4) { right: 10%; bottom: -4%; left: auto; top: auto; background: #A855F7; }
+.fx-prism .fx-layer i:nth-child(5) { left: 42%; top: -8%; background: #F59E0B; }
+.fx-prism .fx-layer i:nth-child(n+6) { display: none; }
 
-.avatar-fx.fx-spark::before {
-  opacity: 1;
-  background: conic-gradient(#FDE047, #FACC15, #FFF7ED, #FDE047);
-  animation: fxSpin 2.8s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+.fx-nitro .fx-layer { animation: fxOrbit 6s linear infinite; }
+.fx-nitro .fx-layer i { width: 12%; height: 12%; border-radius: 50%; }
+.fx-nitro .fx-layer i:nth-child(1) { left: 44%; top: -8%; background: #5865F2; }
+.fx-nitro .fx-layer i:nth-child(2) { right: -6%; top: 28%; left: auto; background: #EB459E; }
+.fx-nitro .fx-layer i:nth-child(3) { left: -6%; top: 30%; background: #57F287; }
+.fx-nitro .fx-layer i:nth-child(4) { left: 20%; bottom: -6%; top: auto; background: #FEE75C; }
+.fx-nitro .fx-layer i:nth-child(5),
+.fx-nitro .fx-layer i:nth-child(6) {
+  width: 8%; height: 8%; background: #fff;
+  clip-path: polygon(50% 0, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0 50%, 39% 35%);
+  animation: fxTwinkle 1.2s ease-in-out infinite;
 }
-.avatar-fx.fx-spark::after { opacity: .5; box-shadow: 0 0 18px rgba(250,204,21,.5); animation: fxPulse 1.2s ease-in-out infinite; }
+.fx-nitro .fx-layer i:nth-child(5) { left: 70%; top: 8%; }
+.fx-nitro .fx-layer i:nth-child(6) { left: 10%; top: 70%; }
+
+.chat-item, .sidebar-footer, .user-mini { overflow: visible; }
+#chat-conversations { overflow-x: visible; }
 
 .fx-picker {
   display: grid;
@@ -500,13 +553,27 @@ h3 { font-size: 1.05rem; }
 }
 .fx-pick:hover { border-color: rgba(99,102,241,.4); color: var(--text-primary); }
 .fx-pick.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-hover); }
+.fx-pick.locked { opacity: 0.72; }
 .fx-pick-orb {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   margin: 0 auto 0.35rem;
   background: #27272A;
+  position: relative;
+  overflow: visible;
 }
+.fx-pick-price {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  margin-top: 0.2rem;
+  font-size: 0.64rem;
+  color: #FBBF24;
+  font-weight: 600;
+}
+.fx-pick-price.owned { color: var(--success); }
 .discord-profile.has-fx { box-shadow: 0 0 40px rgba(99,102,241,.12); }
 .main-content {
   flex: 1;
@@ -1009,6 +1076,8 @@ h3 { font-size: 1.05rem; }
   padding: 1.35rem;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
   gap: 0.65rem;
 }
 .message {
@@ -1697,15 +1766,18 @@ h3 { font-size: 1.05rem; }
 .chat-peer-clickable:hover #chat-peer-name { color: var(--accent-hover); }
 .wa-messages {
   background: #0B141A;
-  gap: 0.28rem !important;
+  gap: 0.35rem !important;
   padding: 1rem 1.1rem !important;
 }
 .wa-bubble {
-  max-width: 75%;
-  padding: 0.42rem 0.7rem 0.32rem;
+  flex: 0 0 auto !important;
+  height: auto !important;
+  width: fit-content;
+  max-width: min(75%, 420px);
+  padding: 0.38rem 0.7rem 0.28rem;
   border-radius: 12px;
   font-size: 0.92rem;
-  line-height: 1.45;
+  line-height: 1.4;
   position: relative;
   word-wrap: break-word;
   overflow-wrap: anywhere;
@@ -1713,16 +1785,18 @@ h3 { font-size: 1.05rem; }
   box-shadow: 0 1px 1px rgba(0,0,0,0.18);
 }
 .wa-reply-quote {
-  border-left: 3px solid var(--accent);
-  background: rgba(0,0,0,0.2);
+  border-left: 3px solid #53BDEB;
+  background: rgba(0,0,0,0.18);
   border-radius: 6px;
   padding: 0.3rem 0.5rem;
   margin-bottom: 0.35rem;
   font-size: 0.78rem;
-  color: var(--text-secondary);
+  color: rgba(233,237,239,0.75);
   cursor: pointer;
   overflow: hidden;
   max-height: 3.2em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .wa-reply-quote strong {
   color: var(--accent-hover);
@@ -1763,12 +1837,14 @@ h3 { font-size: 1.05rem; }
 .wa-reply-bar-text strong { color: var(--accent-hover); }
 .wa-bubble.sent {
   align-self: flex-end;
+  margin-left: auto;
   background: #005C4B;
   color: #E9EDEF;
   border-bottom-right-radius: 3px;
 }
 .wa-bubble.received {
   align-self: flex-start;
+  margin-right: auto;
   background: #202C33;
   color: #E9EDEF;
   border-bottom-left-radius: 3px;
@@ -1836,6 +1912,23 @@ h3 { font-size: 1.05rem; }
 .status-dot.dnd { background: #F23F43; }
 .status-dot.invisible,
 .status-dot.offline { background: #80848E; }
+.chat-avatar-wrap {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-avatar-wrap .avatar {
+  width: 34px;
+  height: 34px;
+}
+.chat-avatar-wrap .status-dot {
+  border-color: var(--bg-elevated);
+  z-index: 3;
+}
 
 .discord-avatar-status.online { background: #23A55A; }
 .discord-avatar-status.idle { background: #F0B232; }
@@ -2045,6 +2138,7 @@ h3 { font-size: 1.05rem; }
         </div>
         <div class="user-mini" onclick="toggleStatusMenu(event)">
           <div class="user-mini-avatar-wrap avatar-fx fx-none" id="sidebar-avatar-fx">
+            <span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             <img class="avatar" id="sidebar-user-avatar" src="" alt="" />
             <span class="status-dot online" id="sidebar-status-dot" title="Online"></span>
           </div>
@@ -2303,7 +2397,10 @@ h3 { font-size: 1.05rem; }
             <div id="chat-active" class="hidden" style="display:none;flex-direction:column;height:100%">
               <div class="chat-header">
                 <div class="chat-peer-clickable" style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:0" onclick="openPeerProfileFromChat()" title="View profile">
-                  <img class="avatar" id="chat-peer-avatar" src="" alt="" />
+                  <span class="chat-avatar-wrap" id="chat-peer-avatar-wrap">
+                    <img class="avatar" id="chat-peer-avatar" src="" alt="" />
+                    <span class="status-dot offline" id="chat-peer-status-dot" title="Offline"></span>
+                  </span>
                   <div style="min-width:0">
                     <div style="font-weight:600" id="chat-peer-name">—</div>
                     <div class="text-xs" id="chat-peer-status">offline</div>
@@ -2346,6 +2443,7 @@ h3 { font-size: 1.05rem; }
         <div class="discord-profile">
           <div class="discord-banner" id="profile-banner"></div>
           <div class="discord-avatar-wrap avatar-fx fx-none" id="profile-avatar-wrap">
+            <span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             <img class="discord-avatar" id="profile-avatar" src="" alt="" />
             <div class="discord-avatar-status online" id="profile-status-dot" title="Online"></div>
           </div>
@@ -2396,6 +2494,7 @@ h3 { font-size: 1.05rem; }
         </div>
         <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
           <div class="avatar-fx fx-none edit-avatar-fx" id="edit-avatar-fx" style="position:relative">
+            <span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             <img id="edit-avatar-preview" src="" alt="" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-elevated)" />
             <label for="edit-avatar-input" style="position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card);z-index:2" title="Change avatar (GIF ok)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -2407,7 +2506,8 @@ h3 { font-size: 1.05rem; }
         <div class="form-group">
           <button type="button" class="btn btn-outline w-full" onclick="toggleAvatarEffectPanel()">Avatar effects</button>
           <div id="avatar-fx-panel" class="hidden">
-            <p class="text-xs text-muted" style="margin-top:0.65rem">Pick a decoration around your avatar — like Discord.</p>
+            <p class="text-xs text-muted" style="margin-top:0.65rem">Buy decorations with coins. Unlock once, use anytime.</p>
+            <p class="text-xs" id="avatar-fx-hint" style="margin-top:0.35rem;color:#FBBF24">Balance: 0 coins</p>
             <div class="fx-picker" id="avatar-fx-picker"></div>
           </div>
         </div>
@@ -2472,6 +2572,7 @@ h3 { font-size: 1.05rem; }
       <div class="discord-profile" style="margin:0">
         <div class="discord-banner" id="view-profile-banner"></div>
         <div class="discord-avatar-wrap avatar-fx fx-none" id="view-profile-avatar-wrap">
+          <span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
           <img class="discord-avatar" id="view-profile-avatar" src="" alt="" />
           <div class="discord-avatar-status" id="view-profile-status-dot" title="Status"></div>
         </div>
@@ -2734,14 +2835,18 @@ window.FIREBASE_CONFIG = {
   </script>
   <script>
     if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && !String(window.FIREBASE_CONFIG.apiKey).startsWith('PASTE_')) {
-      firebase.initializeApp(window.FIREBASE_CONFIG);
-    } else {
-      console.warn('DevFlow: Fill FIREBASE_CONFIG with your Firebase web config');
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
+      } catch (e) {}
     }
   </script>
   <script>
 /* ========== CHAT.JS ========== */
 /* DevFlow Chat — Firebase Firestore realtime + WhatsApp receipts */
+
+function fxLayerHtml() {
+  return '<span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
+}
 
 let activePeerHandle = null;
 let activePeerUid = null;
@@ -2758,6 +2863,16 @@ function auth() { return firebase.auth(); }
 
 function chatRoomId(a, b) {
   return [String(a).toLowerCase(), String(b).toLowerCase()].sort().join('_');
+}
+
+function publicPresence(d) {
+  d = d || {};
+  if (d.status === 'invisible' || d.online === false) return 'offline';
+  if (d.status === 'idle' || d.status === 'dnd' || d.status === 'online') return d.status;
+  return d.online === true ? 'online' : 'offline';
+}
+function presenceLabel(st) {
+  return ({ online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline', invisible: 'Offline' })[st] || 'Offline';
 }
 
 function tickHtml(status) {
@@ -2840,6 +2955,8 @@ async function openChatWith(peerHandle) {
 
   document.getElementById('chat-peer-name').textContent = peer.displayName || peer.handle;
   document.getElementById('chat-peer-avatar').src = peer.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(activePeerHandle));
+  const hdot = document.getElementById('chat-peer-status-dot');
+  if (hdot) hdot.style.display = '';
   updatePeerStatusFromPresence(peer.uid);
 
   beatPresence();
@@ -2854,11 +2971,14 @@ function updatePeerStatusFromPresence(uid) {
     const stEl = document.getElementById('chat-peer-status');
     if (!stEl) return;
     const d = snap.data() || {};
-    const status = d.status || (d.online === true ? 'online' : 'offline');
-    const labels = { online: 'online', idle: 'idle', dnd: 'do not disturb', invisible: 'offline', offline: 'offline' };
-    const visible = status !== 'invisible' && d.online !== false;
-    stEl.textContent = visible ? (labels[status] || 'online') : 'offline';
-    stEl.className = 'text-xs ' + (visible && status === 'online' ? 'chat-peer-online' : 'chat-peer-offline');
+    const status = publicPresence(d);
+    stEl.textContent = presenceLabel(status).toLowerCase();
+    stEl.className = 'text-xs ' + (status === 'online' ? 'chat-peer-online' : 'chat-peer-offline');
+    const dot = document.getElementById('chat-peer-status-dot');
+    if (dot) {
+      dot.className = 'status-dot ' + status;
+      dot.title = presenceLabel(status);
+    }
   });
 }
 
@@ -3246,13 +3366,17 @@ async function renderChatList() {
       const userDoc = await db().collection('users').doc(otherUid).get();
       const u = userDoc.data() || {};
       const pres = await db().collection('presence').doc(otherUid).get();
-      const online = (pres.data() || {}).online === true;
+      const st = publicPresence(pres.data() || {});
       const name = u.displayName || u.handle || 'User';
       const handle = u.handle || otherUid;
       const avatar = u.avatar || '';
       const fx = validAvatarEffect(u.avatarEffect || 'none');
       rows.push(`<div class="chat-item" onclick="openChatWith('${handle}')">
-        <span class="avatar-fx fx-${fx}"><img class="avatar" src="${avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + handle}" alt="" /></span>
+        <span class="chat-avatar-wrap avatar-fx fx-${fx}">
+          ${fxLayerHtml()}
+          <img class="avatar" src="${avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + handle}" alt="" />
+          <span class="status-dot ${st}" title="${presenceLabel(st)}"></span>
+        </span>
         <div style="min-width:0;flex:1">
           <div style="font-weight:600;font-size:0.9rem">${escapeHtml(name)}</div>
           <div class="text-xs text-muted truncate">${escapeHtml(data.lastText || '')}</div>
@@ -3486,6 +3610,8 @@ async function openGroupChat(groupId, groupName) {
   document.getElementById('chat-peer-avatar').src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(groupId);
   document.getElementById('chat-peer-status').textContent = 'group';
   document.getElementById('chat-peer-status').className = 'text-xs text-muted';
+  const gdot = document.getElementById('chat-peer-status-dot');
+  if (gdot) gdot.style.display = 'none';
   // disable profile click for groups by clearing activePeerHandle
   listenGroupMessages(groupId);
   renderChatList();
@@ -3619,6 +3745,17 @@ function addCoins(n, reason){
   saveCoins();
   if(reason) showToast('+' + n + ' coins', reason);
 }
+function spendCoins(n, reason){
+  n = Math.max(0, parseInt(n, 10) || 0);
+  if (COINS < n) {
+    showToast('Not enough coins', 'You need ' + n + ' coins');
+    return false;
+  }
+  COINS -= n;
+  saveCoins();
+  if (reason) showToast('-' + n + ' coins', reason);
+  return true;
+}
 function updateCoinsUI(){
   document.querySelectorAll('.coin-value').forEach(el => { el.textContent = COINS; });
 }
@@ -3699,6 +3836,7 @@ function startGoogleSignup(optionalName) {
           bio: d.bio || '',
           banner: d.banner || '',
           avatarEffect: d.avatarEffect || 'none',
+          unlockedEffects: d.unlockedEffects || ['none'],
           createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
         });
         return;
@@ -3711,7 +3849,6 @@ function startGoogleSignup(optionalName) {
       setTimeout(() => document.getElementById('setup-username')?.focus(), 100);
     });
   }).catch(err => {
-    console.error(err);
     showToast('Google sign-in failed', err.message || 'Try again');
   });
 }
@@ -3840,8 +3977,15 @@ function login(name, handle, avatarUrl, uid, extra){
     banner: (extra && extra.banner) || (prev && prev.banner) || '',
     bio: (extra && extra.bio) || (prev && prev.bio) || '',
     createdAt: (extra && extra.createdAt) || (prev && prev.createdAt) || Date.now(),
-    avatarEffect: (extra && extra.avatarEffect) || (prev && prev.avatarEffect) || 'none'
+    avatarEffect: (extra && extra.avatarEffect) || (prev && prev.avatarEffect) || 'none',
+    unlockedEffects: (extra && extra.unlockedEffects) || (prev && prev.unlockedEffects) || ['none']
   };
+  if (currentUser.avatarEffect && currentUser.avatarEffect !== 'none') {
+    const u = currentUser.unlockedEffects || [];
+    if (!u.includes(currentUser.avatarEffect)) u.push(currentUser.avatarEffect);
+    currentUser.unlockedEffects = u;
+    localStorage.setItem('devflow_unlocked_fx', JSON.stringify(u));
+  }
   localStorage.setItem('devflow_logged_in','true');
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
   updateUserUI();
@@ -3957,25 +4101,57 @@ function renderDiscordProfile(){
 }
 
 const AVATAR_EFFECTS = [
-  { id: 'none', label: 'None' },
-  { id: 'nitro', label: 'Nitro' },
-  { id: 'galaxy', label: 'Galaxy' },
-  { id: 'ember', label: 'Ember' },
-  { id: 'frost', label: 'Frost' },
-  { id: 'neon', label: 'Neon' },
-  { id: 'gold', label: 'Gold' },
-  { id: 'aurora', label: 'Aurora' },
-  { id: 'sakura', label: 'Sakura' },
-  { id: 'ghost', label: 'Ghost' },
-  { id: 'midnight', label: 'Midnight' },
-  { id: 'lava', label: 'Lava' },
-  { id: 'prism', label: 'Prism' },
-  { id: 'wave', label: 'Wave' },
-  { id: 'spark', label: 'Spark' }
+  { id: 'none', label: 'None', cost: 0 },
+  { id: 'ghost', label: 'Ghost', cost: 20 },
+  { id: 'wave', label: 'Wave', cost: 25 },
+  { id: 'frost', label: 'Frost', cost: 25 },
+  { id: 'sakura', label: 'Sakura', cost: 40 },
+  { id: 'ember', label: 'Ember', cost: 45 },
+  { id: 'spark', label: 'Spark', cost: 50 },
+  { id: 'gold', label: 'Gold', cost: 60 },
+  { id: 'neon', label: 'Neon', cost: 70 },
+  { id: 'midnight', label: 'Midnight', cost: 80 },
+  { id: 'lava', label: 'Lava', cost: 85 },
+  { id: 'aurora', label: 'Aurora', cost: 90 },
+  { id: 'galaxy', label: 'Galaxy', cost: 100 },
+  { id: 'prism', label: 'Prism', cost: 110 },
+  { id: 'nitro', label: 'Nitro', cost: 150 }
 ];
+
+function loadUnlockedEffects() {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('devflow_unlocked_fx') || '[]'); } catch (e) { list = []; }
+  if (currentUser && Array.isArray(currentUser.unlockedEffects)) {
+    list = [...new Set(list.concat(currentUser.unlockedEffects))];
+  }
+  if (!list.includes('none')) list.unshift('none');
+  return list;
+}
+function saveUnlockedEffects(list) {
+  const uniq = [...new Set(['none'].concat(list || []))];
+  localStorage.setItem('devflow_unlocked_fx', JSON.stringify(uniq));
+  if (currentUser) {
+    currentUser.unlockedEffects = uniq;
+    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  }
+}
+function isEffectUnlocked(id) {
+  const fx = validAvatarEffect(id);
+  if (fx === 'none') return true;
+  return loadUnlockedEffects().includes(fx);
+}
 
 function validAvatarEffect(id) {
   return AVATAR_EFFECTS.some(e => e.id === id) ? id : 'none';
+}
+function fxLayerHtml() {
+  return '<span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
+}
+function ensureFxLayer(el) {
+  if (!el) return;
+  if (!el.querySelector('.fx-layer')) {
+    el.insertAdjacentHTML('afterbegin', fxLayerHtml());
+  }
 }
 function setAvatarFxClass(el, effect, extra) {
   if (!el) return;
@@ -3985,6 +4161,7 @@ function setAvatarFxClass(el, effect, extra) {
     ? 'discord-avatar-wrap avatar-fx'
     : (el.id === 'sidebar-avatar-fx' ? 'user-mini-avatar-wrap avatar-fx' : 'avatar-fx');
   el.className = (base + ' fx-' + fx + ' ' + keep).trim();
+  ensureFxLayer(el);
 }
 function applyAvatarEffectsUI(effect) {
   const fx = validAvatarEffect(effect || (currentUser && currentUser.avatarEffect) || 'none');
@@ -4005,14 +4182,39 @@ function renderAvatarEffectPicker() {
   const box = document.getElementById('avatar-fx-picker');
   if (!box) return;
   const current = validAvatarEffect(pendingEditEffect || (currentUser && currentUser.avatarEffect) || 'none');
-  box.innerHTML = AVATAR_EFFECTS.map(e =>
-    '<button type="button" class="fx-pick'+(e.id===current?' active':'')+'" onclick="pickAvatarEffect(\''+e.id+'\')">' +
-      '<div class="fx-pick-orb avatar-fx fx-'+e.id+'"></div>'+e.label+
-    '</button>'
-  ).join('');
+  box.innerHTML = AVATAR_EFFECTS.map(e => {
+    const owned = isEffectUnlocked(e.id);
+    const price = e.cost
+      ? (owned
+          ? '<div class="fx-pick-price owned">Owned</div>'
+          : '<div class="fx-pick-price">✦ ' + e.cost + '</div>')
+      : '<div class="fx-pick-price owned">Free</div>';
+    return '<button type="button" class="fx-pick'+(e.id===current?' active':'')+(owned?'':' locked')+'" onclick="pickAvatarEffect(\''+e.id+'\')">' +
+      '<div class="fx-pick-orb avatar-fx fx-'+e.id+'">'+fxLayerHtml()+'</div>'+e.label+price+
+    '</button>';
+  }).join('');
+  const hint = document.getElementById('avatar-fx-hint');
+  if (hint) hint.textContent = 'Balance: ' + COINS + ' coins';
 }
 function pickAvatarEffect(id) {
-  pendingEditEffect = validAvatarEffect(id);
+  const fx = validAvatarEffect(id);
+  const meta = AVATAR_EFFECTS.find(e => e.id === fx) || AVATAR_EFFECTS[0];
+  if (!isEffectUnlocked(fx)) {
+    if (!meta.cost) {
+      saveUnlockedEffects(loadUnlockedEffects().concat([fx]));
+    } else if (!spendCoins(meta.cost, 'Unlocked ' + meta.label)) {
+      return;
+    } else {
+      saveUnlockedEffects(loadUnlockedEffects().concat([fx]));
+      if (currentUser && currentUser.uid && window.firebase && firebase.apps.length) {
+        firebase.firestore().collection('users').doc(currentUser.uid).set({
+          unlockedEffects: currentUser.unlockedEffects || loadUnlockedEffects(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(()=>{});
+      }
+    }
+  }
+  pendingEditEffect = fx;
   applyAvatarEffectsUI(pendingEditEffect);
   renderAvatarEffectPicker();
 }
@@ -4130,6 +4332,7 @@ async function saveEditProfile(){
         banner: banner,
         bio: bio,
         avatarEffect: currentUser.avatarEffect || 'none',
+        unlockedEffects: currentUser.unlockedEffects || loadUnlockedEffects(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     } catch(err){
@@ -5027,6 +5230,7 @@ document.addEventListener('DOMContentLoaded',()=>{
               bio: d.bio || '',
               banner: d.banner || '',
               avatarEffect: d.avatarEffect || 'none',
+          unlockedEffects: d.unlockedEffects || ['none'],
               createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
             });
           }
