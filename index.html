@@ -293,24 +293,40 @@ h3 { font-size: 1.05rem; }
 
 /* Discord-style avatar decorations (shapes + motion, not just color rings) */
 .avatar-fx {
+  --avatar: 34px;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   isolation: isolate;
   overflow: visible;
+  width: var(--avatar);
+  height: var(--avatar);
+  flex-shrink: 0;
 }
 .avatar-fx > img,
-.avatar-fx > .discord-avatar,
-.avatar-fx > .status-dot,
-.avatar-fx > .discord-avatar-status {
+.avatar-fx > .discord-avatar {
   position: relative;
   z-index: 1;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
-.edit-avatar-fx { width: 90px; height: 90px; }
+.avatar-fx > .status-dot,
+.avatar-fx > .discord-avatar-status {
+  position: absolute;
+  z-index: 3;
+}
+.user-mini-avatar-wrap { --avatar: 34px; }
+.chat-avatar-wrap { --avatar: 34px; }
+.discord-avatar-wrap { --avatar: 104px; }
+.edit-avatar-fx { --avatar: 90px; }
+.fx-pick-orb { --avatar: 46px; }
 .fx-layer {
   position: absolute;
-  inset: -22%;
+  inset: -14%;
   pointer-events: none;
   z-index: 2;
   overflow: visible;
@@ -1074,11 +1090,7 @@ h3 { font-size: 1.05rem; }
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1.35rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  gap: 0.65rem;
+  display: block;
 }
 .message {
   max-width: 70%;
@@ -1547,6 +1559,66 @@ h3 { font-size: 1.05rem; }
 }
 .terminal-hint { color: #52525B; font-size: 0.75rem; }
 
+#page-tremenal:not(.hidden) {
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  min-height: 0;
+}
+.tremenal-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #09090B;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+.tremenal-head {
+  flex-shrink: 0;
+  padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid #27272A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.tremenal-head h2 { font-size: 0.95rem; letter-spacing: 0.04em; }
+.tremenal-head span { color: #71717A; font-size: 0.75rem; }
+.tremenal-console {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #D4D4D8;
+}
+.tremenal-line { margin: 0 0 0.2rem; white-space: pre-wrap; word-break: break-word; }
+.tremenal-line.cmd { color: #A5B4FC; }
+.tremenal-line.ok { color: #4ADE80; }
+.tremenal-line.err { color: #F87171; }
+.tremenal-line.info { color: #A1A1AA; }
+.tremenal-input-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid #27272A;
+  background: #0C0C0E;
+}
+.tremenal-input-bar .prompt { color: #4ADE80; flex-shrink: 0; }
+.tremenal-input-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #F4F4F5;
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+
 /* Community / OSS */
 .oss-card {
   padding: 1.15rem;
@@ -1766,13 +1838,24 @@ h3 { font-size: 1.05rem; }
 .chat-peer-clickable:hover #chat-peer-name { color: var(--accent-hover); }
 .wa-messages {
   background: #0B141A;
-  gap: 0.35rem !important;
   padding: 1rem 1.1rem !important;
+  display: block !important;
 }
+.wa-row {
+  display: block;
+  width: 100%;
+  margin: 0 0 0.4rem;
+  position: relative;
+  overflow: visible;
+}
+.wa-row.sent { text-align: right; }
+.wa-row.received { text-align: left; }
 .wa-bubble {
-  flex: 0 0 auto !important;
-  height: auto !important;
-  width: fit-content;
+  display: inline-block;
+  vertical-align: top;
+  text-align: left;
+  height: auto;
+  width: auto;
   max-width: min(75%, 420px);
   padding: 0.38rem 0.7rem 0.28rem;
   border-radius: 12px;
@@ -1836,19 +1919,16 @@ h3 { font-size: 1.05rem; }
 .wa-reply-bar-text { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .wa-reply-bar-text strong { color: var(--accent-hover); }
 .wa-bubble.sent {
-  align-self: flex-end;
-  margin-left: auto;
   background: #005C4B;
   color: #E9EDEF;
   border-bottom-right-radius: 3px;
 }
 .wa-bubble.received {
-  align-self: flex-start;
-  margin-right: auto;
   background: #202C33;
   color: #E9EDEF;
   border-bottom-left-radius: 3px;
 }
+.wa-text { display: block; margin: 0; padding: 0; min-height: 0; }
 .message.sent {
   align-self: flex-end;
   background: #005C4B;
@@ -1914,16 +1994,16 @@ h3 { font-size: 1.05rem; }
 .status-dot.offline { background: #80848E; }
 .chat-avatar-wrap {
   position: relative;
-  width: 38px;
-  height: 38px;
+  width: var(--avatar, 34px);
+  height: var(--avatar, 34px);
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 .chat-avatar-wrap .avatar {
-  width: 34px;
-  height: 34px;
+  width: 100%;
+  height: 100%;
 }
 .chat-avatar-wrap .status-dot {
   border-color: var(--bg-elevated);
@@ -2107,6 +2187,10 @@ h3 { font-size: 1.05rem; }
         <button class="nav-item" data-nav="profile" onclick="handleProfileClick()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Profile
+        </button>
+        <button class="nav-item hidden" data-nav="tremenal" id="nav-tremenal" onclick="navigate('tremenal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          Tremenal
         </button>
       </nav>
 
@@ -2461,6 +2545,21 @@ h3 { font-size: 1.05rem; }
               <button class="btn btn-primary btn-sm" onclick="openEditProfile()">Edit Profile</button>
               <button class="btn btn-outline btn-sm" onclick="logout()">Sign out</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tremenal (owner / accepted operators) -->
+      <div class="page-content page-view hidden" id="page-tremenal">
+        <div class="tremenal-wrap">
+          <div class="tremenal-head">
+            <h2>Tremenal</h2>
+            <span id="tremenal-role">operator</span>
+          </div>
+          <div class="tremenal-console" id="tremenal-console"></div>
+          <div class="tremenal-input-bar">
+            <span class="prompt">tremenal&gt;</span>
+            <input id="tremenal-input" placeholder="!help" autocomplete="off" onkeydown="if(event.key==='Enter') runTremenalCommand(this.value)" />
           </div>
         </div>
       </div>
@@ -2875,6 +2974,31 @@ function presenceLabel(st) {
   return ({ online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline', invisible: 'Offline' })[st] || 'Offline';
 }
 
+function cleanMsgText(text) {
+  return String(text || '').replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+function waBubbleHtml(docId, m, mine, extraTop) {
+  const ticks = mine ? tickHtml(m.status || 'sent') : '';
+  let replyHtml = '';
+  if (m.replyTo && m.replyTo.text) {
+    replyHtml = '<div class="wa-reply-quote"><strong>' + escapeHtml(m.replyTo.fromHandle || 'user') + '</strong>' + escapeHtml((m.replyTo.text || '').slice(0, 80)) + '</div>';
+  }
+  const text = cleanMsgText(m.text || '');
+  const safeText = text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
+  const safeHandle = String(m.fromHandle || '').replace(/'/g, "\\'");
+  const bodyHtml = (m.type === 'voice' && m.audioUrl)
+    ? voiceMessageHtml(m)
+    : ('<div class="wa-text">' + escapeHtml(text) + '</div>');
+  return '<div class="wa-row ' + (mine ? 'sent' : 'received') + '">' +
+    '<div class="wa-bubble ' + (mine ? 'sent' : 'received') + '" data-msg-id="' + docId + '">' +
+      '<button type="button" class="wa-reply-btn" onclick="event.stopPropagation(); setReplyTo(\'' + docId + '\',\'' + safeHandle + '\',\'' + safeText + '\')">Reply</button>' +
+      (extraTop || '') +
+      replyHtml +
+      bodyHtml +
+      '<div class="wa-meta"><span>' + formatMsgTime(m.createdAt) + '</span>' + ticks + '</div>' +
+    '</div></div>';
+}
+
 function tickHtml(status) {
   if (status === 'read') return '<span class="wa-ticks read">✓✓</span>';
   if (status === 'delivered') return '<span class="wa-ticks delivered">✓✓</span>';
@@ -3013,22 +3137,7 @@ function listenMessages() {
             batchCount++;
           }
         }
-        const ticks = mine ? tickHtml(m.status || 'sent') : '';
-        let replyHtml = '';
-        if (m.replyTo && m.replyTo.text) {
-          replyHtml = `<div class="wa-reply-quote"><strong>${escapeHtml(m.replyTo.fromHandle || 'user')}</strong>${escapeHtml((m.replyTo.text || '').slice(0, 80))}</div>`;
-        }
-        const safeText = String(m.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
-        const safeHandle = String(m.fromHandle || '').replace(/'/g, "\\'");
-        const bodyHtml = (m.type === 'voice' && m.audioUrl)
-          ? voiceMessageHtml(m)
-          : `<div>${escapeHtml(m.text || '')}</div>`;
-        html += `<div class="wa-bubble ${mine ? 'sent' : 'received'}" data-msg-id="${doc.id}">
-          <button type="button" class="wa-reply-btn" onclick="event.stopPropagation(); setReplyTo('${doc.id}','${safeHandle}','${safeText}')">Reply</button>
-          ${replyHtml}
-          ${bodyHtml}
-          <div class="wa-meta"><span>${formatMsgTime(m.createdAt)}</span>${ticks}</div>
-        </div>`;
+        html += waBubbleHtml(doc.id, m, mine, '');
       });
       box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
@@ -3630,24 +3739,8 @@ function listenGroupMessages(groupId) {
       snap.forEach(doc => {
         const m = doc.data();
         const mine = m.fromUid === meUid;
-        const ticks = mine ? tickHtml(m.status || 'sent') : '';
         const who = mine ? '' : ('<div class="text-xs" style="opacity:0.7;margin-bottom:2px">' + escapeHtml(m.fromHandle || 'user') + '</div>');
-        let replyHtml = '';
-        if (m.replyTo && m.replyTo.text) {
-          replyHtml = `<div class="wa-reply-quote"><strong>${escapeHtml(m.replyTo.fromHandle || 'user')}</strong>${escapeHtml((m.replyTo.text || '').slice(0, 80))}</div>`;
-        }
-        const safeText = String(m.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
-        const safeHandle = String(m.fromHandle || '').replace(/'/g, "\\'");
-        const bodyHtml = (m.type === 'voice' && m.audioUrl)
-          ? voiceMessageHtml(m)
-          : `<div>${escapeHtml(m.text || '')}</div>`;
-        html += `<div class="wa-bubble ${mine ? 'sent' : 'received'}" data-msg-id="${doc.id}">
-          <button type="button" class="wa-reply-btn" onclick="event.stopPropagation(); setReplyTo('${doc.id}','${safeHandle}','${safeText}')">Reply</button>
-          ${who}
-          ${replyHtml}
-          ${bodyHtml}
-          <div class="wa-meta"><span>${formatMsgTime(m.createdAt)}</span>${ticks}</div>
-        </div>`;
+        html += waBubbleHtml(doc.id, m, mine, who);
       });
       box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
@@ -3738,7 +3831,19 @@ let pendingStartTaskId = null;
 function saveTasks(){ localStorage.setItem('devflow_tasks', JSON.stringify(TASKS)); }
 function saveNotifs(){ localStorage.setItem('devflow_notifs', JSON.stringify(NOTIFICATIONS)); }
 function saveFriends(){ localStorage.setItem('devflow_friends', JSON.stringify(FRIENDS)); }
-function saveCoins(){ localStorage.setItem('devflow_coins', String(COINS)); updateCoinsUI(); }
+function saveCoins(){
+  localStorage.setItem('devflow_coins', String(COINS));
+  updateCoinsUI();
+  if (window._coinsSyncLock) return;
+  try {
+    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
+      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
+        coins: COINS,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(()=>{});
+    }
+  } catch (e) {}
+}
 
 function addCoins(n, reason){
   COINS += n;
@@ -3805,6 +3910,8 @@ function showApp(){
   renderSkillsOnDashboard();
   renderCertificates();
   applyTerminalPref();
+  if (typeof refreshTremenalAccess === 'function') refreshTremenalAccess();
+  if (typeof startUserDocSync === 'function') startUserDocSync();
   navigate('dashboard');
   maybeShowOnboarding();
   applyAvatarEffectsUI();
@@ -3837,6 +3944,9 @@ function startGoogleSignup(optionalName) {
           banner: d.banner || '',
           avatarEffect: d.avatarEffect || 'none',
           unlockedEffects: d.unlockedEffects || ['none'],
+          email: d.email || user.email || '',
+          coins: d.coins,
+          terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
           createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
         });
         return;
@@ -3942,6 +4052,8 @@ function finishSignup() {
       email: pendingSignup.email || '',
       bio: '',
       avatarEffect: 'none',
+      coins: 0,
+      terminalAccess: String(pendingSignup.email || '').toLowerCase() === 'xrammar4@gmail.com',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(doLogin).catch(err => {
@@ -3978,8 +4090,14 @@ function login(name, handle, avatarUrl, uid, extra){
     bio: (extra && extra.bio) || (prev && prev.bio) || '',
     createdAt: (extra && extra.createdAt) || (prev && prev.createdAt) || Date.now(),
     avatarEffect: (extra && extra.avatarEffect) || (prev && prev.avatarEffect) || 'none',
-    unlockedEffects: (extra && extra.unlockedEffects) || (prev && prev.unlockedEffects) || ['none']
+    unlockedEffects: (extra && extra.unlockedEffects) || (prev && prev.unlockedEffects) || ['none'],
+    email: (extra && extra.email) || (prev && prev.email) || '',
+    terminalAccess: !!(extra && extra.terminalAccess) || !!(prev && prev.terminalAccess)
   };
+  if (typeof extra !== 'undefined' && extra && extra.coins != null) {
+    COINS = parseInt(extra.coins, 10) || COINS;
+    localStorage.setItem('devflow_coins', String(COINS));
+  }
   if (currentUser.avatarEffect && currentUser.avatarEffect !== 'none') {
     const u = currentUser.unlockedEffects || [];
     if (!u.includes(currentUser.avatarEffect)) u.push(currentUser.avatarEffect);
@@ -3994,6 +4112,7 @@ function login(name, handle, avatarUrl, uid, extra){
   if (typeof startChatEngine === 'function') startChatEngine();
 }
 function logout(){
+  if (unsubUserDoc) { try { unsubUserDoc(); } catch (e) {} unsubUserDoc = null; }
   if (typeof setOffline === 'function') setOffline();
   if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
     firebase.auth().signOut().catch(()=>{});
@@ -4421,6 +4540,10 @@ function navigate(page){
   if(page==='focus') initTimerUI();
   if(page==='messages'){ if(typeof renderMessagesPage==='function') renderMessagesPage(); setUnreadChats(0); if(activePeerHandle) markIncomingRead(activePeerHandle); }
   if(page==='analytics'){ renderAnalyticsEmpty(); renderAnalyticsCharts(); }
+  if(page==='tremenal'){
+    if (typeof hasTremenalAccess === 'function' && !hasTremenalAccess()) { navigate('dashboard'); return; }
+    if (typeof focusTremenal === 'function') focusTremenal();
+  }
   
   updateMiniTimer();
   persistTimer();
@@ -5176,6 +5299,200 @@ function removeCert(i){
   renderCertificates();
 }
 
+/* Tremenal — owner console */
+const TREMENAL_OWNER = 'xrammar4@gmail.com';
+let unsubUserDoc = null;
+let TREMENAL_LOG = [];
+
+function currentAuthEmail() {
+  try {
+    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
+      return String(firebase.auth().currentUser.email || '').toLowerCase();
+    }
+  } catch (e) {}
+  return String((currentUser && currentUser.email) || '').toLowerCase();
+}
+function isTremenalOwner() {
+  return currentAuthEmail() === TREMENAL_OWNER;
+}
+function hasTremenalAccess() {
+  if (isTremenalOwner()) return true;
+  return !!(currentUser && currentUser.terminalAccess);
+}
+function refreshTremenalAccess() {
+  const nav = document.getElementById('nav-tremenal');
+  const ok = hasTremenalAccess();
+  if (nav) nav.classList.toggle('hidden', !ok);
+  const role = document.getElementById('tremenal-role');
+  if (role) role.textContent = isTremenalOwner() ? 'owner' : 'operator';
+  if (!ok) {
+    const page = document.getElementById('page-tremenal');
+    if (page && !page.classList.contains('hidden')) navigate('dashboard');
+  }
+}
+function startUserDocSync() {
+  if (unsubUserDoc) { try { unsubUserDoc(); } catch (e) {} unsubUserDoc = null; }
+  if (!window.firebase || !firebase.apps.length || !firebase.auth().currentUser) {
+    refreshTremenalAccess();
+    return;
+  }
+  const uid = firebase.auth().currentUser.uid;
+  unsubUserDoc = firebase.firestore().collection('users').doc(uid).onSnapshot(snap => {
+    const d = snap.data() || {};
+    if (typeof d.coins === 'number' && d.coins !== COINS) {
+      window._coinsSyncLock = true;
+      COINS = d.coins;
+      localStorage.setItem('devflow_coins', String(COINS));
+      updateCoinsUI();
+      window._coinsSyncLock = false;
+    }
+    if (currentUser) {
+      currentUser.email = d.email || currentUser.email || currentAuthEmail();
+      currentUser.terminalAccess = !!d.terminalAccess || isTremenalOwner();
+      localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+    }
+    refreshTremenalAccess();
+  }, () => refreshTremenalAccess());
+}
+function tremLog(type, text) {
+  TREMENAL_LOG.push({ type: type || 'info', text: String(text || '') });
+  if (TREMENAL_LOG.length > 200) TREMENAL_LOG = TREMENAL_LOG.slice(-200);
+  const box = document.getElementById('tremenal-console');
+  if (!box) return;
+  const line = document.createElement('div');
+  line.className = 'tremenal-line ' + (type || 'info');
+  line.textContent = text;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+function focusTremenal() {
+  const box = document.getElementById('tremenal-console');
+  if (box && !box.childElementCount) {
+    tremLog('info', 'Tremenal ready. Type !help');
+    if (isTremenalOwner()) tremLog('ok', 'Signed in as owner');
+  }
+  setTimeout(() => document.getElementById('tremenal-input')?.focus(), 50);
+}
+async function tremFindUser(handle) {
+  handle = String(handle || '').replace(/^@/, '').trim().toLowerCase();
+  if (!handle) return null;
+  if (!window.firebase || !firebase.apps.length) throw new Error('Firebase offline');
+  const q = await firebase.firestore().collection('users').where('handle', '==', handle).limit(1).get();
+  if (q.empty) return null;
+  return { uid: q.docs[0].id, data: q.docs[0].data() || {} };
+}
+async function runTremenalCommand(raw) {
+  const input = document.getElementById('tremenal-input');
+  if (input) input.value = '';
+  raw = String(raw || '').trim();
+  if (!raw) return;
+  if (!hasTremenalAccess()) {
+    showToast('Denied', 'No Tremenal access');
+    return;
+  }
+  tremLog('cmd', 'tremenal> ' + raw);
+  const parts = raw.split(/\s+/);
+  const cmd = (parts[0] || '').toLowerCase();
+  try {
+    if (cmd === '!help' || cmd === 'help') {
+      tremLog('info', '!give @user amount     add coins');
+      tremLog('info', '!remove @user amount   take coins');
+      tremLog('info', '!setcoins @user amount set exact balance');
+      tremLog('info', '!accept @user          grant Tremenal');
+      tremLog('info', '!revoke @user          remove Tremenal');
+      tremLog('info', '!whois @user           profile lookup');
+      tremLog('info', '!online                who is online');
+      tremLog('info', '!me                    your account');
+      tremLog('info', '!clear                 clear console');
+      return;
+    }
+    if (cmd === '!clear' || cmd === 'clear') {
+      TREMENAL_LOG = [];
+      const box = document.getElementById('tremenal-console');
+      if (box) box.innerHTML = '';
+      tremLog('info', 'Console cleared');
+      return;
+    }
+    if (cmd === '!me') {
+      tremLog('ok', '@' + (currentUser && currentUser.handle) + '  coins=' + COINS + '  role=' + (isTremenalOwner() ? 'owner' : 'operator'));
+      return;
+    }
+    if (cmd === '!give' || cmd === '!remove' || cmd === '!setcoins') {
+      const handle = parts[1];
+      const amount = parseInt(parts[2], 10);
+      if (!handle || isNaN(amount) || amount < 0) {
+        tremLog('err', 'Usage: ' + cmd + ' @user number');
+        return;
+      }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found: @' + String(handle).replace(/^@/, '')); return; }
+      const now = typeof found.data.coins === 'number' ? found.data.coins : 0;
+      let next = now;
+      if (cmd === '!give') next = now + amount;
+      else if (cmd === '!remove') next = Math.max(0, now - amount);
+      else next = amount;
+      await firebase.firestore().collection('users').doc(found.uid).set({
+        coins: next,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      tremLog('ok', '@' + (found.data.handle || handle.replace(/^@/, '')) + ' coins ' + now + ' -> ' + next);
+      return;
+    }
+    if (cmd === '!accept' || cmd === '!revoke') {
+      if (cmd === '!revoke' && !isTremenalOwner()) {
+        tremLog('err', 'Only owner can revoke');
+        return;
+      }
+      const handle = parts[1];
+      if (!handle) { tremLog('err', 'Usage: ' + cmd + ' @user'); return; }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found'); return; }
+      const grant = cmd === '!accept';
+      await firebase.firestore().collection('users').doc(found.uid).set({
+        terminalAccess: grant,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      tremLog('ok', grant
+        ? 'Granted Tremenal to @' + (found.data.handle || handle)
+        : 'Revoked Tremenal from @' + (found.data.handle || handle));
+      return;
+    }
+    if (cmd === '!whois') {
+      const handle = parts[1];
+      if (!handle) { tremLog('err', 'Usage: !whois @user'); return; }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found'); return; }
+      const d = found.data;
+      tremLog('ok', '@' + (d.handle || '') + '  ' + (d.displayName || ''));
+      tremLog('info', 'uid=' + found.uid);
+      tremLog('info', 'coins=' + (d.coins || 0) + '  tremenal=' + (!!d.terminalAccess) + '  effect=' + (d.avatarEffect || 'none'));
+      if (d.email) tremLog('info', 'email=' + d.email);
+      return;
+    }
+    if (cmd === '!online') {
+      const snap = await firebase.firestore().collection('presence').limit(40).get();
+      let n = 0;
+      snap.forEach(doc => {
+        const p = doc.data() || {};
+        const st = (typeof publicPresence === 'function') ? publicPresence(p) : (p.online ? 'online' : 'offline');
+        if (st === 'offline') return;
+        n++;
+        tremLog('ok', (p.handle || doc.id) + '  ' + st);
+      });
+      if (!n) tremLog('info', 'Nobody online');
+      return;
+    }
+    tremLog('err', 'Unknown command. Type !help');
+  } catch (e) {
+    tremLog('err', e.message || 'Command failed');
+  }
+}
+window.runTremenalCommand = runTremenalCommand;
+window.refreshTremenalAccess = refreshTremenalAccess;
+window.hasTremenalAccess = hasTremenalAccess;
+window.focusTremenal = focusTremenal;
+window.startUserDocSync = startUserDocSync;
+
 /* Terminal (optional) */
 function applyTerminalPref(){
   const bar=document.getElementById('terminal-bar');
@@ -5231,6 +5548,9 @@ document.addEventListener('DOMContentLoaded',()=>{
               banner: d.banner || '',
               avatarEffect: d.avatarEffect || 'none',
           unlockedEffects: d.unlockedEffects || ['none'],
+          email: d.email || user.email || '',
+          coins: d.coins,
+          terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
               createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
             });
           }
