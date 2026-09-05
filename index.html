@@ -2097,6 +2097,222 @@ h3 { font-size: 1.05rem; }
   background: rgba(255,255,255,0.08);
   margin: 4px 6px;
 }
+
+/* ========== Store & Nitro ========== */
+
+.nitro-card .btn { margin-top: auto; }
+.nitro-badge-inline.nitro-badge { width: 28px; height: 28px; }
+.nitro-badge-inline.nitro-badge svg { width: 26px; height: 26px; }
+.store-section-title:first-of-type { margin-top: 0.35rem; }
+.discord-name-row { align-items: center; }
+
+.store-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.35rem;
+}
+.store-balance {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  border-radius: 100px;
+  color: #FBBF24;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.store-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 1.5rem 0 0.85rem;
+}
+.nitro-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 1100px) {
+  .nitro-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .nitro-grid { grid-template-columns: 1fr; }
+}
+.nitro-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.25rem 1.15rem 1.15rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s var(--ease);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.nitro-card:hover {
+  border-color: rgba(99,102,241,0.35);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+.nitro-card.featured {
+  border-color: rgba(99,102,241,0.45);
+  background: linear-gradient(180deg, rgba(99,102,241,0.12) 0%, var(--bg-card) 55%);
+}
+.nitro-card .nitro-ribbon {
+  position: absolute;
+  top: 12px; right: -28px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 2rem;
+  transform: rotate(35deg);
+  letter-spacing: 0.04em;
+}
+.nitro-tier-badge {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+.nitro-tier-badge svg { width: 30px; height: 30px; }
+.nitro-tier-badge.bronze { background: linear-gradient(135deg,#F97316,#EA580C); box-shadow: 0 0 20px rgba(249,115,22,0.35); }
+.nitro-tier-badge.silver { background: linear-gradient(135deg,#E5E7EB,#9CA3AF); box-shadow: 0 0 20px rgba(156,163,175,0.35); }
+.nitro-tier-badge.gold { background: linear-gradient(135deg,#FDE68A,#F59E0B); box-shadow: 0 0 20px rgba(245,158,11,0.4); }
+.nitro-tier-badge.diamond { background: linear-gradient(135deg,#60A5FA,#3B82F6); box-shadow: 0 0 20px rgba(59,130,246,0.45); }
+.nitro-card h3 { font-size: 1.05rem; }
+.nitro-price {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #FBBF24;
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+.nitro-price span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+.nitro-perks { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; margin: 0.25rem 0 0.5rem; flex: 1; }
+.nitro-perks li {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+.nitro-perks li::before {
+  content: '✓';
+  color: var(--success);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.nitro-active-banner {
+  display: none;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.15rem;
+  border-radius: 14px;
+  border: 1px solid rgba(99,102,241,0.35);
+  background: linear-gradient(90deg, rgba(99,102,241,0.14), rgba(167,139,250,0.08));
+  margin-bottom: 1.25rem;
+}
+.nitro-active-banner.visible { display: flex; }
+.nitro-active-banner .nitro-badge-inline { flex-shrink: 0; }
+
+.store-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+.store-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  transition: all 0.2s var(--ease);
+}
+.store-item:hover { border-color: rgba(99,102,241,0.3); }
+.store-item-icon {
+  width: 42px; height: 42px;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  display: flex; align-items: center; justify-content: center;
+}
+.store-item h4 { font-size: 0.95rem; }
+.store-item p { font-size: 0.78rem; color: var(--text-muted); flex: 1; }
+.store-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+.store-item-price {
+  font-weight: 700;
+  color: #FBBF24;
+  font-size: 0.9rem;
+}
+
+/* Discord-style Nitro badge next to name */
+.nitro-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-left: 4px;
+  position: relative;
+}
+.nitro-badge svg { width: 18px; height: 18px; display: block; }
+.nitro-badge.bronze svg { filter: drop-shadow(0 0 4px rgba(249,115,22,0.55)); }
+.nitro-badge.silver svg { filter: drop-shadow(0 0 4px rgba(156,163,175,0.5)); }
+.nitro-badge.gold svg { filter: drop-shadow(0 0 5px rgba(245,158,11,0.55)); }
+.nitro-badge.diamond svg { filter: drop-shadow(0 0 5px rgba(59,130,246,0.6)); }
+@keyframes nitroShimmer {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.25); }
+}
+.nitro-badge.active-pulse svg { animation: nitroShimmer 2.8s ease-in-out infinite; }
+
+/* Profile theme (Nitro unlock) */
+.theme-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+.theme-swatch {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.theme-swatch:hover { transform: scale(1.08); }
+.theme-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+.theme-locked-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+.discord-profile.theme-custom .discord-banner {
+  /* overridden via inline style */
+}
+
   </style>
 </head>
 <body>
@@ -2187,6 +2403,10 @@ h3 { font-size: 1.05rem; }
         <button class="nav-item" data-nav="profile" onclick="handleProfileClick()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Profile
+        </button>
+        <button class="nav-item" data-nav="store" onclick="navigate('store')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Store
         </button>
         <button class="nav-item hidden" data-nav="tremenal" id="nav-tremenal" onclick="navigate('tremenal')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
@@ -2522,6 +2742,37 @@ h3 { font-size: 1.05rem; }
         </div>
       </div>
 
+
+      <!-- Store -->
+      <div class="page-content page-view hidden" id="page-store">
+        <div class="store-hero">
+          <div>
+            <h1 style="margin-bottom:0.25rem">Store</h1>
+            <p class="text-secondary text-sm">Spend coins on Nitro, themes, and boosts</p>
+          </div>
+          <div class="store-balance">
+            <svg class="coin-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="10" fill="#09090B" font-weight="700">✦</text></svg>
+            <span class="coin-value">0</span>
+            <span style="font-weight:500;opacity:0.85">coins</span>
+          </div>
+        </div>
+
+        <div class="nitro-active-banner" id="nitro-active-banner">
+          <span class="nitro-badge-inline" id="nitro-banner-badge"></span>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:0.95rem" id="nitro-banner-title">Nitro active</div>
+            <div class="text-xs text-muted" id="nitro-banner-sub">Expires —</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="navigate('profile')">View profile</button>
+        </div>
+
+        <div class="store-section-title">DevFlow Nitro</div>
+        <div class="nitro-grid" id="nitro-grid"></div>
+
+        <div class="store-section-title">More items</div>
+        <div class="store-items-grid" id="store-items-grid"></div>
+      </div>
+
       <!-- Profile (Discord-style) -->
       <div class="page-content page-view hidden" id="page-profile">
         <div class="discord-profile">
@@ -2534,15 +2785,23 @@ h3 { font-size: 1.05rem; }
           <div class="discord-body">
             <div class="discord-name-row">
               <span class="discord-display-name" id="profile-name">—</span>
+              <span class="nitro-badge hidden" id="profile-nitro-badge" title="DevFlow Nitro"></span>
             </div>
             <div class="discord-handle" id="profile-handle">@—</div>
             <div class="discord-bio" id="profile-bio">No bio yet. Click Edit Profile to add one.</div>
             <div class="discord-divider"></div>
             <div class="discord-section-title">Member Since</div>
             <div class="discord-member-since" id="profile-member-since"><strong>—</strong></div>
+            <div class="discord-divider" id="profile-theme-block-divider"></div>
+            <div id="profile-theme-block">
+              <div class="discord-section-title">Profile theme <span class="text-xs" style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-muted)">(Nitro)</span></div>
+              <div class="theme-swatches" id="profile-theme-swatches"></div>
+              <p class="theme-locked-hint" id="profile-theme-hint">Subscribe to Nitro to customize banner colors</p>
+            </div>
             <div class="discord-divider"></div>
             <div class="discord-actions">
               <button class="btn btn-primary btn-sm" onclick="openEditProfile()">Edit Profile</button>
+              <button class="btn btn-outline btn-sm" onclick="navigate('store')">Store</button>
               <button class="btn btn-outline btn-sm" onclick="logout()">Sign out</button>
             </div>
           </div>
@@ -3846,6 +4105,18 @@ function saveCoins(){
 }
 
 function addCoins(n, reason){
+  n = Math.max(0, parseInt(n, 10) || 0);
+  if (typeof hasActiveNitro === 'function' && hasActiveNitro()) {
+    n = Math.round(n * 1.1);
+  }
+  try {
+    const flags = JSON.parse(localStorage.getItem('devflow_store_flags') || '{}');
+    if (flags.focus_boost_left > 0 && reason && /focus|session|Focus/i.test(reason)) {
+      n = Math.round(n * 1.25);
+      flags.focus_boost_left -= 1;
+      localStorage.setItem('devflow_store_flags', JSON.stringify(flags));
+    }
+  } catch (e) {}
   COINS += n;
   saveCoins();
   if(reason) showToast('+' + n + ' coins', reason);
@@ -4104,6 +4375,13 @@ function login(name, handle, avatarUrl, uid, extra){
     currentUser.unlockedEffects = u;
     localStorage.setItem('devflow_unlocked_fx', JSON.stringify(u));
   }
+  if (extra && extra.nitro && extra.nitro.expiresAt && extra.nitro.expiresAt > Date.now()) {
+    localStorage.setItem('devflow_nitro', JSON.stringify(extra.nitro));
+  }
+  if (extra && extra.profileTheme) {
+    currentUser.profileTheme = extra.profileTheme;
+    localStorage.setItem('devflow_profile_theme', extra.profileTheme);
+  }
   localStorage.setItem('devflow_logged_in','true');
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
   updateUserUI();
@@ -4217,6 +4495,7 @@ function renderDiscordProfile(){
   }
   applyUserStatusUI();
   applyAvatarEffectsUI();
+  applyNitroUI();
 }
 
 const AVATAR_EFFECTS = [
@@ -4540,6 +4819,8 @@ function navigate(page){
   if(page==='focus') initTimerUI();
   if(page==='messages'){ if(typeof renderMessagesPage==='function') renderMessagesPage(); setUnreadChats(0); if(activePeerHandle) markIncomingRead(activePeerHandle); }
   if(page==='analytics'){ renderAnalyticsEmpty(); renderAnalyticsCharts(); }
+  if(page==='store'){ renderStorePage(); }
+  if(page==='profile'){ applyNitroUI(); }
   if(page==='tremenal'){
     if (typeof hasTremenalAccess === 'function' && !hasTremenalAccess()) { navigate('dashboard'); return; }
     if (typeof focusTremenal === 'function') focusTremenal();
@@ -5530,6 +5811,364 @@ function runTerminalCommand(raw){
   showToast('Unknown','Type help');
 }
 
+
+/* ========== Store / Nitro ========== */
+const NITRO_TIERS = [
+  {
+    id: 'month',
+    label: '1 Month',
+    months: 1,
+    cost: 50,
+    tier: 'bronze',
+    color: '#F97316',
+    gradient: 'linear-gradient(135deg,#F97316,#EA580C)',
+    tagline: 'Bronze Nitro',
+    perks: ['Nitro badge (orange)', 'Profile theme colors', 'Animated avatar effects free', '+10% coin rewards']
+  },
+  {
+    id: 'quarter',
+    label: '3 Months',
+    months: 3,
+    cost: 130,
+    tier: 'silver',
+    color: '#D1D5DB',
+    gradient: 'linear-gradient(135deg,#E5E7EB,#9CA3AF)',
+    tagline: 'Silver Nitro',
+    perks: ['Silver badge', 'All 1-month perks', 'Custom status longer', 'Priority in search'],
+    save: 'Save 13%'
+  },
+  {
+    id: 'half',
+    label: '6 Months',
+    months: 6,
+    cost: 240,
+    tier: 'gold',
+    color: '#FBBF24',
+    gradient: 'linear-gradient(135deg,#FDE68A,#F59E0B)',
+    tagline: 'Gold Nitro',
+    perks: ['Gold badge', 'All previous perks', 'Exclusive Gold glow', '2× streak freeze'],
+    save: 'Save 20%',
+    featured: true
+  },
+  {
+    id: 'year',
+    label: '1 Year',
+    months: 12,
+    cost: 420,
+    tier: 'diamond',
+    color: '#3B82F6',
+    gradient: 'linear-gradient(135deg,#60A5FA,#2563EB)',
+    tagline: 'Diamond Nitro',
+    perks: ['Blue badge', 'All perks unlocked', 'Yearly exclusive frame', 'Founder-style boost'],
+    save: 'Save 30%'
+  }
+];
+
+const STORE_ITEMS = [
+  { id: 'coins_pack_s', label: 'Starter boost', desc: 'Instant +40 coins (focus motivator)', cost: 0, type: 'grant', grant: 40, once: true },
+  { id: 'coins_focus', label: 'Focus booster', desc: '+25% coins from the next 5 focus sessions', cost: 35, type: 'boost_focus' },
+  { id: 'streak_freeze', label: 'Streak freeze', desc: 'Protect your streak for 1 missed day', cost: 20, type: 'streak_freeze' },
+  { id: 'unlock_all_fx', label: 'FX Bundle', desc: 'Unlock every avatar effect at once', cost: 180, type: 'all_fx' },
+  { id: 'extra_bio', label: 'Long bio', desc: 'Raise bio limit to 300 characters', cost: 25, type: 'long_bio' },
+  { id: 'custom_tag', label: 'Custom tag color', desc: 'Colored skill tags on your dashboard', cost: 30, type: 'tag_color' },
+  { id: 'priority_msg', label: 'Priority inbox', desc: 'Unread chats stay pinned for 7 days', cost: 15, type: 'priority_msg' },
+  { id: 'heatmap_pro', label: 'Heatmap Pro', desc: 'Unlock richer analytics heatmap colors', cost: 40, type: 'heatmap_pro' }
+];
+
+const PROFILE_THEMES = [
+  { id: 'default', label: 'Default', css: 'linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%)' },
+  { id: 'sunset', label: 'Sunset', css: 'linear-gradient(135deg,#F97316,#EC4899,#8B5CF6)' },
+  { id: 'ocean', label: 'Ocean', css: 'linear-gradient(135deg,#0EA5E9,#2563EB,#1E3A8A)' },
+  { id: 'forest', label: 'Forest', css: 'linear-gradient(135deg,#22C55E,#15803D,#14532D)' },
+  { id: 'ember', label: 'Ember', css: 'linear-gradient(135deg,#EF4444,#F59E0B,#7F1D1D)' },
+  { id: 'midnight', label: 'Midnight', css: 'linear-gradient(135deg,#312E81,#1E1B4B,#0F172A)' },
+  { id: 'candy', label: 'Candy', css: 'linear-gradient(135deg,#F472B6,#A78BFA,#38BDF8)' },
+  { id: 'mono', label: 'Mono', css: 'linear-gradient(135deg,#52525B,#27272A,#18181B)' },
+  { id: 'gold', label: 'Gold', css: 'linear-gradient(135deg,#FDE68A,#F59E0B,#B45309)' },
+  { id: 'ice', label: 'Ice', css: 'linear-gradient(135deg,#E0F2FE,#7DD3FC,#0284C7)' }
+];
+
+function loadNitro() {
+  try {
+    const raw = localStorage.getItem('devflow_nitro');
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.expiresAt) return null;
+    if (Date.now() > data.expiresAt) {
+      localStorage.removeItem('devflow_nitro');
+      return null;
+    }
+    return data;
+  } catch (e) { return null; }
+}
+function saveNitro(data) {
+  if (!data) localStorage.removeItem('devflow_nitro');
+  else localStorage.setItem('devflow_nitro', JSON.stringify(data));
+  if (currentUser) {
+    currentUser.nitro = data;
+    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  }
+  try {
+    if (window.firebase && firebase.apps.length && firebase.auth().currentUser && data) {
+      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
+        nitro: data,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(()=>{});
+    }
+  } catch (e) {}
+}
+function hasActiveNitro() {
+  return !!loadNitro();
+}
+function getNitroTierMeta() {
+  const n = loadNitro();
+  if (!n) return null;
+  return NITRO_TIERS.find(t => t.tier === n.tier) || NITRO_TIERS[0];
+}
+
+function nitroBadgeSvg(tier, uid) {
+  // Discord-inspired classic nitro gem / boost shape
+  const fills = {
+    bronze: { a: '#FDBA74', b: '#EA580C', c: '#9A3412' },
+    silver: { a: '#F3F4F6', b: '#9CA3AF', c: '#6B7280' },
+    gold: { a: '#FEF3C7', b: '#F59E0B', c: '#B45309' },
+    diamond: { a: '#BFDBFE', b: '#3B82F6', c: '#1D4ED8' }
+  };
+  const f = fills[tier] || fills.bronze;
+  const gid = 'ng-' + tier + '-' + (uid || Math.random().toString(36).slice(2, 8));
+  return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0%" stop-color="' + f.a + '"/><stop offset="55%" stop-color="' + f.b + '"/>' +
+    '<stop offset="100%" stop-color="' + f.c + '"/></linearGradient></defs>' +
+    '<path fill="url(#' + gid + ')" d="M12 2L3.5 7.5v9L12 22l8.5-5.5v-9L12 2zm0 2.2l6.5 4.2v7.2L12 19.8 5.5 15.6V8.4L12 4.2z"/>' +
+    '<path fill="' + f.a + '" opacity="0.95" d="M12 7.2l-3.2 4.4L12 16.8l3.2-5.2L12 7.2z"/>' +
+    '<circle cx="12" cy="11.5" r="1.6" fill="' + f.c + '" opacity="0.85"/>' +
+    '</svg>';
+}
+
+function renderNitroBadgeEl(el, tier) {
+  if (!el) return;
+  if (!tier) {
+    el.classList.add('hidden');
+    el.innerHTML = '';
+    return;
+  }
+  el.className = 'nitro-badge active-pulse ' + tier;
+  el.innerHTML = nitroBadgeSvg(tier);
+  el.title = 'DevFlow Nitro · ' + (tier.charAt(0).toUpperCase() + tier.slice(1));
+  el.classList.remove('hidden');
+}
+
+function applyNitroUI() {
+  const nitro = loadNitro();
+  const banner = document.getElementById('nitro-active-banner');
+  const badge = document.getElementById('profile-nitro-badge');
+  if (nitro) {
+    const meta = getNitroTierMeta();
+    renderNitroBadgeEl(badge, nitro.tier);
+    if (banner) {
+      banner.classList.add('visible');
+      const bBadge = document.getElementById('nitro-banner-badge');
+      if (bBadge) {
+        bBadge.className = 'nitro-badge active-pulse ' + nitro.tier;
+        bBadge.innerHTML = nitroBadgeSvg(nitro.tier);
+      }
+      const title = document.getElementById('nitro-banner-title');
+      const sub = document.getElementById('nitro-banner-sub');
+      if (title) title.textContent = (meta ? meta.tagline : 'Nitro') + ' active';
+      if (sub) {
+        const left = Math.max(0, nitro.expiresAt - Date.now());
+        const days = Math.ceil(left / 86400000);
+        sub.textContent = 'Expires ' + new Date(nitro.expiresAt).toLocaleDateString() + ' · ' + days + ' day' + (days === 1 ? '' : 's') + ' left';
+      }
+    }
+  } else {
+    renderNitroBadgeEl(badge, null);
+    if (banner) banner.classList.remove('visible');
+  }
+  renderProfileThemes();
+  applyProfileTheme();
+}
+
+function buyNitro(tierId) {
+  if (!isLoggedIn && !currentUser) { openModal('modal-auth'); return; }
+  if (!isLoggedIn) {
+    showToast('Sign in required', 'Create an account to buy Nitro');
+    openModal('modal-auth');
+    return;
+  }
+  const tier = NITRO_TIERS.find(t => t.id === tierId);
+  if (!tier) return;
+  if (!spendCoins(tier.cost, 'Nitro ' + tier.label)) return;
+  const existing = loadNitro();
+  const base = existing && existing.expiresAt > Date.now() ? existing.expiresAt : Date.now();
+  const ms = tier.months * 30 * 24 * 60 * 60 * 1000;
+  // If upgrading to higher tier, use new tier; if same or lower, keep higher visual if existing is higher
+  const rank = { bronze: 1, silver: 2, gold: 3, diamond: 4 };
+  let nextTier = tier.tier;
+  if (existing && rank[existing.tier] > rank[tier.tier] && existing.expiresAt > Date.now()) {
+    nextTier = existing.tier;
+  }
+  const data = {
+    tier: nextTier,
+    planId: tier.id,
+    purchasedAt: Date.now(),
+    expiresAt: base + ms,
+    months: (existing && existing.expiresAt > Date.now() ? (existing.months || 0) : 0) + tier.months
+  };
+  saveNitro(data);
+  // free avatar effects while nitro
+  if (tier.tier === 'gold' || tier.tier === 'diamond' || tier.tier === 'silver') {
+    const all = AVATAR_EFFECTS.map(e => e.id);
+    saveUnlockedEffects(all);
+  }
+  applyNitroUI();
+  renderStorePage();
+  showToast('Nitro unlocked', tier.tagline + ' for ' + tier.label);
+  addActivity('Purchased Nitro: ' + tier.label, 'done');
+}
+
+function renderNitroGrid() {
+  const grid = document.getElementById('nitro-grid');
+  if (!grid) return;
+  grid.innerHTML = NITRO_TIERS.map(t => {
+    const featured = t.featured ? ' featured' : '';
+    const ribbon = t.save ? '<div class="nitro-ribbon">' + t.save + '</div>' : '';
+    return '<div class="nitro-card' + featured + '">' + ribbon +
+      '<div class="nitro-tier-badge ' + t.tier + '">' + nitroBadgeSvg(t.tier) + '</div>' +
+      '<h3>' + t.label + '</h3>' +
+      '<div class="text-xs text-muted">' + t.tagline + '</div>' +
+      '<div class="nitro-price">✦ ' + t.cost + ' <span>coins</span></div>' +
+      '<ul class="nitro-perks">' + t.perks.map(p => '<li>' + p + '</li>').join('') + '</ul>' +
+      '<button class="btn btn-primary w-full" onclick="buyNitro(\'' + t.id + '\')">Get ' + t.label + '</button>' +
+      '</div>';
+  }).join('');
+}
+
+function loadStoreFlags() {
+  try { return JSON.parse(localStorage.getItem('devflow_store_flags') || '{}'); } catch (e) { return {}; }
+}
+function saveStoreFlags(flags) {
+  localStorage.setItem('devflow_store_flags', JSON.stringify(flags || {}));
+}
+
+function buyStoreItem(id) {
+  if (!isLoggedIn && !currentUser) { openModal('modal-auth'); return; }
+  if (!isLoggedIn) { openModal('modal-auth'); showToast('Sign in required', 'Account needed for store items'); return; }
+  const item = STORE_ITEMS.find(x => x.id === id);
+  if (!item) return;
+  const flags = loadStoreFlags();
+  if (item.type !== 'grant' && flags[item.id]) {
+    showToast('Already owned', item.label);
+    return;
+  }
+  if (item.cost > 0 && !spendCoins(item.cost, item.label)) return;
+
+  if (item.type === 'grant') {
+    if (flags._daily_boost === new Date().toDateString()) {
+      showToast('Already claimed', 'Come back tomorrow');
+      // refund if spent 0
+      return;
+    }
+    addCoins(item.grant, item.label);
+    flags._daily_boost = new Date().toDateString();
+  } else if (item.type === 'all_fx') {
+    saveUnlockedEffects(AVATAR_EFFECTS.map(e => e.id));
+    flags[item.id] = true;
+  } else if (item.type === 'streak_freeze') {
+    flags.streak_freeze = (flags.streak_freeze || 0) + 1;
+    showToast('Streak freeze', 'You have ' + flags.streak_freeze + ' freeze(s)');
+  } else if (item.type === 'boost_focus') {
+    flags.focus_boost_left = 5;
+  } else {
+    flags[item.id] = true;
+  }
+  saveStoreFlags(flags);
+  renderStorePage();
+  if (item.type !== 'grant') showToast('Purchased', item.label);
+}
+
+function renderStoreItems() {
+  const grid = document.getElementById('store-items-grid');
+  if (!grid) return;
+  const flags = loadStoreFlags();
+  grid.innerHTML = STORE_ITEMS.map(item => {
+    const owned = item.type !== 'grant' && item.type !== 'streak_freeze' && flags[item.id];
+    const claimedToday = item.type === 'grant' && flags._daily_boost === new Date().toDateString();
+    let btn;
+    if (owned) btn = '<button class="btn btn-outline btn-sm" disabled>Owned</button>';
+    else if (claimedToday) btn = '<button class="btn btn-outline btn-sm" disabled>Claimed</button>';
+    else btn = '<button class="btn btn-primary btn-sm" onclick="buyStoreItem(\'' + item.id + '\')">' + (item.cost ? 'Buy' : 'Claim') + '</button>';
+    const price = item.cost ? ('✦ ' + item.cost) : 'Free';
+    return '<div class="store-item">' +
+      '<div class="store-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 22l-6-4-6 4 1.5-8.5L2 9h7z"/></svg></div>' +
+      '<h4>' + item.label + '</h4>' +
+      '<p>' + item.desc + '</p>' +
+      '<div class="store-item-footer"><span class="store-item-price">' + price + '</span>' + btn + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderStorePage() {
+  renderNitroGrid();
+  renderStoreItems();
+  applyNitroUI();
+  updateCoinsUI();
+}
+
+function renderProfileThemes() {
+  const box = document.getElementById('profile-theme-swatches');
+  const hint = document.getElementById('profile-theme-hint');
+  if (!box) return;
+  const nitro = hasActiveNitro();
+  const current = (currentUser && currentUser.profileTheme) || localStorage.getItem('devflow_profile_theme') || 'default';
+  box.innerHTML = PROFILE_THEMES.map(t => {
+    const active = t.id === current ? ' active' : '';
+    const locked = !nitro && t.id !== 'default';
+    return '<button type="button" class="theme-swatch' + active + '" title="' + t.label + (locked ? ' (Nitro)' : '') +
+      '" style="background:' + t.css + ';opacity:' + (locked ? '0.45' : '1') + '" onclick="setProfileTheme(\'' + t.id + '\')"></button>';
+  }).join('');
+  if (hint) {
+    hint.textContent = nitro ? 'Tap a color to change your profile banner theme' : 'Subscribe to Nitro to customize banner colors';
+  }
+}
+
+function setProfileTheme(id) {
+  if (!PROFILE_THEMES.some(t => t.id === id)) return;
+  if (id !== 'default' && !hasActiveNitro()) {
+    showToast('Nitro required', 'Buy Nitro in the Store to unlock themes');
+    navigate('store');
+    return;
+  }
+  localStorage.setItem('devflow_profile_theme', id);
+  if (currentUser) {
+    currentUser.profileTheme = id;
+    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  }
+  applyProfileTheme();
+  renderProfileThemes();
+  showToast('Theme updated', PROFILE_THEMES.find(t => t.id === id).label);
+}
+
+function applyProfileTheme() {
+  const banner = document.getElementById('profile-banner');
+  if (!banner) return;
+  // user custom image banner takes priority
+  if (currentUser && currentUser.banner) {
+    banner.style.backgroundImage = 'url(' + currentUser.banner + ')';
+    banner.style.backgroundSize = 'cover';
+    banner.style.backgroundPosition = 'center';
+    return;
+  }
+  const id = (currentUser && currentUser.profileTheme) || localStorage.getItem('devflow_profile_theme') || 'default';
+  const theme = PROFILE_THEMES.find(t => t.id === id) || PROFILE_THEMES[0];
+  banner.style.backgroundImage = '';
+  banner.style.background = theme.css;
+}
+
+// Hook coin reward bonus for nitro
+const _addCoinsOrig = typeof addCoins === 'function' ? null : null;
+
 /* Init */
 document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem('devflow_user');
@@ -5571,7 +6210,9 @@ document.addEventListener('DOMContentLoaded',()=>{
               email: d.email || user.email || '',
               coins: d.coins,
               terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === TREMENAL_OWNER,
-              createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
+              createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
+              nitro: d.nitro || null,
+              profileTheme: d.profileTheme || null
             });
           }
         }).catch(()=>{});
@@ -5594,6 +6235,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(statusMenu&&statusMenu.classList.contains('open')&&!statusMenu.contains(e.target)&&!userMini?.contains(e.target)) closeStatusMenu();
   });
   applyUserStatusUI();
+  if (typeof applyNitroUI === 'function') applyNitroUI();
 });
 
 window.navigate=navigate; window.openModal=openModal; window.closeModal=closeModal;
@@ -5629,6 +6271,9 @@ window.submitOnboarding=submitOnboarding; window.toggleProject=toggleProject;
 window.addCertificate=addCertificate; window.removeCert=removeCert;
 window.toggleTerminalPref=toggleTerminalPref; window.runTerminalCommand=runTerminalCommand;
 window.renderOnboardingChips=renderOnboardingChips;
+window.buyNitro=buyNitro; window.buyStoreItem=buyStoreItem; window.renderStorePage=renderStorePage;
+window.setProfileTheme=setProfileTheme; window.applyNitroUI=applyNitroUI;
+
   </script>
 </body>
 </html>
