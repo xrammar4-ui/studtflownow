@@ -630,28 +630,106 @@ h3 { font-size: 1.05rem; }
 .user-result-name { font-weight: 600; font-size: 0.9rem; }
 .user-result-handle { font-size: 0.78rem; color: var(--text-muted); }
 
-.profile-header {
-  display: flex; gap: 1.75rem;
-  align-items: flex-start;
-  margin-bottom: 1.75rem;
-  padding: 1.75rem;
+/* ========== Discord-style Profile ========== */
+.discord-profile {
+  max-width: 620px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
 }
-.profile-avatar-lg {
-  width: 100px; height: 100px;
+.discord-banner {
+  height: 140px;
+  background: linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%);
+  position: relative;
+}
+.discord-banner-edit {
+  position: absolute;
+  top: 10px; right: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.discord-profile:hover .discord-banner-edit { opacity: 1; }
+.discord-avatar-wrap {
+  position: relative;
+  margin-top: -52px;
+  margin-left: 22px;
+  width: 104px;
+  height: 104px;
+}
+.discord-avatar {
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
-  border: 2px solid var(--border);
+  border: 6px solid var(--bg-card);
   object-fit: cover;
+  background: var(--bg-elevated);
+  display: block;
 }
-.profile-actions {
-  display: flex; gap: 0.5rem;
-  margin-top: 1.1rem;
+.discord-avatar-status {
+  position: absolute;
+  bottom: 6px; right: 6px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 4px solid var(--bg-card);
+}
+.discord-body {
+  padding: 12px 22px 22px;
+}
+.discord-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   flex-wrap: wrap;
+  margin-bottom: 2px;
 }
-.profile-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.9rem;
-  margin-bottom: 1.75rem;
+.discord-display-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.discord-handle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.discord-bio {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: 16px;
+  white-space: pre-wrap;
+}
+.discord-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
+.discord-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.discord-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.discord-member-since {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+.discord-member-since strong {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .chat-layout {
@@ -889,8 +967,7 @@ h3 { font-size: 1.05rem; }
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
   .main-content { margin-left: 0; }
-  .profile-header { flex-direction: column; align-items: center; text-align: center; }
-  .profile-stats { grid-template-columns: repeat(2, 1fr); }
+  .discord-profile { margin: 0 0.5rem; }
   .landing-nav { padding: 1rem 1.25rem; }
 }
 
@@ -1269,11 +1346,19 @@ h3 { font-size: 1.05rem; }
 }
 
 .chat-list-header {
-  padding: 1rem 1.15rem;
+  padding: 0.85rem 1rem;
   font-weight: 600;
   border-bottom: 1px solid var(--border);
   font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
+.chat-list-header .btn { flex-shrink: 0; }
+.chat-peer-clickable { cursor: pointer; }
+.chat-peer-clickable:hover { opacity: 0.85; }
+.chat-peer-clickable:hover #chat-peer-name { color: var(--accent-hover); }
 .wa-messages {
   background: #0B0B0F;
   gap: 0.35rem !important;
@@ -1654,7 +1739,10 @@ h3 { font-size: 1.05rem; }
       <div class="page-view hidden" id="page-messages" style="padding:0">
         <div class="chat-layout" id="chat-layout">
           <div class="chat-list" id="chat-list-panel">
-            <div class="chat-list-header">Chats</div>
+            <div class="chat-list-header">
+              <span>Chats</span>
+              <button class="btn btn-primary btn-sm" onclick="openCreateGroupModal()" title="Create group">+ Group</button>
+            </div>
             <div id="chat-conversations"></div>
           </div>
           <div class="chat-main" id="chat-main-panel">
@@ -1665,10 +1753,12 @@ h3 { font-size: 1.05rem; }
             </div>
             <div id="chat-active" class="hidden" style="display:none;flex-direction:column;height:100%">
               <div class="chat-header">
-                <img class="avatar" id="chat-peer-avatar" src="" alt="" />
-                <div style="flex:1;min-width:0">
-                  <div style="font-weight:600" id="chat-peer-name">—</div>
-                  <div class="text-xs" id="chat-peer-status">offline</div>
+                <div class="chat-peer-clickable" style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:0" onclick="openPeerProfileFromChat()" title="View profile">
+                  <img class="avatar" id="chat-peer-avatar" src="" alt="" />
+                  <div style="min-width:0">
+                    <div style="font-weight:600" id="chat-peer-name">—</div>
+                    <div class="text-xs" id="chat-peer-status">offline</div>
+                  </div>
                 </div>
               </div>
               <div class="chat-messages wa-messages" id="chat-messages"></div>
@@ -1681,46 +1771,128 @@ h3 { font-size: 1.05rem; }
         </div>
       </div>
 
-      <!-- Profile -->
+      <!-- Profile (Discord-style) -->
       <div class="page-content page-view hidden" id="page-profile">
-        <div class="glass-card profile-header">
-          <img class="profile-avatar-lg" id="profile-avatar" src="" alt="" />
-          <div style="flex:1">
-            <h1 id="profile-name">—</h1>
-            <p class="text-accent" id="profile-handle">@—</p>
-            <p class="text-secondary text-sm" style="margin-top:0.6rem">Your public profile</p>
-            <div class="profile-actions">
+        <div class="discord-profile">
+          <div class="discord-banner" id="profile-banner"></div>
+          <div class="discord-avatar-wrap">
+            <img class="discord-avatar" id="profile-avatar" src="" alt="" />
+            <div class="discord-avatar-status" title="Online"></div>
+          </div>
+          <div class="discord-body">
+            <div class="discord-name-row">
+              <span class="discord-display-name" id="profile-name">—</span>
+            </div>
+            <div class="discord-handle" id="profile-handle">@—</div>
+            <div class="discord-bio" id="profile-bio">No bio yet. Click Edit Profile to add one.</div>
+            <div class="discord-divider"></div>
+            <div class="discord-section-title">Member Since</div>
+            <div class="discord-member-since" id="profile-member-since"><strong>—</strong></div>
+            <div class="discord-divider"></div>
+            <div class="discord-actions">
+              <button class="btn btn-primary btn-sm" onclick="openEditProfile()">Edit Profile</button>
               <button class="btn btn-outline btn-sm" onclick="logout()">Sign out</button>
             </div>
           </div>
         </div>
-        <div class="profile-stats">
-          <div class="glass-card stat-card"><div class="stat-value" id="stat-completed">0</div><div class="stat-label">Tasks Done</div></div>
-          <div class="glass-card stat-card"><div class="stat-value coin-value">0</div><div class="stat-label">Coins</div></div>
-          <div class="glass-card stat-card"><div class="stat-value">0h</div><div class="stat-label">Deep Work</div></div>
-          <div class="glass-card stat-card"><div class="stat-value">—</div><div class="stat-label">On-Time</div></div>
-        </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="glass-card" style="padding:1.35rem;margin-bottom:1.25rem">
-          <div class="section-header"><h3>Certificates & proofs</h3></div>
-          <div class="cert-list" id="cert-list" style="margin-bottom:1rem"></div>
-          <form id="form-cert" onsubmit="addCertificate(event)">
-            <div style="display:grid;grid-template-columns:1fr 1fr 100px;gap:0.5rem;margin-bottom:0.6rem">
-              <input class="form-input" id="cert-title" placeholder="Certificate title" required />
-              <input class="form-input" id="cert-issuer" placeholder="Issuer" />
-              <input class="form-input" id="cert-year" placeholder="Year" />
-            </div>
-            <button type="submit" class="btn btn-outline btn-sm">Add certificate</button>
-          </form>
+  <!-- Edit Profile Modal -->
+  <div class="modal-overlay" id="modal-edit-profile">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Profile</h2>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-edit-profile')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
+          <div style="position:relative">
+            <img id="edit-avatar-preview" src="" alt="" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-elevated)" />
+            <label for="edit-avatar-input" style="position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card)" title="Change photo">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </label>
+            <input type="file" id="edit-avatar-input" accept="image/*" style="display:none" onchange="onEditAvatarSelected(event)" />
+          </div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Display Name</label>
+          <input class="form-input" id="edit-display-name" placeholder="Your name" maxlength="32" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username (handle)</label>
+          <input class="form-input" id="edit-handle" placeholder="username" maxlength="20" />
+          <p class="text-xs text-muted" style="margin-top:0.3rem">Letters, numbers, underscore only</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea class="form-textarea" id="edit-bio" placeholder="Tell people about yourself..." maxlength="190" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-edit-profile')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
 
-        <div class="glass-card" style="padding:1.35rem">
-          <h3 style="margin-bottom:0.75rem">Preferences</h3>
-          <label class="text-sm" style="display:flex;align-items:center;gap:0.6rem;cursor:pointer">
-            <input type="checkbox" id="pref-terminal" onchange="toggleTerminalPref(this.checked)" />
-            Enable terminal command bar (optional)
-          </label>
-          <p class="text-xs text-muted" style="margin-top:0.4rem">Commands: add, start, done, focus, coins, help</p>
+  <!-- Create Group Modal -->
+  <div class="modal-overlay" id="modal-create-group">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Create Group</h2>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-create-group')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Group name</label>
+          <input class="form-input" id="group-name-input" placeholder="e.g. Study Squad" maxlength="40" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description (optional)</label>
+          <textarea class="form-textarea" id="group-desc-input" placeholder="What is this group about?" maxlength="120" rows="2"></textarea>
+        </div>
+        <div id="group-invite-result" class="hidden" style="margin-top:0.5rem">
+          <div class="discord-section-title">Invite link</div>
+          <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.4rem">
+            <input class="form-input" id="group-invite-link" readonly style="font-size:0.8rem" />
+            <button class="btn btn-outline btn-sm" onclick="copyGroupInvite()">Copy</button>
+          </div>
+          <p class="text-xs text-muted" style="margin-top:0.4rem">Share this link so others can join the group.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-create-group')">Close</button>
+        <button class="btn btn-primary" id="btn-create-group" onclick="createGroupChat()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View other user profile (Discord-style popup) -->
+  <div class="modal-overlay" id="modal-view-profile">
+    <div class="modal" style="max-width:420px;padding:0;overflow:hidden;background:transparent;border:none;box-shadow:none">
+      <div class="discord-profile" style="margin:0">
+        <div class="discord-banner" id="view-profile-banner"></div>
+        <div class="discord-avatar-wrap">
+          <img class="discord-avatar" id="view-profile-avatar" src="" alt="" />
+          <div class="discord-avatar-status" id="view-profile-status-dot" title="Status"></div>
+        </div>
+        <div class="discord-body">
+          <div class="discord-name-row">
+            <span class="discord-display-name" id="view-profile-name">—</span>
+          </div>
+          <div class="discord-handle" id="view-profile-handle">@—</div>
+          <div class="discord-bio" id="view-profile-bio"></div>
+          <div class="discord-divider"></div>
+          <div class="discord-actions">
+            <button class="btn btn-primary btn-sm" id="view-profile-msg-btn" onclick="messageFromViewProfile()">Message</button>
+            <button class="btn btn-outline btn-sm" onclick="closeModal('modal-view-profile')">Close</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2138,25 +2310,35 @@ async function sendChatMessage() {
   if (!text) return;
 
   const me = auth().currentUser.uid;
-  const room = chatRoomId(me, activePeerUid);
+  const isGroup = String(activePeerUid).startsWith('group_');
+  const room = isGroup ? activePeerUid : chatRoomId(me, activePeerUid);
 
   let status = 'sent';
-  try {
-    const peerPres = await db().collection('presence').doc(activePeerUid).get();
-    const pd = peerPres.data() || {};
-    if (pd.online) status = 'delivered';
-    if (pd.activeChat === me) status = 'read';
-  } catch (e) {}
+  if (!isGroup) {
+    try {
+      const peerPres = await db().collection('presence').doc(activePeerUid).get();
+      const pd = peerPres.data() || {};
+      if (pd.online) status = 'delivered';
+      if (pd.activeChat === me) status = 'read';
+    } catch (e) {}
+  }
 
-  await db().collection('chats').doc(room).set({
-    members: [me, activePeerUid],
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    lastText: text
-  }, { merge: true });
+  if (isGroup) {
+    await db().collection('chats').doc(room).set({
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastText: text
+    }, { merge: true });
+  } else {
+    await db().collection('chats').doc(room).set({
+      members: [me, activePeerUid],
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastText: text
+    }, { merge: true });
+  }
 
   await db().collection('chats').doc(room).collection('messages').add({
     fromUid: me,
-    toUid: activePeerUid,
+    toUid: isGroup ? null : activePeerUid,
     fromHandle: (currentUser && currentUser.handle) || '',
     text,
     status,
@@ -2177,12 +2359,27 @@ async function renderChatList() {
   try {
     const q = await db().collection('chats').where('members', 'array-contains', me).get();
     if (q.empty) {
-      el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">No chats yet</p><p class="text-xs text-muted">Search a user by @handle and message them</p></div>';
+      el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">No chats yet</p><p class="text-xs text-muted">Search a user by @handle or create a group</p></div>';
       return;
     }
     const rows = [];
     for (const doc of q.docs) {
       const data = doc.data();
+      // Group chat
+      if (data.type === 'group' || String(doc.id).startsWith('group_')) {
+        const gId = data.groupId || String(doc.id).replace(/^group_/, '');
+        const gName = data.name || 'Group';
+        const avatar = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(gId);
+        rows.push(`<div class="chat-item" onclick="openGroupChat('${gId}','${escapeHtml(gName).replace(/'/g, "\\'")}')">
+          <img class="avatar" src="${avatar}" alt="" />
+          <div style="min-width:0;flex:1">
+            <div style="font-weight:600;font-size:0.9rem">👥 ${escapeHtml(gName)}</div>
+            <div class="text-xs text-muted truncate">${escapeHtml(data.lastText || 'Group')}</div>
+          </div>
+        </div>`);
+        continue;
+      }
+      // DM
       const otherUid = (data.members || []).find(id => id !== me);
       if (!otherUid) continue;
       const userDoc = await db().collection('users').doc(otherUid).get();
@@ -2222,11 +2419,241 @@ function startChatEngine() {
   });
 }
 
+/* ---- View peer profile from chat ---- */
+function openPeerProfileFromChat() {
+  if (!activePeerHandle) return; // groups have no handle
+  if (String(activePeerUid || '').startsWith('group_')) return;
+  viewUserProfile(activePeerHandle);
+}
+
+let viewingProfileHandle = null;
+
+async function viewUserProfile(handle) {
+  if (!handle) return;
+  viewingProfileHandle = handle.toLowerCase().replace(/^@/, '');
+  const peer = await findUserByHandle(viewingProfileHandle);
+  if (!peer) {
+    showToast('User not found', '@' + viewingProfileHandle);
+    return;
+  }
+  document.getElementById('view-profile-name').textContent = peer.displayName || peer.handle;
+  document.getElementById('view-profile-handle').textContent = '@' + (peer.handle || viewingProfileHandle);
+  document.getElementById('view-profile-avatar').src = peer.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(peer.handle || 'user'));
+  document.getElementById('view-profile-bio').textContent = peer.bio || 'No bio yet.';
+  // presence
+  try {
+    const pres = await db().collection('presence').doc(peer.uid).get();
+    const online = (pres.data() || {}).online === true;
+    const dot = document.getElementById('view-profile-status-dot');
+    if (dot) {
+      dot.style.background = online ? 'var(--success)' : '#71717A';
+      dot.title = online ? 'Online' : 'Offline';
+    }
+  } catch (e) {}
+  // hide Message if viewing self
+  const msgBtn = document.getElementById('view-profile-msg-btn');
+  if (msgBtn) {
+    const me = auth().currentUser;
+    msgBtn.style.display = (me && peer.uid === me.uid) ? 'none' : '';
+  }
+  openModal('modal-view-profile');
+}
+
+function messageFromViewProfile() {
+  if (!viewingProfileHandle) return;
+  closeModal('modal-view-profile');
+  navigate('messages');
+  openChatWith(viewingProfileHandle);
+}
+
+/* ---- Create Group + Invite links ---- */
+function openCreateGroupModal() {
+  if (!fbReady() || !auth().currentUser) {
+    showToast('Sign in required', 'Sign in to create a group');
+    return;
+  }
+  document.getElementById('group-name-input').value = '';
+  document.getElementById('group-desc-input').value = '';
+  document.getElementById('group-invite-result').classList.add('hidden');
+  document.getElementById('btn-create-group').style.display = '';
+  openModal('modal-create-group');
+  setTimeout(() => document.getElementById('group-name-input')?.focus(), 80);
+}
+
+function generateInviteCode() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let s = '';
+  for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
+async function createGroupChat() {
+  if (!fbReady() || !auth().currentUser) {
+    showToast('Sign in required', 'Sign in first');
+    return;
+  }
+  const name = (document.getElementById('group-name-input')?.value || '').trim();
+  const desc = (document.getElementById('group-desc-input')?.value || '').trim();
+  if (!name || name.length < 2) {
+    showToast('Name required', 'Enter a group name (min 2 chars)');
+    return;
+  }
+  const me = auth().currentUser.uid;
+  const inviteCode = generateInviteCode();
+  try {
+    const ref = await db().collection('groups').add({
+      name,
+      description: desc,
+      createdBy: me,
+      members: [me],
+      inviteCode,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastText: 'Group created'
+    });
+    // also create a chat room document for messaging
+    await db().collection('chats').doc('group_' + ref.id).set({
+      type: 'group',
+      groupId: ref.id,
+      name,
+      members: [me],
+      inviteCode,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastText: 'Group created'
+    }, { merge: true });
+
+    const link = location.origin + location.pathname + '?join=' + inviteCode;
+    document.getElementById('group-invite-link').value = link;
+    document.getElementById('group-invite-result').classList.remove('hidden');
+    document.getElementById('btn-create-group').style.display = 'none';
+    showToast('Group created', name);
+    renderChatList();
+  } catch (err) {
+    showToast('Failed', err.message || 'Could not create group');
+  }
+}
+
+function copyGroupInvite() {
+  const el = document.getElementById('group-invite-link');
+  if (!el || !el.value) return;
+  navigator.clipboard.writeText(el.value).then(() => {
+    showToast('Copied', 'Invite link copied to clipboard');
+  }).catch(() => {
+    el.select();
+    document.execCommand('copy');
+    showToast('Copied', 'Invite link copied');
+  });
+}
+
+async function tryJoinFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const code = params.get('join');
+  if (!code) return;
+  if (!fbReady()) return;
+  // wait a bit for auth
+  const waitAuth = () => new Promise(resolve => {
+    if (auth().currentUser) return resolve(auth().currentUser);
+    const unsub = auth().onAuthStateChanged(u => { if (u) { unsub(); resolve(u); } });
+    setTimeout(() => { unsub(); resolve(auth().currentUser); }, 4000);
+  });
+  const user = await waitAuth();
+  if (!user) {
+    showToast('Sign in to join', 'Sign in first, then open the invite link again');
+    return;
+  }
+  try {
+    const q = await db().collection('groups').where('inviteCode', '==', code).limit(1).get();
+    if (q.empty) {
+      showToast('Invalid invite', 'This group invite link is not valid');
+      return;
+    }
+    const gDoc = q.docs[0];
+    const data = gDoc.data();
+    const members = data.members || [];
+    if (members.includes(user.uid)) {
+      showToast('Already a member', data.name || 'Group');
+    } else {
+      await gDoc.ref.update({
+        members: firebase.firestore.FieldValue.arrayUnion(user.uid),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await db().collection('chats').doc('group_' + gDoc.id).set({
+        type: 'group',
+        groupId: gDoc.id,
+        name: data.name,
+        members: firebase.firestore.FieldValue.arrayUnion(user.uid),
+        inviteCode: code,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastText: 'Someone joined'
+      }, { merge: true });
+      showToast('Joined group', data.name || 'Group');
+    }
+    // clean URL
+    history.replaceState({}, '', location.pathname);
+    navigate('messages');
+    renderChatList();
+  } catch (err) {
+    showToast('Join failed', err.message || '');
+  }
+}
+
+// Open group chat
+async function openGroupChat(groupId, groupName) {
+  if (!fbReady() || !auth().currentUser) return;
+  activePeerHandle = null;
+  activePeerUid = 'group_' + groupId;
+  const ph = document.getElementById('chat-placeholder');
+  const active = document.getElementById('chat-active');
+  if (ph) ph.style.display = 'none';
+  if (active) { active.classList.remove('hidden'); active.style.display = 'flex'; }
+  document.getElementById('chat-peer-name').textContent = groupName || 'Group';
+  document.getElementById('chat-peer-avatar').src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(groupId);
+  document.getElementById('chat-peer-status').textContent = 'group';
+  document.getElementById('chat-peer-status').className = 'text-xs text-muted';
+  // disable profile click for groups by clearing activePeerHandle
+  listenGroupMessages(groupId);
+  renderChatList();
+}
+
+function listenGroupMessages(groupId) {
+  if (unsubMessages) unsubMessages();
+  const room = 'group_' + groupId;
+  unsubMessages = db().collection('chats').doc(room).collection('messages')
+    .orderBy('createdAt', 'asc')
+    .onSnapshot(async snap => {
+      const box = document.getElementById('chat-messages');
+      if (!box) return;
+      const meUid = auth().currentUser.uid;
+      let html = '';
+      snap.forEach(doc => {
+        const m = doc.data();
+        const mine = m.fromUid === meUid;
+        const ticks = mine ? tickHtml(m.status || 'sent') : '';
+        const who = mine ? '' : ('<div class="text-xs" style="opacity:0.7;margin-bottom:2px">' + escapeHtml(m.fromHandle || 'user') + '</div>');
+        html += `<div class="wa-bubble ${mine ? 'sent' : 'received'}">
+          ${who}
+          <div>${escapeHtml(m.text || '')}</div>
+          <div class="wa-meta"><span>${formatMsgTime(m.createdAt)}</span>${ticks}</div>
+        </div>`;
+      });
+      box.innerHTML = html;
+      box.scrollTop = box.scrollHeight;
+    });
+}
+
 window.sendChatMessage = sendChatMessage;
 window.openChatWith = openChatWith;
 window.renderMessagesPage = renderMessagesPage;
 window.startChatEngine = startChatEngine;
 window.findUserByHandle = findUserByHandle;
+window.openPeerProfileFromChat = openPeerProfileFromChat;
+window.viewUserProfile = viewUserProfile;
+window.messageFromViewProfile = messageFromViewProfile;
+window.openCreateGroupModal = openCreateGroupModal;
+window.createGroupChat = createGroupChat;
+window.copyGroupInvite = copyGroupInvite;
+window.openGroupChat = openGroupChat;
+window.tryJoinFromUrl = tryJoinFromUrl;
   </script>
   <script>
 /* ========== APP.JS ========== */
@@ -2343,7 +2770,10 @@ function startGoogleSignup(optionalName) {
     return firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
       if (doc.exists && doc.data().handle) {
         const d = doc.data();
-        login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid);
+        login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
+          bio: d.bio || '',
+          createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
+        });
         return;
       }
       if (pendingSignup.displayName) {
@@ -2438,13 +2868,16 @@ function finishSignup() {
   closeModal('modal-avatar');
   const avatar = pendingAvatarData || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(pendingSignup.handle || 'dev') + '&backgroundColor=09090b');
   const uid = pendingSignup.uid || (firebase.auth().currentUser && firebase.auth().currentUser.uid);
-  const doLogin = () => login(pendingSignup.displayName, pendingSignup.handle, avatar, uid);
+  const createdAt = Date.now();
+  const doLogin = () => login(pendingSignup.displayName, pendingSignup.handle, avatar, uid, { bio: '', createdAt });
   if (window.firebase && firebase.apps.length && uid) {
     firebase.firestore().collection('users').doc(uid).set({
       handle: pendingSignup.handle.toLowerCase(),
       displayName: pendingSignup.displayName,
       avatar: avatar,
       email: pendingSignup.email || '',
+      bio: '',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(doLogin).catch(err => {
       showToast('Profile save failed', err.message || '');
@@ -2468,13 +2901,16 @@ function enterGuest(){
     }
   }, 3000);
 }
-function login(name, handle, avatarUrl, uid){
+function login(name, handle, avatarUrl, uid, extra){
   isLoggedIn = true;
+  const prev = (() => { try { return JSON.parse(localStorage.getItem('devflow_user')||'null'); } catch(e){ return null; } })();
   currentUser = {
     uid: uid || null,
     displayName: name || 'Developer',
     handle: handle || 'developer',
-    avatar: avatarUrl || ('https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(handle||name||'dev')+'&backgroundColor=09090b')
+    avatar: avatarUrl || ('https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(handle||name||'dev')+'&backgroundColor=09090b'),
+    bio: (extra && extra.bio) || (prev && prev.bio) || '',
+    createdAt: (extra && extra.createdAt) || (prev && prev.createdAt) || Date.now()
   };
   localStorage.setItem('devflow_logged_in','true');
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
@@ -2506,12 +2942,104 @@ function updateUserUI(){
 function handleProfileClick(){
   if(!isLoggedIn){ openModal('modal-auth'); return; }
   navigate('profile');
-  if(currentUser){
-    document.getElementById('profile-name').textContent = currentUser.displayName;
-    document.getElementById('profile-handle').textContent = '@'+currentUser.handle;
-    document.getElementById('profile-avatar').src = currentUser.avatar;
+  renderDiscordProfile();
+}
+
+function renderDiscordProfile(){
+  if(!currentUser) return;
+  const nameEl = document.getElementById('profile-name');
+  const handleEl = document.getElementById('profile-handle');
+  const avatarEl = document.getElementById('profile-avatar');
+  const bioEl = document.getElementById('profile-bio');
+  const sinceEl = document.getElementById('profile-member-since');
+  if(nameEl) nameEl.textContent = currentUser.displayName || 'Developer';
+  if(handleEl) handleEl.textContent = '@' + (currentUser.handle || 'user');
+  if(avatarEl) avatarEl.src = currentUser.avatar || '';
+  if(bioEl) bioEl.textContent = currentUser.bio || 'No bio yet. Click Edit Profile to add one.';
+  if(sinceEl) {
+    const d = currentUser.createdAt ? new Date(currentUser.createdAt) : new Date();
+    sinceEl.innerHTML = '<strong>' + d.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) + '</strong>';
   }
-  renderCertificates();
+}
+
+let pendingEditAvatar = '';
+
+function openEditProfile(){
+  if(!currentUser) return;
+  document.getElementById('edit-display-name').value = currentUser.displayName || '';
+  document.getElementById('edit-handle').value = currentUser.handle || '';
+  document.getElementById('edit-bio').value = currentUser.bio || '';
+  const prev = document.getElementById('edit-avatar-preview');
+  if(prev) prev.src = currentUser.avatar || '';
+  pendingEditAvatar = '';
+  openModal('modal-edit-profile');
+}
+
+function onEditAvatarSelected(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    showToast('Invalid file', 'Please choose an image');
+    return;
+  }
+  if(file.size > 2 * 1024 * 1024){
+    showToast('Too large', 'Image must be under 2MB');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    pendingEditAvatar = reader.result;
+    const prev = document.getElementById('edit-avatar-preview');
+    if(prev) prev.src = pendingEditAvatar;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveEditProfile(){
+  let handle = (document.getElementById('edit-handle')?.value || '').trim().toLowerCase();
+  handle = handle.replace(/^@/, '').replace(/[^a-z0-9_]/g, '');
+  const display = (document.getElementById('edit-display-name')?.value || '').trim() || handle || 'Developer';
+  const bio = (document.getElementById('edit-bio')?.value || '').trim().slice(0, 190);
+  if(!handle || handle.length < 3){
+    showToast('Username required', 'At least 3 characters (a-z, 0-9, _)');
+    return;
+  }
+  // uniqueness check
+  if(window.firebase && firebase.apps.length && currentUser.uid){
+    try {
+      const snap = await firebase.firestore().collection('users').where('handle','==',handle).limit(1).get();
+      if(!snap.empty && snap.docs[0].id !== currentUser.uid){
+        showToast('Username taken', '@' + handle + ' is already used');
+        return;
+      }
+    } catch(e){}
+  }
+  const avatar = pendingEditAvatar || currentUser.avatar;
+  currentUser.displayName = display;
+  currentUser.handle = handle;
+  currentUser.avatar = avatar;
+  currentUser.bio = bio;
+  if(!currentUser.createdAt) currentUser.createdAt = Date.now();
+  localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  updateUserUI();
+  renderDiscordProfile();
+
+  // save to Firestore
+  if(window.firebase && firebase.apps.length && currentUser.uid){
+    try {
+      await firebase.firestore().collection('users').doc(currentUser.uid).set({
+        handle: handle,
+        displayName: display,
+        avatar: avatar,
+        bio: bio,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } catch(err){
+      showToast('Saved locally', 'Cloud sync failed: ' + (err.message||''));
+    }
+  }
+  closeModal('modal-edit-profile');
+  showToast('Profile updated', 'Your changes have been saved');
 }
 
 /* Onboarding */
@@ -3265,9 +3793,16 @@ document.addEventListener('DOMContentLoaded',()=>{
         firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
           if (doc.exists && doc.data().handle) {
             const d = doc.data();
-            login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid);
+            login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
+              bio: d.bio || '',
+              createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
+            });
           }
         }).catch(()=>{});
+      }
+      // Join group from invite link if present
+      if (user && typeof tryJoinFromUrl === 'function') {
+        setTimeout(() => tryJoinFromUrl(), 600);
       }
     });
   }
@@ -3289,6 +3824,8 @@ window.startFreeTimer=startFreeTimer;
 window.startFreeTimerFromInput=startFreeTimerFromInput; window.snoozeTask=snoozeTask;
 window.openSearch=openSearch; window.handleSearchInput=handleSearchInput;
 window.handleProfileClick=handleProfileClick; window.login=login;
+window.openEditProfile=openEditProfile; window.saveEditProfile=saveEditProfile;
+window.onEditAvatarSelected=onEditAvatarSelected; window.renderDiscordProfile=renderDiscordProfile;
 window.confirmAvatar=confirmAvatar;
 window.skipAvatar=skipAvatar;
 window.onAvatarSelected=onAvatarSelected;
