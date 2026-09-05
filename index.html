@@ -591,6 +591,18 @@ h3 { font-size: 1.05rem; }
 }
 .fx-pick-price.owned { color: var(--success); }
 .discord-profile.has-fx { box-shadow: none; }
+
+.discord-profile.themed-profile {
+  background: var(--profile-theme-bg, var(--bg-card));
+}
+.discord-profile .discord-body {
+  background: var(--profile-theme-body, transparent);
+  border-radius: 0 0 12px 12px;
+}
+.discord-profile.themed-profile .discord-divider {
+  border-color: rgba(255,255,255,0.12);
+}
+
 .main-content {
   flex: 1;
   margin-left: 240px;
@@ -3217,7 +3229,7 @@ h3 { font-size: 1.05rem; }
           </div>
         </div>
         <div class="form-group" id="edit-theme-group">
-          <label class="form-label">Banner colors <span class="text-xs text-muted">(Nitro · top &amp; bottom)</span></label>
+          <label class="form-label">Profile background <span class="text-xs text-muted">(Nitro · top &amp; bottom)</span></label>
           <div class="theme-colors-grid">
             <div class="theme-color-field">
               <span class="text-xs text-muted">Top</span>
@@ -3236,7 +3248,7 @@ h3 { font-size: 1.05rem; }
             <button type="button" class="btn btn-ghost btn-sm theme-reset-btn" onclick="resetEditThemeColor()">Reset</button>
           </div>
           <div class="theme-preview-bar" id="edit-theme-preview-bar"></div>
-          <p class="text-xs text-muted" id="edit-theme-hint" style="margin-top:0.35rem">Two colors like Discord — top fades into bottom on the banner</p>
+          <p class="text-xs text-muted" id="edit-theme-hint" style="margin-top:0.35rem">Two colors like Discord — applied to the profile card background</p>
         </div>
         <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
           <div class="avatar-fx fx-none edit-avatar-fx" id="edit-avatar-fx" style="position:relative">
@@ -4221,6 +4233,7 @@ async function viewUserProfile(handle) {
       const viewCard = document.querySelector('#modal-view-profile .discord-profile');
       if (viewCard) viewCard.classList.toggle('has-fx', validAvatarEffect(peer.avatarEffect) !== 'none');
       document.getElementById('view-profile-bio').textContent = peer.bio || 'No bio yet.';
+      if (typeof applyPeerProfileTheme === 'function') applyPeerProfileTheme(peer);
       const bannerEl = document.getElementById('view-profile-banner');
       if (bannerEl) {
         if (peer.banner) {
@@ -4243,6 +4256,9 @@ async function viewUserProfile(handle) {
       const viewCard = document.querySelector('#modal-view-profile .discord-profile');
       if (viewCard) viewCard.classList.remove('has-fx');
       document.getElementById('view-profile-bio').textContent = 'This account is private. Send a friend request to see more.';
+      const vroot = document.querySelector('#modal-view-profile .discord-profile');
+      if (vroot) { vroot.style.removeProperty('background'); vroot.classList.remove('themed-profile'); }
+
       const bannerEl = document.getElementById('view-profile-banner');
       if (bannerEl) {
         bannerEl.style.backgroundImage = '';
@@ -5204,11 +5220,6 @@ async function saveEditProfile(){
   if (pendingEditBanner === '') banner = '';
   const topEl = document.getElementById('edit-theme-hex-top') || document.getElementById('edit-theme-color-top');
   const botEl = document.getElementById('edit-theme-hex-bottom') || document.getElementById('edit-theme-color-bottom');
-  const colorsTouched = !!(pendingEditThemeTop || pendingEditThemeBottom || (topEl && topEl.value) || (botEl && botEl.value));
-  // When colors are saved and no NEW image was picked this session, prefer gradient over old image
-  if (colorsTouched && !pendingEditBanner) {
-    banner = '';
-  }
   currentUser.displayName = display;
   currentUser.handle = handle;
   currentUser.avatar = avatar;
@@ -5329,6 +5340,7 @@ function navigate(page){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelector('[data-nav="'+page+'"]')?.classList.add('active');
   if(page==='focus') initTimerUI();
+  if(page==='profile'){ if(typeof renderDiscordProfile==='function') renderDiscordProfile(); if(typeof applyProfileTheme==='function') applyProfileTheme(); }
   if(page==='messages'){ if(typeof renderMessagesPage==='function') renderMessagesPage(); setUnreadChats(0); if(activePeerHandle) markIncomingRead(activePeerHandle); }
   if(page==='analytics'){ renderAnalyticsEmpty(); renderAnalyticsCharts(); }
   if(page==='store'){ renderStorePage(); }
@@ -6994,33 +7006,71 @@ function saveThemeColor(hex) {
 function renderProfileThemes() {}
 function setProfileTheme() {}
 
-function applyProfileTheme() {
-  const banner = document.getElementById('profile-banner');
-  if (!banner) return;
-  const rawBanner = currentUser && currentUser.banner != null ? String(currentUser.banner).trim() : '';
-  const hasImg = rawBanner.length > 8 && (rawBanner.startsWith('http') || rawBanner.startsWith('data:') || rawBanner.startsWith('blob:'));
-  if (hasImg) {
-    banner.style.setProperty('background-image', 'url(' + rawBanner + ')', 'important');
-    banner.style.setProperty('background-size', 'cover', 'important');
-    banner.style.setProperty('background-position', 'center', 'important');
-    banner.style.setProperty('background-repeat', 'no-repeat', 'important');
+
+function applyPeerProfileTheme(peer, rootSelector) {
+  const root = document.querySelector(rootSelector || '#modal-view-profile .discord-profile');
+  if (!root || !peer) return;
+  const top = peer.profileThemeTop || peer.profileThemeColor;
+  const bot = peer.profileThemeBottom;
+  if (!top && !bot) {
+    root.style.removeProperty('background');
+    root.classList.remove('themed-profile');
     return;
   }
-  const colors = (typeof getSavedThemeColors === 'function') ? getSavedThemeColors() : { top: '#5865F2', bottom: '#4752C4' };
-  const top = colors.top || '#5865F2';
-  const bot = colors.bottom || '#4752C4';
-  const grad = 'linear-gradient(180deg, ' + top + ' 0%, ' + bot + ' 100%)';
-  banner.style.cssText = banner.style.cssText; // keep other inline if any
-  banner.style.removeProperty('background');
-  banner.style.removeProperty('background-image');
-  banner.style.removeProperty('background-size');
-  banner.style.removeProperty('background-position');
-  banner.style.removeProperty('background-repeat');
-  banner.style.removeProperty('background-color');
-  banner.style.setProperty('background', grad, 'important');
-  banner.style.setProperty('background-image', grad, 'important');
-  banner.style.setProperty('background-color', top, 'important');
+  const t = top || '#5865F2';
+  const b = bot || '#4752C4';
+  const grad = 'linear-gradient(180deg, ' + t + ' 0%, ' + b + ' 100%)';
+  root.classList.add('themed-profile');
+  root.style.setProperty('background', grad, 'important');
+  const body = root.querySelector('.discord-body');
+  if (body) body.style.setProperty('background', grad, 'important');
 }
+
+function applyProfileTheme() {
+  const colors = (typeof getSavedThemeColors === 'function')
+    ? getSavedThemeColors()
+    : { top: '#5865F2', bottom: '#4752C4' };
+  const top = (colors && colors.top) || '#5865F2';
+  const bot = (colors && colors.bottom) || '#4752C4';
+  const grad = 'linear-gradient(180deg, ' + top + ' 0%, ' + bot + ' 100%)';
+
+  // Profile card + body = the "background" the user wants to change
+  const card = document.querySelector('#page-profile .discord-profile');
+  if (card) {
+    card.classList.add('themed-profile');
+    card.style.setProperty('--profile-theme-bg', grad);
+    card.style.setProperty('--profile-theme-body', grad);
+    card.style.setProperty('background', grad, 'important');
+    card.style.setProperty('background-color', top, 'important');
+    card.style.setProperty('background-image', grad, 'important');
+  }
+  const body = document.querySelector('#page-profile .discord-body');
+  if (body) {
+    body.style.setProperty('background', grad, 'important');
+    body.style.setProperty('background-color', bot, 'important');
+    body.style.setProperty('background-image', grad, 'important');
+  }
+  // Avatar strip area between banner and body sits on the card — card gradient shows through
+
+  // Banner: keep uploaded image if any; otherwise also use theme gradient
+  const banner = document.getElementById('profile-banner');
+  if (banner) {
+    const rawBanner = currentUser && currentUser.banner != null ? String(currentUser.banner).trim() : '';
+    const hasImg = rawBanner.length > 8 && (rawBanner.startsWith('http') || rawBanner.startsWith('data:') || rawBanner.startsWith('blob:'));
+    if (hasImg) {
+      banner.style.setProperty('background-image', 'url("' + rawBanner.replace(/"/g, '') + '")', 'important');
+      banner.style.setProperty('background-size', 'cover', 'important');
+      banner.style.setProperty('background-position', 'center', 'important');
+      banner.style.setProperty('background-repeat', 'no-repeat', 'important');
+    } else {
+      banner.style.setProperty('background', grad, 'important');
+      banner.style.setProperty('background-image', grad, 'important');
+      banner.style.setProperty('background-color', top, 'important');
+    }
+  }
+}
+
+
 
 let pendingEditThemeTop = '';
 let pendingEditThemeBottom = '';
@@ -7122,8 +7172,8 @@ function syncEditThemeUI() {
   const hint = document.getElementById('edit-theme-hint');
   if (hint) {
     hint.textContent = nitro
-      ? 'Two colors like Discord — top fades into bottom on the banner'
-      : 'Nitro required — subscribe in the Store to unlock custom banner colors';
+      ? 'Two colors like Discord — applied to the profile card background'
+      : 'Nitro required — subscribe in the Store to unlock profile background colors';
   }
   const group = document.getElementById('edit-theme-group');
   if (group) group.style.opacity = nitro ? '1' : '0.7';
