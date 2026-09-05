@@ -1262,6 +1262,112 @@ h3 { font-size: 1.05rem; }
   margin-top: 0.5rem;
 }
 
+
+/* Realtime message popup notification */
+.msg-notif-container {
+  position: fixed;
+  top: 1.15rem;
+  right: 1.15rem;
+  z-index: 220;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: min(380px, calc(100vw - 2rem));
+  pointer-events: none;
+}
+.msg-notif {
+  pointer-events: auto;
+  background: var(--bg-card);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(99,102,241,0.12);
+  min-width: 280px;
+  animation: msgNotifIn 0.32s var(--ease);
+  cursor: pointer;
+  position: relative;
+}
+@keyframes msgNotifIn {
+  from { transform: translateX(40px) translateY(-8px); opacity: 0; }
+  to { transform: translateX(0) translateY(0); opacity: 1; }
+}
+.msg-notif.leaving {
+  animation: msgNotifOut 0.28s var(--ease) forwards;
+}
+@keyframes msgNotifOut {
+  to { transform: translateX(36px); opacity: 0; }
+}
+.msg-notif-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 0.75rem;
+}
+.msg-notif-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-deep);
+  border: 1.5px solid var(--border);
+}
+.msg-notif-body { flex: 1; min-width: 0; }
+.msg-notif-title {
+  font-weight: 650;
+  font-size: 0.88rem;
+  margin-bottom: 0.15rem;
+  color: var(--text-primary);
+}
+.msg-notif-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.msg-notif-close {
+  width: 26px; height: 26px;
+  border: none; background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.msg-notif-close:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+.msg-notif-progress {
+  height: 3px;
+  width: 100%;
+  background: rgba(99, 102, 241, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+.msg-notif-progress-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #6366F1, #818CF8);
+  transform-origin: left center;
+  animation: msgNotifShrink linear forwards;
+}
+@keyframes msgNotifShrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.chat-item.has-unread {
+  background: rgba(99, 102, 241, 0.08);
+}
+.chat-item-unread-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #EF4444;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.2);
+}
+
 .toast-container {
   position: fixed;
   bottom: 1.35rem; right: 1.35rem;
@@ -3744,6 +3850,9 @@ h3 { font-size: 1.05rem; }
     </div>
   </div>
 
+  <div class="toast-container" id="toast-container"></div>
+  <div class="msg-notif-container" id="msg-notif-container" aria-live="polite"></div>
+
   <!-- Mini timer PiP -->
   <div class="mini-timer" id="mini-timer" onclick="navigate('focus')">
     <div>
@@ -3931,6 +4040,11 @@ async function openChatWith(peerHandle) {
 
   beatPresence();
   listenMessages();
+  try {
+    const me = auth().currentUser && auth().currentUser.uid;
+    if (me && activePeerUid) clearChatUnread(chatRoomId(me, activePeerUid));
+  } catch (e) {}
+  markChatRead();
   markChatRead();
   renderChatList();
 }
@@ -4062,13 +4176,19 @@ async function sendChatMessage() {
   if (isGroup) {
     await db().collection('chats').doc(room).set({
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      lastText: text
+      lastText: text,
+      lastFromUid: me,
+      lastFromHandle: (currentUser && currentUser.handle) || '',
+      lastFromAvatar: (currentUser && currentUser.avatar) || ''
     }, { merge: true });
   } else {
     await db().collection('chats').doc(room).set({
       members: [me, activePeerUid],
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      lastText: text
+      lastText: text,
+      lastFromUid: me,
+      lastFromHandle: (currentUser && currentUser.handle) || '',
+      lastFromAvatar: (currentUser && currentUser.avatar) || ''
     }, { merge: true });
   }
 
@@ -4252,13 +4372,19 @@ async function sendVoiceMessage(blob, duration) {
   if (isGroup) {
     await db().collection('chats').doc(room).set({
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      lastText
+      lastText,
+      lastFromUid: me,
+      lastFromHandle: (currentUser && currentUser.handle) || '',
+      lastFromAvatar: (currentUser && currentUser.avatar) || ''
     }, { merge: true });
   } else {
     await db().collection('chats').doc(room).set({
       members: [me, activePeerUid],
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      lastText
+      lastText,
+      lastFromUid: me,
+      lastFromHandle: (currentUser && currentUser.handle) || '',
+      lastFromAvatar: (currentUser && currentUser.avatar) || ''
     }, { merge: true });
   }
 
@@ -4306,12 +4432,14 @@ async function renderChatList() {
         const gId = data.groupId || String(doc.id).replace(/^group_/, '');
         const gName = data.name || 'Group';
         const avatar = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(gId);
-        rows.push(`<div class="chat-item" onclick="openGroupChat('${gId}','${escapeHtml(gName).replace(/'/g, "\\'")}')">
+        const isUnreadG = UNREAD_CHAT_IDS.includes(doc.id);
+        rows.push(`<div class="chat-item${isUnreadG ? ' has-unread' : ''}" onclick="openGroupChat('${gId}','${escapeHtml(gName).replace(/'/g, "\\'")}')">
           <img class="avatar" src="${avatar}" alt="" />
           <div style="min-width:0;flex:1">
             <div style="font-weight:600;font-size:0.9rem">👥 ${escapeHtml(gName)}</div>
             <div class="text-xs text-muted truncate">${escapeHtml(data.lastText || 'Group')}</div>
           </div>
+          ${isUnreadG ? '<span class="chat-item-unread-dot" title="Unread"></span>' : ''}
         </div>`);
         continue;
       }
@@ -4326,7 +4454,8 @@ async function renderChatList() {
       const handle = u.handle || otherUid;
       const avatar = u.avatar || '';
       const fx = validAvatarEffect(u.avatarEffect || 'none');
-      rows.push(`<div class="chat-item" onclick="openChatWith('${handle}')">
+      const isUnread = UNREAD_CHAT_IDS.includes(doc.id);
+      rows.push(`<div class="chat-item${isUnread ? ' has-unread' : ''}" onclick="openChatWith('${handle}')">
         <span class="chat-avatar-wrap avatar-fx fx-${fx}">
           ${fxLayerHtml()}
           <img class="avatar" src="${avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + handle}" alt="" />
@@ -4336,6 +4465,7 @@ async function renderChatList() {
           <div style="font-weight:600;font-size:0.9rem">${escapeHtml(name)}</div>
           <div class="text-xs text-muted truncate">${escapeHtml(data.lastText || '')}</div>
         </div>
+        ${isUnread ? '<span class="chat-item-unread-dot" title="Unread"></span>' : ''}
       </div>`);
     }
     el.innerHTML = rows.join('') || '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">No chats yet</p></div>';
@@ -4355,10 +4485,192 @@ function startChatEngine() {
   beatPresence();
   window.addEventListener('beforeunload', setOffline);
   auth().onAuthStateChanged(u => {
-    if (u) beatPresence();
-    else setOffline();
+    if (u) {
+      beatPresence();
+      startInboxListener();
+    } else {
+      setOffline();
+      stopInboxListener();
+    }
   });
+  if (auth().currentUser) startInboxListener();
 }
+
+/* ========== Realtime inbox + message popups ========== */
+let unsubInbox = null;
+let inboxBootstrapped = false;
+const inboxKnownUpdated = {}; // chatId -> millis
+function saveUnreadChatIds() {
+  localStorage.setItem('devflow_unread_ids', JSON.stringify(UNREAD_CHAT_IDS));
+  setUnreadChats(UNREAD_CHAT_IDS.length);
+}
+
+function markChatUnread(chatId) {
+  chatId = String(chatId || '');
+  if (!chatId) return;
+  if (!UNREAD_CHAT_IDS.includes(chatId)) {
+    UNREAD_CHAT_IDS.unshift(chatId);
+    if (UNREAD_CHAT_IDS.length > 80) UNREAD_CHAT_IDS = UNREAD_CHAT_IDS.slice(0, 80);
+    saveUnreadChatIds();
+  } else {
+    setUnreadChats(UNREAD_CHAT_IDS.length);
+  }
+}
+
+function clearChatUnread(chatId) {
+  chatId = String(chatId || '');
+  const before = UNREAD_CHAT_IDS.length;
+  UNREAD_CHAT_IDS = UNREAD_CHAT_IDS.filter(id => id !== chatId);
+  if (UNREAD_CHAT_IDS.length !== before) saveUnreadChatIds();
+  else setUnreadChats(UNREAD_CHAT_IDS.length);
+}
+
+function clearAllChatUnread() {
+  UNREAD_CHAT_IDS = [];
+  saveUnreadChatIds();
+}
+
+function stopInboxListener() {
+  if (unsubInbox) { try { unsubInbox(); } catch (e) {} unsubInbox = null; }
+  inboxBootstrapped = false;
+}
+
+function startInboxListener() {
+  if (!fbReady() || !auth().currentUser) return;
+  stopInboxListener();
+  const me = auth().currentUser.uid;
+  unsubInbox = db().collection('chats').where('members', 'array-contains', me)
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(change => {
+        if (change.type !== 'added' && change.type !== 'modified') return;
+        const doc = change.doc;
+        const data = doc.data() || {};
+        const chatId = doc.id;
+        let ts = 0;
+        if (data.updatedAt && data.updatedAt.toMillis) ts = data.updatedAt.toMillis();
+        else if (typeof data.updatedAt === 'number') ts = data.updatedAt;
+        const prev = inboxKnownUpdated[chatId] || 0;
+
+        // Bootstrap: record current state without notifying
+        if (!inboxBootstrapped) {
+          if (ts) inboxKnownUpdated[chatId] = ts;
+          return;
+        }
+
+        if (!ts || ts <= prev) return;
+        inboxKnownUpdated[chatId] = ts;
+
+        const fromUid = data.lastFromUid || '';
+        if (fromUid && fromUid === me) return; // own message
+
+        // Don't popup if user is already viewing this conversation
+        const viewingThis =
+          (activePeerUid && (activePeerUid === chatId || chatRoomId(me, activePeerUid) === chatId)) ||
+          (activePeerUid && String(activePeerUid).startsWith('group_') && ('group_' + String(activePeerUid).replace(/^group_/, '')) === chatId);
+
+        const isGroup = data.type === 'group' || String(chatId).startsWith('group_');
+        const preview = data.lastText || (isGroup ? 'New group message' : 'New message');
+        const handle = data.lastFromHandle || (isGroup ? (data.name || 'Group') : 'Someone');
+        const title = isGroup
+          ? ((data.name || 'Group') + ' · @' + handle)
+          : ('@' + handle);
+
+        markChatUnread(chatId);
+
+        if (!viewingThis && USER_STATUS !== 'dnd' && USER_STATUS !== 'invisible') {
+          showMessageNotification({
+            title: title,
+            text: preview,
+            avatar: data.lastFromAvatar || '',
+            chatId: chatId,
+            handle: data.lastFromHandle || '',
+            isGroup: isGroup,
+            groupId: data.groupId || String(chatId).replace(/^group_/, ''),
+            groupName: data.name || 'Group'
+          });
+        }
+
+        // Refresh list if on messages page
+        const msgPage = document.getElementById('page-messages');
+        if (msgPage && !msgPage.classList.contains('hidden')) {
+          renderChatList();
+        }
+      });
+      inboxBootstrapped = true;
+      // sync badge from stored ids
+      setUnreadChats(UNREAD_CHAT_IDS.length);
+    }, err => {
+      console.warn('inbox listener', err);
+    });
+}
+
+function showMessageNotification(opts) {
+  opts = opts || {};
+  const container = document.getElementById('msg-notif-container');
+  if (!container) {
+    showToast(opts.title || 'New message', opts.text || '');
+    return;
+  }
+  const duration = 5500;
+  const el = document.createElement('div');
+  el.className = 'msg-notif';
+  const avatar = opts.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(opts.handle || opts.title || 'user'));
+  el.innerHTML =
+    '<div class="msg-notif-inner">' +
+      '<img class="msg-notif-avatar" src="' + avatar.replace(/"/g, '') + '" alt="" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=user\'" />' +
+      '<div class="msg-notif-body">' +
+        '<div class="msg-notif-title">' + escapeHtml(opts.title || 'New message') + '</div>' +
+        '<div class="msg-notif-text">' + escapeHtml(opts.text || '') + '</div>' +
+      '</div>' +
+      '<button type="button" class="msg-notif-close" aria-label="Dismiss">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+      '</button>' +
+    '</div>' +
+    '<div class="msg-notif-progress"><div class="msg-notif-progress-bar" style="animation-duration:' + duration + 'ms"></div></div>';
+
+  const remove = () => {
+    if (!el.parentNode) return;
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 280);
+  };
+
+  el.querySelector('.msg-notif-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    remove();
+  });
+  el.addEventListener('click', () => {
+    remove();
+    if (opts.isGroup) {
+      openGroupChat(opts.groupId, opts.groupName);
+      navigate('messages');
+    } else if (opts.handle) {
+      openChatWith(opts.handle);
+      navigate('messages');
+    } else {
+      navigate('messages');
+    }
+  });
+
+  container.appendChild(el);
+  // keep max 4 visible
+  while (container.children.length > 4) container.firstChild.remove();
+  setTimeout(remove, duration);
+
+  // Optional system notification when tab is in background
+  try {
+    if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+      const n = new Notification(opts.title || 'New message', {
+        body: opts.text || '',
+        icon: opts.avatar || undefined,
+        tag: 'devflow-msg-' + (opts.chatId || '')
+      });
+      n.onclick = () => { window.focus(); el.click(); n.close(); };
+    } else if (document.hidden && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(()=>{});
+    }
+  } catch (e) {}
+}
+
 
 /* ---- View peer profile from chat ---- */
 function openPeerProfileFromChat() {
@@ -4635,6 +4947,7 @@ async function openGroupChat(groupId, groupName) {
   if (gdot) gdot.style.display = 'none';
   // disable profile click for groups by clearing activePeerHandle
   listenGroupMessages(groupId);
+  clearChatUnread('group_' + groupId);
   renderChatList();
 }
 
@@ -4706,7 +5019,9 @@ let USER_STATUS = localStorage.getItem('devflow_status') || 'online';
 let TASKS = JSON.parse(localStorage.getItem('devflow_tasks') || '[]');
 let NOTIFICATIONS = JSON.parse(localStorage.getItem('devflow_notifs') || '[]');
 let ACTIVE_TIMER = null;
-let UNREAD_CHATS = parseInt(localStorage.getItem('devflow_unread_chats') || '0', 10);
+let UNREAD_CHAT_IDS = [];
+try { UNREAD_CHAT_IDS = JSON.parse(localStorage.getItem('devflow_unread_ids') || '[]'); if (!Array.isArray(UNREAD_CHAT_IDS)) UNREAD_CHAT_IDS = []; } catch (e) { UNREAD_CHAT_IDS = []; }
+let UNREAD_CHATS = UNREAD_CHAT_IDS.length || parseInt(localStorage.getItem('devflow_unread_chats') || '0', 10);
 let ACTIVITY = JSON.parse(localStorage.getItem('devflow_activity') || '[]');
 let FOCUS_TODAY_MIN = parseInt(localStorage.getItem('devflow_focus_today') || '0', 10);
 let COINS = parseInt(localStorage.getItem('devflow_coins') || '0', 10);
@@ -5533,7 +5848,7 @@ function navigate(page){
   document.querySelector('[data-nav="'+page+'"]')?.classList.add('active');
   if(page==='focus') initTimerUI();
   if(page==='profile'){ if(typeof renderDiscordProfile==='function') renderDiscordProfile(); if(typeof applyProfileTheme==='function') applyProfileTheme(); }
-  if(page==='messages'){ if(typeof renderMessagesPage==='function') renderMessagesPage(); setUnreadChats(0); if(activePeerHandle) markIncomingRead(activePeerHandle); }
+  if(page==='messages'){ if(typeof renderMessagesPage==='function') renderMessagesPage(); if(activePeerUid){ const me=auth().currentUser&&auth().currentUser.uid; const rid=String(activePeerUid).startsWith('group_')?activePeerUid:(me?chatRoomId(me,activePeerUid):activePeerUid); clearChatUnread(rid); } if(activePeerHandle) markIncomingRead(activePeerHandle); }
   if(page==='analytics'){ renderAnalyticsEmpty(); renderAnalyticsCharts(); }
   if(page==='store'){ renderStorePage(); }
   if(page==='profile'){ applyNitroUI(); }
@@ -7834,6 +8149,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(statusMenu&&statusMenu.classList.contains('open')&&!statusMenu.contains(e.target)&&!userMini?.contains(e.target)) closeStatusMenu();
   });
   applyUserStatusUI();
+  updateMsgBadge();
   if (typeof applyNitroUI === 'function') applyNitroUI();
   if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
   if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
@@ -7871,6 +8187,9 @@ window.logDistraction=logDistraction; window.toggleFocusMode=toggleFocusMode;
 window.toggleNotifPanel=toggleNotifPanel; window.acceptFriend=acceptFriend; window.declineFriend=declineFriend;
 window.simulateFriendRequest=simulateFriendRequest; window.showApp=showApp; window.enterGuest=enterGuest;
 window.simulateIncomingMessage=simulateIncomingMessage; window.setUnreadChats=setUnreadChats;
+window.showMessageNotification=showMessageNotification;
+window.startInboxListener=startInboxListener;
+window.clearChatUnread=clearChatUnread;
 window.submitOnboarding=submitOnboarding; window.toggleProject=toggleProject;
 window.addCertificate=addCertificate; window.removeCert=removeCert;
 window.toggleTerminalPref=toggleTerminalPref; window.runTerminalCommand=runTerminalCommand;
