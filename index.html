@@ -590,7 +590,7 @@ h3 { font-size: 1.05rem; }
   font-weight: 600;
 }
 .fx-pick-price.owned { color: var(--success); }
-.discord-profile.has-fx { box-shadow: 0 0 40px rgba(99,102,241,.12); }
+.discord-profile.has-fx { box-shadow: none; }
 .main-content {
   flex: 1;
   margin-left: 240px;
@@ -943,13 +943,14 @@ h3 { font-size: 1.05rem; }
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
 }
 .discord-banner {
   height: 140px;
-  background: linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%);
-  background-size: cover;
+  background: linear-gradient(180deg, #5865F2 0%, #4752C4 100%);
+  background-size: auto;
   background-position: center;
+  background-repeat: no-repeat;
   position: relative;
 }
 .discord-banner-edit {
@@ -5083,22 +5084,26 @@ function openEditProfile(){
   document.getElementById('edit-bio').value = currentUser.bio || '';
   const prev = document.getElementById('edit-avatar-preview');
   if(prev) prev.src = currentUser.avatar || '';
-  const banPrev = document.getElementById('edit-banner-preview');
-  if (banPrev) {
-    if (currentUser.banner) {
-      banPrev.style.backgroundImage = 'url(' + currentUser.banner + ')';
-    } else {
-      banPrev.style.backgroundImage = '';
-      banPrev.style.background = 'linear-gradient(135deg,#5865F2,#4752C4)';
-    }
-  }
   pendingEditAvatar = '';
   pendingEditBanner = '';
   pendingEditEffect = currentUser.avatarEffect || 'none';
-  const _tc = getSavedThemeColors();
+  const _tc = (typeof getSavedThemeColors === 'function') ? getSavedThemeColors() : { top: '#5865F2', bottom: '#4752C4' };
   pendingEditThemeTop = _tc.top;
   pendingEditThemeBottom = _tc.bottom;
   pendingEditThemeColor = _tc.top;
+  const banPrev = document.getElementById('edit-banner-preview');
+  if (banPrev) {
+    if (currentUser.banner && String(currentUser.banner).trim()) {
+      banPrev.style.backgroundImage = 'url(' + currentUser.banner + ')';
+      banPrev.style.backgroundSize = 'cover';
+    } else {
+      const g = (typeof themeGradientFromPair === 'function')
+        ? themeGradientFromPair(_tc.top, _tc.bottom)
+        : ('linear-gradient(180deg,' + _tc.top + ',' + _tc.bottom + ')');
+      banPrev.style.backgroundImage = '';
+      banPrev.style.background = g;
+    }
+  }
   applyAvatarEffectsUI(pendingEditEffect);
   const panel = document.getElementById('avatar-fx-panel');
   if (panel) panel.classList.add('hidden');
@@ -5176,17 +5181,22 @@ async function saveEditProfile(){
   currentUser.banner = banner;
   currentUser.bio = bio;
   currentUser.avatarEffect = validAvatarEffect(pendingEditEffect || currentUser.avatarEffect || 'none');
-  if (hasActiveNitro()) {
-    saveThemeColors(
-      pendingEditThemeTop || pendingEditThemeColor || getSavedThemeColors().top,
-      pendingEditThemeBottom || getSavedThemeColors().bottom
-    );
+  // Read latest values from inputs (more reliable than pending vars)
+  const topEl = document.getElementById('edit-theme-hex-top') || document.getElementById('edit-theme-color-top');
+  const botEl = document.getElementById('edit-theme-hex-bottom') || document.getElementById('edit-theme-color-bottom');
+  let topColor = (topEl && topEl.value) || pendingEditThemeTop || pendingEditThemeColor;
+  let botColor = (botEl && botEl.value) || pendingEditThemeBottom;
+  if (typeof saveThemeColors === 'function' && topColor && botColor) {
+    // Persist always; UI is locked without Nitro so free users keep defaults
+    saveThemeColors(topColor, botColor);
   }
   if(!currentUser.createdAt) currentUser.createdAt = Date.now();
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
   updateUserUI();
   renderDiscordProfile();
-  applyProfileTheme();
+  if (typeof applyProfileTheme === 'function') applyProfileTheme();
+  // ensure banner paints after modal close / reflow
+  setTimeout(function(){ if (typeof applyProfileTheme === 'function') applyProfileTheme(); }, 50);
 
   if(window.firebase && firebase.apps.length && currentUser.uid){
     try {
@@ -6955,19 +6965,27 @@ function setProfileTheme() {}
 function applyProfileTheme() {
   const banner = document.getElementById('profile-banner');
   if (!banner) return;
-  if (currentUser && currentUser.banner) {
-    banner.style.backgroundImage = 'url(' + currentUser.banner + ')';
-    banner.style.backgroundSize = 'cover';
-    banner.style.backgroundPosition = 'center';
-    banner.style.backgroundColor = '';
+  const hasImg = currentUser && currentUser.banner && String(currentUser.banner).trim().length > 0;
+  if (hasImg) {
+    banner.style.setProperty('background', 'none', 'important');
+    banner.style.setProperty('background-image', 'url(' + currentUser.banner + ')', 'important');
+    banner.style.setProperty('background-size', 'cover', 'important');
+    banner.style.setProperty('background-position', 'center', 'important');
+    banner.style.setProperty('background-repeat', 'no-repeat', 'important');
     return;
   }
-  const colors = getSavedThemeColors();
-  const grad = themeGradientFromPair(colors.top, colors.bottom);
-  banner.style.backgroundImage = grad;
-  banner.style.background = grad;
-  banner.style.backgroundSize = '';
-  banner.style.backgroundPosition = '';
+  const colors = (typeof getSavedThemeColors === 'function') ? getSavedThemeColors() : { top: '#5865F2', bottom: '#4752C4' };
+  const grad = (typeof themeGradientFromPair === 'function')
+    ? themeGradientFromPair(colors.top, colors.bottom)
+    : ('linear-gradient(180deg, ' + colors.top + ' 0%, ' + colors.bottom + ' 100%)');
+  // clear image-related props so gradient always shows
+  banner.style.removeProperty('background-image');
+  banner.style.removeProperty('background-size');
+  banner.style.removeProperty('background-position');
+  banner.style.removeProperty('background-repeat');
+  banner.style.removeProperty('background');
+  banner.style.setProperty('background', grad, 'important');
+  banner.style.setProperty('background-image', grad, 'important');
 }
 
 let pendingEditThemeTop = '';
