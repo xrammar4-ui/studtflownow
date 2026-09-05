@@ -2233,6 +2233,80 @@ h3 { font-size: 1.05rem; }
 }
 .view-profile-handle-row .discord-handle { margin-bottom: 0; }
 
+
+/* Name style pickers */
+.name-font-grid, .name-effect-grid, .nameplate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 0.5rem;
+}
+.name-font-btn, .name-effect-btn, .nameplate-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  color: #E4E4E7;
+  border-radius: 12px;
+  padding: 0.7rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.12s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  text-align: center;
+  line-height: 1.25;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.name-font-btn:hover, .name-effect-btn:hover, .nameplate-btn:hover {
+  border-color: rgba(129,140,248,0.55);
+  background: linear-gradient(180deg, rgba(99,102,241,0.2), rgba(99,102,241,0.06));
+  transform: translateY(-1px);
+}
+.name-font-btn.active, .name-effect-btn.active, .nameplate-btn.active {
+  border-color: #818CF8;
+  background: linear-gradient(180deg, rgba(99,102,241,0.4), rgba(99,102,241,0.14));
+  box-shadow: 0 0 0 1px rgba(129,140,248,0.35), 0 4px 14px rgba(99,102,241,0.22);
+  color: #fff;
+}
+.name-font-btn[data-font="tempo"] { font-family: 'Russo One', sans-serif; }
+.name-font-btn[data-font="sakura"] { font-family: 'Yomogi', cursive; }
+.name-font-btn[data-font="jellybean"] { font-family: 'Fredoka', sans-serif; }
+.name-font-btn[data-font="modern"] { font-family: 'Montserrat', sans-serif; font-weight: 700; }
+.name-font-btn[data-font="medieval"] { font-family: 'Cinzel', serif; }
+.name-font-btn[data-font="8bit"] { font-family: 'Press Start 2P', monospace; font-size: 0.52rem; }
+.name-font-btn[data-font="vampyre"] { font-family: 'Creepster', cursive; }
+.name-effect-btn[data-effect="neon"] { text-shadow: 0 0 8px #a78bfa, 0 0 16px #818cf8; }
+.name-effect-btn[data-effect="gradient"] { background: linear-gradient(90deg, rgba(99,102,241,0.28), rgba(236,72,153,0.22)); }
+.name-effect-btn[data-effect="pop"] { text-shadow: 2px 2px 0 rgba(167,139,250,0.55); }
+.nameplate-btn[data-plate="cyber"] { border-color: rgba(34,211,238,0.45); }
+.nameplate-btn[data-plate="galaxy"] { border-color: rgba(192,132,252,0.45); }
+.nameplate-btn[data-plate="anime"] { border-color: rgba(249,168,212,0.5); }
+.nameplate-btn[data-plate="fire"] { border-color: rgba(251,146,60,0.5); }
+.nameplate-btn[data-plate="ocean"] { border-color: rgba(56,189,248,0.45); }
+.nameplate-btn[data-plate="gold"] { border-color: rgba(251,191,36,0.5); }
+.nameplate-btn[data-plate="void"] { border-color: rgba(82,82,91,0.65); }
+.name-style-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 0.85rem 1.25rem;
+  border-radius: 14px;
+  margin: 0.35rem 0 0.9rem;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.08);
+  width: 100%;
+  box-sizing: border-box;
+}
+.name-style-preview span {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 /* ========== Store & Nitro ========== */
 
 #modal-edit-profile .modal {
@@ -5266,9 +5340,8 @@ async function saveEditProfile(){
     // Persist always; UI is locked without Nitro so free users keep defaults
     saveThemeColors(topColor, botColor);
   }
-  if (typeof hasActiveNitro === 'function' ? hasActiveNitro() : true) {
-    if (typeof saveNameStyle === 'function') saveNameStyle(pendingNameStyle);
-  }
+  if (typeof saveNameStyle === 'function') saveNameStyle(pendingNameStyle);
+  if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
   if(!currentUser.createdAt) currentUser.createdAt = Date.now();
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
   updateUserUI();
@@ -7159,25 +7232,45 @@ function applyOwnNameStyle() {
 }
 
 function renderNameStylePickers() {
+  if (!pendingNameStyle) pendingNameStyle = loadNameStyle();
   const fontGrid = document.getElementById('name-font-grid');
   const effectGrid = document.getElementById('name-effect-grid');
   const plateGrid = document.getElementById('nameplate-grid');
   if (fontGrid) {
-    fontGrid.innerHTML = NAME_FONTS.map(f =>
-      '<button type="button" class="name-font-btn' + (pendingNameStyle.font === f.id ? ' active' : '') + '" data-font="' + f.id + '" onclick="selectNameFont(\'' + f.id + '\')">' + f.label + '</button>'
-    ).join('');
+    fontGrid.innerHTML = NAME_FONTS.map(function(f) {
+      return '<button type="button" class="name-font-btn' + (pendingNameStyle.font === f.id ? ' active' : '') + '" data-font="' + f.id + '">' + f.label + '</button>';
+    }).join('');
+    fontGrid.querySelectorAll('.name-font-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        selectNameFont(btn.getAttribute('data-font'));
+      });
+    });
   }
   if (effectGrid) {
-    effectGrid.innerHTML = NAME_EFFECTS.map(e =>
-      '<button type="button" class="name-effect-btn' + (pendingNameStyle.effect === e.id ? ' active' : '') + '" data-effect="' + e.id + '" onclick="selectNameEffect(\'' + e.id + '\')">' + e.label + '</button>'
-    ).join('');
+    effectGrid.innerHTML = NAME_EFFECTS.map(function(e) {
+      return '<button type="button" class="name-effect-btn' + (pendingNameStyle.effect === e.id ? ' active' : '') + '" data-effect="' + e.id + '">' + e.label + '</button>';
+    }).join('');
+    effectGrid.querySelectorAll('.name-effect-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        selectNameEffect(btn.getAttribute('data-effect'));
+      });
+    });
   }
   if (plateGrid) {
-    plateGrid.innerHTML = NAMEPLATES.map(p =>
-      '<button type="button" class="nameplate-btn' + (pendingNameStyle.nameplate === p.id ? ' active' : '') + '" data-plate="' + p.id + '" onclick="selectNameplate(\'' + p.id + '\')">' + p.label + '</button>'
-    ).join('');
+    plateGrid.innerHTML = NAMEPLATES.map(function(p) {
+      return '<button type="button" class="nameplate-btn' + (pendingNameStyle.nameplate === p.id ? ' active' : '') + '" data-plate="' + p.id + '">' + p.label + '</button>';
+    }).join('');
+    plateGrid.querySelectorAll('.nameplate-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        selectNameplate(btn.getAttribute('data-plate'));
+      });
+    });
   }
 }
+
 function selectNameFont(id) {
   pendingNameStyle.font = id;
   renderNameStylePickers();
@@ -7240,30 +7333,23 @@ function updateNameStylePreview() {
   }
 }
 function syncNameStyleUI() {
-  const nitro = typeof hasActiveNitro === 'function' && hasActiveNitro();
   pendingNameStyle = loadNameStyle();
   const c1 = document.getElementById('edit-name-color-1');
   const h1 = document.getElementById('edit-name-hex-1');
   const c2 = document.getElementById('edit-name-color-2');
   const h2 = document.getElementById('edit-name-hex-2');
-  if (c1) { c1.value = pendingNameStyle.color1; c1.disabled = !nitro; }
-  if (h1) { h1.value = pendingNameStyle.color1; h1.disabled = !nitro; }
-  if (c2) { c2.value = pendingNameStyle.color2; c2.disabled = !nitro; }
-  if (h2) { h2.value = pendingNameStyle.color2; h2.disabled = !nitro; }
+  if (c1) { c1.value = pendingNameStyle.color1; c1.disabled = false; }
+  if (h1) { h1.value = pendingNameStyle.color1; h1.disabled = false; }
+  if (c2) { c2.value = pendingNameStyle.color2; c2.disabled = false; }
+  if (h2) { h2.value = pendingNameStyle.color2; h2.disabled = false; }
   renderNameStylePickers();
-  document.querySelectorAll('.name-font-btn, .name-effect-btn, .nameplate-btn').forEach(btn => {
-    btn.disabled = !nitro;
-  });
   const hint = document.getElementById('name-style-hint');
-  if (hint) {
-    hint.textContent = nitro
-      ? 'Fonts, effects & nameplates like Discord Nitro Display Name Styles'
-      : 'Nitro required — unlock Display Name Styles in the Store';
-  }
+  if (hint) hint.textContent = 'Tap a font, effect, or nameplate — preview updates live';
   const group = document.getElementById('edit-name-style-group');
-  if (group) group.style.opacity = nitro ? '1' : '0.7';
+  if (group) group.style.opacity = '1';
   updateNameStylePreview();
 }
+
 
 
 function applyProfileTheme() {
