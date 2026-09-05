@@ -3160,7 +3160,9 @@ h3 { font-size: 1.05rem; }
           </div>
           <div class="discord-body">
             <div class="discord-name-row">
-              <span class="discord-display-name" id="profile-name">—</span>
+              <span class="nameplate-wrap nameplate-none" id="profile-nameplate">
+                <span class="discord-display-name" id="profile-name">—</span>
+              </span>
             </div>
             <div class="discord-handle-row">
               <span class="discord-handle" id="profile-handle">@—</span>
@@ -3269,9 +3271,10 @@ h3 { font-size: 1.05rem; }
             <div class="fx-picker" id="avatar-fx-picker"></div>
           </div>
         </div>
+        <div class="edit-section-title">Identity</div>
         <div class="form-group">
           <label class="form-label">Display Name</label>
-          <input class="form-input" id="edit-display-name" placeholder="Your name" maxlength="32" />
+          <input class="form-input" id="edit-display-name" placeholder="Your name" maxlength="32" oninput="updateNameStylePreview()" />
         </div>
         <div class="form-group">
           <label class="form-label">Username (handle)</label>
@@ -3282,10 +3285,30 @@ h3 { font-size: 1.05rem; }
           <label class="form-label">Bio</label>
           <textarea class="form-textarea" id="edit-bio" placeholder="Tell people about yourself..." maxlength="190" rows="3"></textarea>
         </div>
+
+        <div class="edit-section-title" id="name-style-section-title">Display Name Style <span class="text-xs" style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-muted)">(Nitro)</span></div>
+        <div class="form-group" id="edit-name-style-group">
+          <div class="name-style-preview" id="name-style-preview"><span id="name-style-preview-text">Preview</span></div>
+          <label class="form-label">Name color</label>
+          <div class="theme-color-row" style="margin-bottom:0.65rem">
+            <input type="color" id="edit-name-color-1" value="#FFFFFF" class="theme-color-input" oninput="onNameStyleInput()" />
+            <input type="text" id="edit-name-hex-1" class="form-input theme-hex-input" value="#FFFFFF" maxlength="7" oninput="onNameStyleInput()" />
+            <span class="text-xs text-muted" style="margin-left:0.25rem">+ 2nd for gradient</span>
+            <input type="color" id="edit-name-color-2" value="#A78BFA" class="theme-color-input" oninput="onNameStyleInput()" />
+            <input type="text" id="edit-name-hex-2" class="form-input theme-hex-input" value="#A78BFA" maxlength="7" oninput="onNameStyleInput()" />
+          </div>
+          <label class="form-label">Font</label>
+          <div class="name-font-grid" id="name-font-grid"></div>
+          <label class="form-label" style="margin-top:0.75rem">Effect</label>
+          <div class="name-effect-grid" id="name-effect-grid"></div>
+          <label class="form-label" style="margin-top:0.75rem">Nameplate</label>
+          <div class="nameplate-grid" id="nameplate-grid"></div>
+          <p class="text-xs text-muted" id="name-style-hint" style="margin-top:0.45rem">Fonts, effects &amp; nameplates like Discord Nitro Display Name Styles</p>
+        </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('modal-edit-profile')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveEditProfile()">Save Changes</button>
+        <button class="btn btn-ghost" type="button" onclick="closeModal('modal-edit-profile')">Cancel</button>
+        <button class="btn btn-primary" type="button" onclick="saveEditProfile()">Save Changes</button>
       </div>
     </div>
   </div>
@@ -3336,7 +3359,9 @@ h3 { font-size: 1.05rem; }
         </div>
         <div class="discord-body">
           <div class="discord-name-row">
-            <span class="discord-display-name" id="view-profile-name">—</span>
+            <span class="nameplate-wrap nameplate-none" id="view-profile-nameplate">
+              <span class="discord-display-name" id="view-profile-name">—</span>
+            </span>
           </div>
           <div class="view-profile-handle-row">
             <span class="discord-handle" id="view-profile-handle">@—</span>
@@ -4208,6 +4233,11 @@ async function viewUserProfile(handle) {
     const canSeeFull = isSelf || !privateAcc || friend;
 
     document.getElementById('view-profile-name').textContent = peer.displayName || peer.handle;
+    if (canSeeFull && peer.nameStyle && typeof applyNameStyleToEl === 'function') {
+      applyNameStyleToEl(document.getElementById('view-profile-name'), peer.nameStyle, document.getElementById('view-profile-nameplate'));
+    } else if (typeof applyNameStyleToEl === 'function') {
+      applyNameStyleToEl(document.getElementById('view-profile-name'), DEFAULT_NAME_STYLE, document.getElementById('view-profile-nameplate'));
+    }
     document.getElementById('view-profile-handle').textContent = '@' + (peer.handle || viewingProfileHandle);
     document.getElementById('view-profile-avatar').src = peer.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(peer.handle || 'user'));
 
@@ -4952,6 +4982,7 @@ function renderDiscordProfile(){
   const sinceEl = document.getElementById('profile-member-since');
   const bannerEl = document.getElementById('profile-banner');
   if(nameEl) nameEl.textContent = currentUser.displayName || 'Developer';
+  if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
   if(handleEl) handleEl.textContent = '@' + (currentUser.handle || 'user');
   if(avatarEl) avatarEl.src = currentUser.avatar || '';
   if(bioEl) bioEl.textContent = currentUser.bio || 'No bio yet. Click Edit Profile to add one.';
@@ -4971,6 +5002,7 @@ function renderDiscordProfile(){
   applyAvatarEffectsUI();
   applyNitroUI();
   if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
+  if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
 }
 
 const AVATAR_EFFECTS = [
@@ -5128,6 +5160,7 @@ function openEditProfile(){
   if (panel) panel.classList.add('hidden');
   openModal('modal-edit-profile');
   syncEditThemeUI();
+  if (typeof syncNameStyleUI === 'function') syncNameStyleUI();
 }
 
 function onEditAvatarSelected(e){
@@ -5232,6 +5265,9 @@ async function saveEditProfile(){
   if (typeof saveThemeColors === 'function' && topColor && botColor) {
     // Persist always; UI is locked without Nitro so free users keep defaults
     saveThemeColors(topColor, botColor);
+  }
+  if (typeof hasActiveNitro === 'function' ? hasActiveNitro() : true) {
+    if (typeof saveNameStyle === 'function') saveNameStyle(pendingNameStyle);
   }
   if(!currentUser.createdAt) currentUser.createdAt = Date.now();
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
@@ -7026,6 +7062,210 @@ function applyPeerProfileTheme(peer, rootSelector) {
   if (body) body.style.setProperty('background', grad, 'important');
 }
 
+
+/* ========== Display Name Styles (Discord Nitro-like) ========== */
+const NAME_FONTS = [
+  { id: 'default', label: 'gg sans' },
+  { id: 'tempo', label: 'Tempo' },
+  { id: 'sakura', label: 'Sakura' },
+  { id: 'jellybean', label: 'Jellybean' },
+  { id: 'modern', label: 'Modern' },
+  { id: 'medieval', label: 'Medieval' },
+  { id: '8bit', label: '8Bit' },
+  { id: 'vampyre', label: 'Vampyre' }
+];
+const NAME_EFFECTS = [
+  { id: 'solid', label: 'Solid' },
+  { id: 'gradient', label: 'Gradient' },
+  { id: 'neon', label: 'Neon' },
+  { id: 'toon', label: 'Toon' },
+  { id: 'pop', label: 'Pop' }
+];
+const NAMEPLATES = [
+  { id: 'none', label: 'None' },
+  { id: 'cyber', label: 'Cyber' },
+  { id: 'galaxy', label: 'Galaxy' },
+  { id: 'anime', label: 'Anime' },
+  { id: 'fire', label: 'Fire' },
+  { id: 'ocean', label: 'Ocean' },
+  { id: 'gold', label: 'Gold' },
+  { id: 'void', label: 'Void' }
+];
+
+const DEFAULT_NAME_STYLE = {
+  font: 'default',
+  effect: 'solid',
+  color1: '#FFFFFF',
+  color2: '#A78BFA',
+  nameplate: 'none'
+};
+
+let pendingNameStyle = Object.assign({}, DEFAULT_NAME_STYLE);
+
+function loadNameStyle() {
+  try {
+    if (currentUser && currentUser.nameStyle) return Object.assign({}, DEFAULT_NAME_STYLE, currentUser.nameStyle);
+    const raw = localStorage.getItem('devflow_name_style');
+    if (raw) return Object.assign({}, DEFAULT_NAME_STYLE, JSON.parse(raw));
+  } catch (e) {}
+  return Object.assign({}, DEFAULT_NAME_STYLE);
+}
+function saveNameStyle(style) {
+  style = Object.assign({}, DEFAULT_NAME_STYLE, style || {});
+  localStorage.setItem('devflow_name_style', JSON.stringify(style));
+  if (currentUser) {
+    currentUser.nameStyle = style;
+    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  }
+  try {
+    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
+      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
+        nameStyle: style,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(()=>{});
+    }
+  } catch (e) {}
+  return style;
+}
+
+function applyNameStyleToEl(el, style, nameplateEl) {
+  if (!el) return;
+  style = Object.assign({}, DEFAULT_NAME_STYLE, style || {});
+  el.classList.add('name-styled');
+  // strip old font/effect classes
+  el.className = (el.className || '').split(/\s+/).filter(c => c && !c.startsWith('dn-font-') && !c.startsWith('dn-fx-') && c !== 'name-styled').join(' ');
+  el.classList.add('discord-display-name', 'name-styled', 'dn-font-' + style.font, 'dn-fx-' + style.effect);
+  el.style.setProperty('--dn-c1', style.color1 || '#FFFFFF');
+  el.style.setProperty('--dn-c2', style.color2 || '#A78BFA');
+  if (style.effect === 'solid') {
+    el.style.color = style.color1 || '#FFFFFF';
+    el.style.webkitTextFillColor = style.color1 || '#FFFFFF';
+    el.style.background = 'none';
+  } else if (style.effect === 'gradient') {
+    el.style.color = 'transparent';
+  } else {
+    el.style.color = style.color1 || '#FFFFFF';
+    el.style.webkitTextFillColor = '';
+    el.style.background = 'none';
+  }
+  if (nameplateEl) {
+    nameplateEl.className = 'nameplate-wrap nameplate-' + (style.nameplate || 'none');
+  }
+}
+
+function applyOwnNameStyle() {
+  const style = (currentUser && currentUser.nameStyle) || loadNameStyle();
+  applyNameStyleToEl(document.getElementById('profile-name'), style, document.getElementById('profile-nameplate'));
+}
+
+function renderNameStylePickers() {
+  const fontGrid = document.getElementById('name-font-grid');
+  const effectGrid = document.getElementById('name-effect-grid');
+  const plateGrid = document.getElementById('nameplate-grid');
+  if (fontGrid) {
+    fontGrid.innerHTML = NAME_FONTS.map(f =>
+      '<button type="button" class="name-font-btn' + (pendingNameStyle.font === f.id ? ' active' : '') + '" data-font="' + f.id + '" onclick="selectNameFont(\'' + f.id + '\')">' + f.label + '</button>'
+    ).join('');
+  }
+  if (effectGrid) {
+    effectGrid.innerHTML = NAME_EFFECTS.map(e =>
+      '<button type="button" class="name-effect-btn' + (pendingNameStyle.effect === e.id ? ' active' : '') + '" data-effect="' + e.id + '" onclick="selectNameEffect(\'' + e.id + '\')">' + e.label + '</button>'
+    ).join('');
+  }
+  if (plateGrid) {
+    plateGrid.innerHTML = NAMEPLATES.map(p =>
+      '<button type="button" class="nameplate-btn' + (pendingNameStyle.nameplate === p.id ? ' active' : '') + '" data-plate="' + p.id + '" onclick="selectNameplate(\'' + p.id + '\')">' + p.label + '</button>'
+    ).join('');
+  }
+}
+function selectNameFont(id) {
+  pendingNameStyle.font = id;
+  renderNameStylePickers();
+  updateNameStylePreview();
+}
+function selectNameEffect(id) {
+  pendingNameStyle.effect = id;
+  renderNameStylePickers();
+  updateNameStylePreview();
+}
+function selectNameplate(id) {
+  pendingNameStyle.nameplate = id;
+  renderNameStylePickers();
+  updateNameStylePreview();
+}
+function onNameStyleInput() {
+  const c1 = document.getElementById('edit-name-hex-1')?.value || document.getElementById('edit-name-color-1')?.value;
+  const c2 = document.getElementById('edit-name-hex-2')?.value || document.getElementById('edit-name-color-2')?.value;
+  const n1 = typeof normalizeHexColor === 'function' ? normalizeHexColor(c1) : c1;
+  const n2 = typeof normalizeHexColor === 'function' ? normalizeHexColor(c2) : c2;
+  if (n1) {
+    pendingNameStyle.color1 = n1;
+    const a = document.getElementById('edit-name-color-1');
+    const b = document.getElementById('edit-name-hex-1');
+    if (a && document.activeElement !== b) a.value = n1;
+    if (b && document.activeElement !== a) b.value = n1;
+  }
+  if (n2) {
+    pendingNameStyle.color2 = n2;
+    const a = document.getElementById('edit-name-color-2');
+    const b = document.getElementById('edit-name-hex-2');
+    if (a && document.activeElement !== b) a.value = n2;
+    if (b && document.activeElement !== a) b.value = n2;
+  }
+  // sync from color picker when active
+  if (document.activeElement && document.activeElement.type === 'color') {
+    if (document.activeElement.id === 'edit-name-color-1') {
+      pendingNameStyle.color1 = document.activeElement.value.toUpperCase();
+      const b = document.getElementById('edit-name-hex-1');
+      if (b) b.value = pendingNameStyle.color1;
+    }
+    if (document.activeElement.id === 'edit-name-color-2') {
+      pendingNameStyle.color2 = document.activeElement.value.toUpperCase();
+      const b = document.getElementById('edit-name-hex-2');
+      if (b) b.value = pendingNameStyle.color2;
+    }
+  }
+  updateNameStylePreview();
+}
+function updateNameStylePreview() {
+  const text = document.getElementById('edit-display-name')?.value || currentUser?.displayName || 'Preview';
+  const el = document.getElementById('name-style-preview-text');
+  if (el) {
+    el.textContent = text;
+    applyNameStyleToEl(el, pendingNameStyle, null);
+  }
+  const wrap = document.getElementById('name-style-preview');
+  if (wrap) {
+    wrap.className = 'name-style-preview nameplate-' + (pendingNameStyle.nameplate || 'none');
+  }
+}
+function syncNameStyleUI() {
+  const nitro = typeof hasActiveNitro === 'function' && hasActiveNitro();
+  pendingNameStyle = loadNameStyle();
+  const c1 = document.getElementById('edit-name-color-1');
+  const h1 = document.getElementById('edit-name-hex-1');
+  const c2 = document.getElementById('edit-name-color-2');
+  const h2 = document.getElementById('edit-name-hex-2');
+  if (c1) { c1.value = pendingNameStyle.color1; c1.disabled = !nitro; }
+  if (h1) { h1.value = pendingNameStyle.color1; h1.disabled = !nitro; }
+  if (c2) { c2.value = pendingNameStyle.color2; c2.disabled = !nitro; }
+  if (h2) { h2.value = pendingNameStyle.color2; h2.disabled = !nitro; }
+  renderNameStylePickers();
+  document.querySelectorAll('.name-font-btn, .name-effect-btn, .nameplate-btn').forEach(btn => {
+    btn.disabled = !nitro;
+  });
+  const hint = document.getElementById('name-style-hint');
+  if (hint) {
+    hint.textContent = nitro
+      ? 'Fonts, effects & nameplates like Discord Nitro Display Name Styles'
+      : 'Nitro required — unlock Display Name Styles in the Store';
+  }
+  const group = document.getElementById('edit-name-style-group');
+  if (group) group.style.opacity = nitro ? '1' : '0.7';
+  updateNameStylePreview();
+}
+
+
 function applyProfileTheme() {
   const colors = (typeof getSavedThemeColors === 'function')
     ? getSavedThemeColors()
@@ -7358,7 +7598,7 @@ document.addEventListener('DOMContentLoaded',()=>{
               terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === TREMENAL_OWNER,
               createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
               nitro: d.nitro || null,
-              profileThemeColor: d.profileThemeColor || null, profileThemeTop: d.profileThemeTop || null, profileThemeBottom: d.profileThemeBottom || null
+              profileThemeColor: d.profileThemeColor || null, profileThemeTop: d.profileThemeTop || null, profileThemeBottom: d.profileThemeBottom || null, nameStyle: d.nameStyle || null
             });
           }
         }).catch(()=>{});
@@ -7383,6 +7623,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   applyUserStatusUI();
   if (typeof applyNitroUI === 'function') applyNitroUI();
   if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
+  if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
 });
 
 window.navigate=navigate; window.openModal=openModal; window.closeModal=closeModal;
@@ -7403,6 +7644,9 @@ window.toggleStatusMenu=toggleStatusMenu; window.setUserStatus=setUserStatus; wi
 window.openEditProfile=openEditProfile; window.saveEditProfile=saveEditProfile;
 window.toggleAvatarEffectPanel=toggleAvatarEffectPanel; window.pickAvatarEffect=pickAvatarEffect;
 window.onEditAvatarSelected=onEditAvatarSelected; window.onEditBannerSelected=onEditBannerSelected; window.clearEditBanner=clearEditBanner;
+window.selectNameFont=selectNameFont; window.selectNameEffect=selectNameEffect; window.selectNameplate=selectNameplate;
+window.onNameStyleInput=onNameStyleInput; window.updateNameStylePreview=updateNameStylePreview;
+
 window.renderDiscordProfile=renderDiscordProfile;
 window.confirmAvatar=confirmAvatar;
 window.skipAvatar=skipAvatar;
