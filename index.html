@@ -3211,7 +3211,10 @@ h3 { font-size: 1.05rem; }
             </label>
             <input type="file" id="edit-banner-input" accept="image/*,image/gif" style="display:none" onchange="onEditBannerSelected(event)" />
           </div>
-          <p class="text-xs text-muted" style="margin-top:0.3rem">JPG, PNG or animated GIF · max 800KB</p>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.45rem;flex-wrap:wrap">
+            <p class="text-xs text-muted" style="margin:0">JPG, PNG or animated GIF · max 800KB</p>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-banner" onclick="clearEditBanner()">Remove image</button>
+          </div>
         </div>
         <div class="form-group" id="edit-theme-group">
           <label class="form-label">Banner colors <span class="text-xs text-muted">(Nitro · top &amp; bottom)</span></label>
@@ -5131,6 +5134,25 @@ function onEditAvatarSelected(e){
   reader.readAsDataURL(file);
 }
 
+
+function clearEditBanner() {
+  pendingEditBanner = '';
+  if (currentUser) currentUser.banner = '';
+  const banPrev = document.getElementById('edit-banner-preview');
+  if (banPrev) {
+    const top = pendingEditThemeTop || (typeof getSavedThemeColors === 'function' && getSavedThemeColors().top) || '#5865F2';
+    const bot = pendingEditThemeBottom || (typeof getSavedThemeColors === 'function' && getSavedThemeColors().bottom) || '#4752C4';
+    const g = (typeof themeGradientFromPair === 'function')
+      ? themeGradientFromPair(top, bot)
+      : ('linear-gradient(180deg,' + top + ' 0%,' + bot + ' 100%)');
+    banPrev.style.backgroundImage = 'none';
+    banPrev.style.background = g;
+  }
+  const input = document.getElementById('edit-banner-input');
+  if (input) input.value = '';
+  showToast('Banner cleared', 'Theme colors will show on save');
+}
+
 function onEditBannerSelected(e){
   const file = e.target.files && e.target.files[0];
   if(!file) return;
@@ -5174,16 +5196,26 @@ async function saveEditProfile(){
     } catch(e){}
   }
   const avatar = pendingEditAvatar || currentUser.avatar;
-  const banner = pendingEditBanner || currentUser.banner || '';
+  // If user set theme colors, drop banner image so the gradient is visible
+  let banner = (pendingEditBanner !== undefined && pendingEditBanner !== null && pendingEditBanner !== '')
+    ? pendingEditBanner
+    : (currentUser.banner || '');
+  // pendingEditBanner === '' means explicitly cleared
+  if (pendingEditBanner === '') banner = '';
+  const topEl = document.getElementById('edit-theme-hex-top') || document.getElementById('edit-theme-color-top');
+  const botEl = document.getElementById('edit-theme-hex-bottom') || document.getElementById('edit-theme-color-bottom');
+  const colorsTouched = !!(pendingEditThemeTop || pendingEditThemeBottom || (topEl && topEl.value) || (botEl && botEl.value));
+  // When colors are saved and no NEW image was picked this session, prefer gradient over old image
+  if (colorsTouched && !pendingEditBanner) {
+    banner = '';
+  }
   currentUser.displayName = display;
   currentUser.handle = handle;
   currentUser.avatar = avatar;
-  currentUser.banner = banner;
+  currentUser.banner = banner || '';
   currentUser.bio = bio;
   currentUser.avatarEffect = validAvatarEffect(pendingEditEffect || currentUser.avatarEffect || 'none');
   // Read latest values from inputs (more reliable than pending vars)
-  const topEl = document.getElementById('edit-theme-hex-top') || document.getElementById('edit-theme-color-top');
-  const botEl = document.getElementById('edit-theme-hex-bottom') || document.getElementById('edit-theme-color-bottom');
   let topColor = (topEl && topEl.value) || pendingEditThemeTop || pendingEditThemeColor;
   let botColor = (botEl && botEl.value) || pendingEditThemeBottom;
   if (typeof saveThemeColors === 'function' && topColor && botColor) {
@@ -6965,27 +6997,29 @@ function setProfileTheme() {}
 function applyProfileTheme() {
   const banner = document.getElementById('profile-banner');
   if (!banner) return;
-  const hasImg = currentUser && currentUser.banner && String(currentUser.banner).trim().length > 0;
+  const rawBanner = currentUser && currentUser.banner != null ? String(currentUser.banner).trim() : '';
+  const hasImg = rawBanner.length > 8 && (rawBanner.startsWith('http') || rawBanner.startsWith('data:') || rawBanner.startsWith('blob:'));
   if (hasImg) {
-    banner.style.setProperty('background', 'none', 'important');
-    banner.style.setProperty('background-image', 'url(' + currentUser.banner + ')', 'important');
+    banner.style.setProperty('background-image', 'url(' + rawBanner + ')', 'important');
     banner.style.setProperty('background-size', 'cover', 'important');
     banner.style.setProperty('background-position', 'center', 'important');
     banner.style.setProperty('background-repeat', 'no-repeat', 'important');
     return;
   }
   const colors = (typeof getSavedThemeColors === 'function') ? getSavedThemeColors() : { top: '#5865F2', bottom: '#4752C4' };
-  const grad = (typeof themeGradientFromPair === 'function')
-    ? themeGradientFromPair(colors.top, colors.bottom)
-    : ('linear-gradient(180deg, ' + colors.top + ' 0%, ' + colors.bottom + ' 100%)');
-  // clear image-related props so gradient always shows
+  const top = colors.top || '#5865F2';
+  const bot = colors.bottom || '#4752C4';
+  const grad = 'linear-gradient(180deg, ' + top + ' 0%, ' + bot + ' 100%)';
+  banner.style.cssText = banner.style.cssText; // keep other inline if any
+  banner.style.removeProperty('background');
   banner.style.removeProperty('background-image');
   banner.style.removeProperty('background-size');
   banner.style.removeProperty('background-position');
   banner.style.removeProperty('background-repeat');
-  banner.style.removeProperty('background');
+  banner.style.removeProperty('background-color');
   banner.style.setProperty('background', grad, 'important');
   banner.style.setProperty('background-image', grad, 'important');
+  banner.style.setProperty('background-color', top, 'important');
 }
 
 let pendingEditThemeTop = '';
@@ -7033,11 +7067,14 @@ function onEditThemePairInput() {
   const bar = document.getElementById('edit-theme-preview-bar');
   if (bar) bar.style.background = themeGradientFromPair(top, bottom);
   const banPrev = document.getElementById('edit-banner-preview');
-  if (banPrev && !pendingEditBanner && !(currentUser && currentUser.banner)) {
-    banPrev.style.backgroundImage = themeGradientFromPair(top, bottom);
-    banPrev.style.background = themeGradientFromPair(top, bottom);
+  if (banPrev) {
+    // Live preview of colors — clears image overlay in the editor
+    const g = themeGradientFromPair(top, bottom);
+    banPrev.style.setProperty('background-image', 'none', 'important');
+    banPrev.style.setProperty('background', g, 'important');
   }
 }
+
 function onEditThemeColorInput(val) {
   const ct = document.getElementById('edit-theme-color-top');
   if (ct) ct.value = normalizeHexColor(val) || val;
@@ -7315,7 +7352,7 @@ window.handleProfileClick=handleProfileClick; window.login=login;
 window.toggleStatusMenu=toggleStatusMenu; window.setUserStatus=setUserStatus; window.closeStatusMenu=closeStatusMenu;
 window.openEditProfile=openEditProfile; window.saveEditProfile=saveEditProfile;
 window.toggleAvatarEffectPanel=toggleAvatarEffectPanel; window.pickAvatarEffect=pickAvatarEffect;
-window.onEditAvatarSelected=onEditAvatarSelected; window.onEditBannerSelected=onEditBannerSelected;
+window.onEditAvatarSelected=onEditAvatarSelected; window.onEditBannerSelected=onEditBannerSelected; window.clearEditBanner=clearEditBanner;
 window.renderDiscordProfile=renderDiscordProfile;
 window.confirmAvatar=confirmAvatar;
 window.skipAvatar=skipAvatar;
