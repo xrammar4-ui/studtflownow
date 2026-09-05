@@ -2098,6 +2098,128 @@ h3 { font-size: 1.05rem; }
   margin: 4px 6px;
 }
 
+
+/* Settings / Privacy / Friends */
+.privacy-badge {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  padding: 0.35rem 0.7rem;
+  width: fit-content;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #E4E4E7;
+}
+.privacy-badge.visible { display: inline-flex; }
+.privacy-badge svg { width: 12px; height: 12px; opacity: 0.85; }
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+.settings-row-info { flex: 1; min-width: 0; }
+.settings-row-title { font-weight: 600; font-size: 0.9rem; }
+.settings-row-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+.settings-link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+.settings-link-row:hover {
+  border-color: rgba(99,102,241,0.35);
+  background: rgba(255,255,255,0.03);
+}
+.settings-link-row svg { width: 18px; height: 18px; color: var(--text-secondary); flex-shrink: 0; }
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #3F3F46;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent);
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.blocked-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 360px; overflow-y: auto; }
+.blocked-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 11px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+.blocked-item img {
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+}
+.blocked-item-info { flex: 1; min-width: 0; }
+.blocked-item-name { font-weight: 600; font-size: 0.88rem; }
+.blocked-item-handle { font-size: 0.75rem; color: var(--text-muted); }
+
+.view-profile-handle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.view-profile-handle-row .discord-handle { margin-bottom: 0; }
+
 /* ========== Store & Nitro ========== */
 
 #modal-edit-profile .modal {
@@ -2196,6 +2318,117 @@ h3 { font-size: 1.05rem; }
   width: 24px;
   height: 24px;
 }
+
+#profile-nitro-badge {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+#profile-nitro-badge:hover {
+  filter: brightness(1.15);
+  transform: scale(1.08);
+}
+#profile-nitro-badge:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.nitro-showcase-overlay .modal {
+  max-width: 560px;
+  width: 94%;
+  background: linear-gradient(180deg, #1a1240 0%, #0f0f12 55%);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  overflow: hidden;
+}
+.nitro-showcase-header {
+  text-align: center;
+  padding: 1.75rem 1.5rem 0.5rem;
+}
+.nitro-showcase-header h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.55rem;
+}
+.nitro-showcase-header p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  max-width: 420px;
+  margin: 0 auto;
+  line-height: 1.45;
+}
+.nitro-showcase-header a {
+  color: #a5b4fc;
+  text-decoration: none;
+}
+.nitro-showcase-header a:hover { text-decoration: underline; }
+.nitro-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.85rem 0.5rem;
+  padding: 1.35rem 1.25rem 0.5rem;
+  justify-items: center;
+}
+@media (max-width: 520px) {
+  .nitro-showcase-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.nitro-showcase-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  padding: 0.55rem 0.35rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s var(--ease);
+  width: 100%;
+  max-width: 96px;
+  background: transparent;
+  cursor: default;
+}
+.nitro-showcase-item.current {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25);
+}
+.nitro-showcase-item img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35));
+}
+.nitro-showcase-item.locked img {
+  opacity: 0.45;
+  filter: grayscale(0.35) drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+}
+.nitro-showcase-item .ns-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.nitro-showcase-item .ns-meta {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+.nitro-showcase-item.current .ns-meta {
+  color: #FBBF24;
+}
+.nitro-showcase-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 1.25rem 1.5rem;
+}
+.nitro-showcase-footer .btn {
+  min-width: 160px;
+  border-radius: 100px;
+  font-weight: 700;
+}
+
 #profile-nitro-badge img {
   width: 24px;
   height: 24px;
@@ -2918,7 +3151,11 @@ h3 { font-size: 1.05rem; }
             </div>
             <div class="discord-handle-row">
               <span class="discord-handle" id="profile-handle">@—</span>
-              <span class="nitro-badge hidden" id="profile-nitro-badge" title="DevFlow Nitro"></span>
+              <button type="button" class="nitro-badge hidden" id="profile-nitro-badge" title="DevFlow Nitro" onclick="openNitroShowcase()" aria-label="Nitro badge"></button>
+            </div>
+            <div class="privacy-badge" id="profile-privacy-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Private Account
             </div>
             <div class="discord-bio" id="profile-bio">No bio yet. Click Edit Profile to add one.</div>
             <div class="discord-divider"></div>
@@ -2926,7 +3163,7 @@ h3 { font-size: 1.05rem; }
             <div class="discord-member-since" id="profile-member-since"><strong>—</strong></div>
             <div class="discord-actions">
               <button class="btn btn-primary btn-sm" onclick="openEditProfile()">Edit Profile</button>
-              <button class="btn btn-outline btn-sm" onclick="navigate('store')">Store</button>
+              <button class="btn btn-outline btn-sm" onclick="openSettingsModal()">Settings</button>
               <button class="btn btn-outline btn-sm" onclick="logout()">Sign out</button>
             </div>
           </div>
@@ -3085,11 +3322,20 @@ h3 { font-size: 1.05rem; }
           <div class="discord-name-row">
             <span class="discord-display-name" id="view-profile-name">—</span>
           </div>
-          <div class="discord-handle" id="view-profile-handle">@—</div>
+          <div class="view-profile-handle-row">
+            <span class="discord-handle" id="view-profile-handle">@—</span>
+            <button type="button" class="nitro-badge hidden" id="view-profile-nitro-badge" title="DevFlow Nitro" onclick="openNitroShowcase()"></button>
+          </div>
+          <div class="privacy-badge" id="view-profile-privacy-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Private Account
+          </div>
           <div class="discord-bio" id="view-profile-bio"></div>
           <div class="discord-divider"></div>
-          <div class="discord-actions">
-            <button class="btn btn-primary btn-sm" id="view-profile-msg-btn" onclick="messageFromViewProfile()">Message</button>
+          <div class="discord-actions" id="view-profile-actions">
+            <button class="btn btn-primary btn-sm" id="view-profile-friend-btn" onclick="sendFriendRequestFromView()">Add Friend</button>
+            <button class="btn btn-outline btn-sm" id="view-profile-msg-btn" onclick="messageFromViewProfile()">Message</button>
+            <button class="btn btn-ghost btn-sm" id="view-profile-block-btn" onclick="blockUserFromView()">Block</button>
             <button class="btn btn-outline btn-sm" onclick="closeModal('modal-view-profile')">Close</button>
           </div>
         </div>
@@ -3932,47 +4178,104 @@ let viewingProfileHandle = null;
 async function viewUserProfile(handle) {
   if (!handle) return;
   viewingProfileHandle = handle.toLowerCase().replace(/^@/, '');
-  const peer = await findUserByHandle(viewingProfileHandle);
-  if (!peer) {
-    showToast('User not found', '@' + viewingProfileHandle);
-    return;
-  }
-  document.getElementById('view-profile-name').textContent = peer.displayName || peer.handle;
-  document.getElementById('view-profile-handle').textContent = '@' + (peer.handle || viewingProfileHandle);
-  document.getElementById('view-profile-avatar').src = peer.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(peer.handle || 'user'));
-  setAvatarFxClass(document.getElementById('view-profile-avatar-wrap'), peer.avatarEffect || 'none');
-  const viewCard = document.querySelector('#modal-view-profile .discord-profile');
-  if (viewCard) viewCard.classList.toggle('has-fx', validAvatarEffect(peer.avatarEffect) !== 'none');
-  document.getElementById('view-profile-bio').textContent = peer.bio || 'No bio yet.';
-  const bannerEl = document.getElementById('view-profile-banner');
-  if (bannerEl) {
-    if (peer.banner) {
-      bannerEl.style.backgroundImage = 'url(' + peer.banner + ')';
-      bannerEl.style.backgroundSize = 'cover';
-      bannerEl.style.backgroundPosition = 'center';
+  (async () => {
+    const peer = await findUserByHandle(viewingProfileHandle);
+    if (!peer) {
+      showToast('User not found', '@' + viewingProfileHandle);
+      return;
+    }
+    viewingProfilePeer = peer;
+    const me = (window.firebase && firebase.apps.length && firebase.auth().currentUser) ? firebase.auth().currentUser : null;
+    const isSelf = me && peer.uid && peer.uid === me.uid;
+    const friend = isFriendWith(peer.handle);
+    const privateAcc = !!peer.privateAccount;
+    const canSeeFull = isSelf || !privateAcc || friend;
+
+    document.getElementById('view-profile-name').textContent = peer.displayName || peer.handle;
+    document.getElementById('view-profile-handle').textContent = '@' + (peer.handle || viewingProfileHandle);
+    document.getElementById('view-profile-avatar').src = peer.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(peer.handle || 'user'));
+
+    // Privacy badge
+    const pBadge = document.getElementById('view-profile-privacy-badge');
+    if (pBadge) pBadge.classList.toggle('visible', privateAcc);
+
+    // Badges / effects: hide for non-friends on private accounts
+    const nitroEl = document.getElementById('view-profile-nitro-badge');
+    if (nitroEl) {
+      if (canSeeFull && peer.nitro && peer.nitro.expiresAt && peer.nitro.expiresAt > Date.now()) {
+        nitroEl.className = 'nitro-badge active-pulse ' + (peer.nitro.tier || 'bronze');
+        nitroEl.innerHTML = typeof nitroBadgeSvg === 'function' ? nitroBadgeSvg(peer.nitro.tier || 'bronze') : '';
+        nitroEl.classList.remove('hidden');
+      } else {
+        nitroEl.classList.add('hidden');
+        nitroEl.innerHTML = '';
+      }
+    }
+
+    if (canSeeFull) {
+      setAvatarFxClass(document.getElementById('view-profile-avatar-wrap'), peer.avatarEffect || 'none');
+      const viewCard = document.querySelector('#modal-view-profile .discord-profile');
+      if (viewCard) viewCard.classList.toggle('has-fx', validAvatarEffect(peer.avatarEffect) !== 'none');
+      document.getElementById('view-profile-bio').textContent = peer.bio || 'No bio yet.';
+      const bannerEl = document.getElementById('view-profile-banner');
+      if (bannerEl) {
+        if (peer.banner) {
+          bannerEl.style.backgroundImage = 'url(' + peer.banner + ')';
+          bannerEl.style.backgroundSize = 'cover';
+          bannerEl.style.backgroundPosition = 'center';
+        } else if (peer.profileThemeTop || peer.profileThemeBottom) {
+          const top = peer.profileThemeTop || '#5865F2';
+          const bot = peer.profileThemeBottom || '#4752C4';
+          bannerEl.style.backgroundImage = '';
+          bannerEl.style.background = 'linear-gradient(180deg,' + top + ',' + bot + ')';
+        } else {
+          bannerEl.style.backgroundImage = '';
+          bannerEl.style.background = 'linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%)';
+        }
+      }
     } else {
-      bannerEl.style.backgroundImage = '';
-      bannerEl.style.background = 'linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%)';
+      // Restricted view
+      setAvatarFxClass(document.getElementById('view-profile-avatar-wrap'), 'none');
+      const viewCard = document.querySelector('#modal-view-profile .discord-profile');
+      if (viewCard) viewCard.classList.remove('has-fx');
+      document.getElementById('view-profile-bio').textContent = 'This account is private. Send a friend request to see more.';
+      const bannerEl = document.getElementById('view-profile-banner');
+      if (bannerEl) {
+        bannerEl.style.backgroundImage = '';
+        bannerEl.style.background = 'linear-gradient(135deg, #27272A, #18181B)';
+      }
     }
-  }
-  // presence
-  try {
-    const pres = await db().collection('presence').doc(peer.uid).get();
-    const online = (pres.data() || {}).online === true;
-    const dot = document.getElementById('view-profile-status-dot');
-    if (dot) {
-      dot.style.background = online ? 'var(--success)' : '#71717A';
-      dot.title = online ? 'Online' : 'Offline';
+
+    try {
+      if (peer.uid && typeof db === 'function') {
+        const pres = await db().collection('presence').doc(peer.uid).get();
+        const online = (pres.data() || {}).online === true;
+        const dot = document.getElementById('view-profile-status-dot');
+        if (dot) {
+          dot.style.background = online ? 'var(--success)' : '#71717A';
+          dot.title = online ? 'Online' : 'Offline';
+        }
+      }
+    } catch (e) {}
+
+    const msgBtn = document.getElementById('view-profile-msg-btn');
+    const friendBtn = document.getElementById('view-profile-friend-btn');
+    const blockBtn = document.getElementById('view-profile-block-btn');
+    if (isSelf) {
+      if (msgBtn) msgBtn.style.display = 'none';
+      if (friendBtn) friendBtn.style.display = 'none';
+      if (blockBtn) blockBtn.style.display = 'none';
+    } else {
+      if (msgBtn) msgBtn.style.display = '';
+      if (friendBtn) friendBtn.style.display = '';
+      if (blockBtn) blockBtn.style.display = '';
+      updateViewFriendButton();
     }
-  } catch (e) {}
-  // hide Message if viewing self
-  const msgBtn = document.getElementById('view-profile-msg-btn');
-  if (msgBtn) {
-    const me = auth().currentUser;
-    msgBtn.style.display = (me && peer.uid === me.uid) ? 'none' : '';
-  }
-  openModal('modal-view-profile');
+
+    openModal('modal-view-profile');
+  })().catch(err => showToast('Error', err.message || 'Could not load profile'));
 }
+
 
 function messageFromViewProfile() {
   if (!viewingProfileHandle) return;
@@ -4647,6 +4950,7 @@ function renderDiscordProfile(){
   applyUserStatusUI();
   applyAvatarEffectsUI();
   applyNitroUI();
+  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
 }
 
 const AVATAR_EFFECTS = [
@@ -5369,13 +5673,30 @@ function addFriendRequest(fromName, fromHandle){
 function acceptFriend(i){
   const n = NOTIFICATIONS[i]; if(!n) return;
   n.handled=true; n.read=true; n.message='You are now friends with '+n.fromName;
-  FRIENDS.push({name:n.fromName,handle:n.fromHandle}); saveFriends(); saveNotifs();
+  if (!FRIENDS.some(f => String(f.handle).toLowerCase() === String(n.fromHandle).toLowerCase())) {
+    FRIENDS.push({name:n.fromName, handle:n.fromHandle, avatar: n.fromAvatar || '', uid: n.fromUid || null});
+  }
+  saveFriends(); saveNotifs();
+  if (typeof syncPrivacyToCloud === 'function') syncPrivacyToCloud();
+  if (n.requestId && window.firebase && firebase.apps.length) {
+    firebase.firestore().collection('friendRequests').doc(n.requestId).set({
+      status: 'accepted',
+      respondedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).catch(()=>{});
+  }
   updateNotifBadge(); renderNotifications(); showToast('Friend added', n.fromName);
 }
 function declineFriend(i){
   const n = NOTIFICATIONS[i]; if(!n) return;
   n.handled=true; n.read=true; n.message='Declined request from '+n.fromName;
-  saveNotifs(); updateNotifBadge(); renderNotifications();
+  saveNotifs();
+  if (n.requestId && window.firebase && firebase.apps.length) {
+    firebase.firestore().collection('friendRequests').doc(n.requestId).set({
+      status: 'declined',
+      respondedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).catch(()=>{});
+  }
+  updateNotifBadge(); renderNotifications();
 }
 function simulateFriendRequest(){
   if(!isLoggedIn) return;
@@ -5790,6 +6111,20 @@ function startUserDocSync() {
   const uid = firebase.auth().currentUser.uid;
   unsubUserDoc = firebase.firestore().collection('users').doc(uid).onSnapshot(snap => {
     const d = snap.data() || {};
+    if (d.banned && d.banUntil && d.banUntil > Date.now()) {
+      enforceBan(d);
+      return;
+    }
+    if (d.banned && !d.banUntil) {
+      enforceBan(d);
+      return;
+    }
+    // ban expired — clear flags
+    if (d.banned && d.banUntil && d.banUntil <= Date.now()) {
+      firebase.firestore().collection('users').doc(uid).set({
+        banned: false, banUntil: null, banReason: null
+      }, { merge: true }).catch(()=>{});
+    }
     if (typeof d.coins === 'number' && d.coins !== COINS) {
       window._coinsSyncLock = true;
       COINS = d.coins;
@@ -5797,13 +6132,64 @@ function startUserDocSync() {
       updateCoinsUI();
       window._coinsSyncLock = false;
     }
+    // nitro stripped remotely
+    if (d.nitro === null || d.nitro === undefined) {
+      if (localStorage.getItem('devflow_nitro')) {
+        localStorage.removeItem('devflow_nitro');
+        if (typeof applyNitroUI === 'function') applyNitroUI();
+  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
+      }
+    } else if (d.nitro && d.nitro.expiresAt) {
+      localStorage.setItem('devflow_nitro', JSON.stringify(d.nitro));
+      if (typeof applyNitroUI === 'function') applyNitroUI();
+  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
+    }
+    if (typeof d.privateAccount === 'boolean') {
+      IS_PRIVATE_ACCOUNT = d.privateAccount;
+      localStorage.setItem('devflow_private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
+      if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
+    }
+    if (Array.isArray(d.blocked)) {
+      BLOCKED = d.blocked;
+      localStorage.setItem('devflow_blocked', JSON.stringify(BLOCKED));
+    }
+    if (Array.isArray(d.friends)) {
+      // merge cloud friends
+      d.friends.forEach(f => {
+        if (f && f.handle && !FRIENDS.some(x => String(x.handle).toLowerCase() === String(f.handle).toLowerCase())) {
+          FRIENDS.push(f);
+        }
+      });
+      if (typeof saveFriends === 'function') saveFriends();
+    }
     if (currentUser) {
       currentUser.email = d.email || currentUser.email || currentAuthEmail();
       currentUser.terminalAccess = !!d.terminalAccess || isTremenalOwner();
+      currentUser.privateAccount = IS_PRIVATE_ACCOUNT;
       localStorage.setItem('devflow_user', JSON.stringify(currentUser));
     }
     refreshTremenalAccess();
   }, () => refreshTremenalAccess());
+}
+function enforceBan(data) {
+  const until = data && data.banUntil ? data.banUntil : null;
+  const reason = (data && data.banReason) || 'You are banned from DevFlow';
+  const msg = until
+    ? (reason + ' · until ' + new Date(until).toLocaleString())
+    : reason;
+  showToast('Banned', msg);
+  try {
+    if (window.firebase && firebase.apps.length) firebase.auth().signOut().catch(()=>{});
+  } catch (e) {}
+  isLoggedIn = false;
+  currentUser = null;
+  localStorage.removeItem('devflow_logged_in');
+  localStorage.removeItem('devflow_user');
+  if (typeof showLanding === 'function') showLanding();
+  else {
+    document.getElementById('app-shell')?.classList.remove('visible');
+    document.getElementById('landing')?.classList.remove('hidden');
+  }
 }
 function tremLog(type, text) {
   TREMENAL_LOG.push({ type: type || 'info', text: String(text || '') });
@@ -5846,15 +6232,18 @@ async function runTremenalCommand(raw) {
   const cmd = (parts[0] || '').toLowerCase();
   try {
     if (cmd === '!help' || cmd === 'help') {
-      tremLog('info', '!give @user amount     add coins');
-      tremLog('info', '!remove @user amount   take coins');
-      tremLog('info', '!setcoins @user amount set exact balance');
-      tremLog('info', '!accept @user          grant Tremenal');
-      tremLog('info', '!revoke @user          remove Tremenal');
-      tremLog('info', '!whois @user           profile lookup');
-      tremLog('info', '!online                who is online');
-      tremLog('info', '!me                    your account');
-      tremLog('info', '!clear                 clear console');
+      tremLog('info', '!give @user amount        add coins');
+      tremLog('info', '!remove @user amount      take coins');
+      tremLog('info', '!setcoins @user amount    set exact balance');
+      tremLog('info', '!accept @user             grant Tremenal');
+      tremLog('info', '!revoke @user             remove Tremenal');
+      tremLog('info', '!ban @user <duration>     ban user (1h 1d 7d 30d permanent)');
+      tremLog('info', '!unban @user              lift ban');
+      tremLog('info', '!removenitro @user        strip Nitro subscription');
+      tremLog('info', '!whois @user              profile lookup');
+      tremLog('info', '!online                   who is online');
+      tremLog('info', '!me                       your account');
+      tremLog('info', '!clear                    clear console');
       return;
     }
     if (cmd === '!clear' || cmd === 'clear') {
@@ -5868,7 +6257,7 @@ async function runTremenalCommand(raw) {
       tremLog('ok', '@' + (currentUser && currentUser.handle) + '  coins=' + COINS + '  role=' + (isTremenalOwner() ? 'owner' : 'operator'));
       return;
     }
-    if (cmd === '!give' || cmd === '!remove' || cmd === '!setcoins') {
+    if ((cmd === '!give' || cmd === '!remove' || cmd === '!setcoins') && String(parts[1] || '').toLowerCase() !== 'nitro') {
       const handle = parts[1];
       const amount = parseInt(parts[2], 10);
       if (!handle || isNaN(amount) || amount < 0) {
@@ -5918,6 +6307,12 @@ async function runTremenalCommand(raw) {
       tremLog('info', 'uid=' + found.uid);
       tremLog('info', 'coins=' + (d.coins || 0) + '  tremenal=' + (!!d.terminalAccess) + '  effect=' + (d.avatarEffect || 'none'));
       if (d.email) tremLog('info', 'email=' + d.email);
+      if (d.banned && (!d.banUntil || d.banUntil > Date.now())) {
+        tremLog('err', 'BANNED until ' + (d.banUntil ? new Date(d.banUntil).toLocaleString() : 'permanent'));
+        if (d.banReason) tremLog('info', 'reason: ' + d.banReason);
+      }
+      if (d.nitro && d.nitro.expiresAt) tremLog('info', 'nitro=' + (d.nitro.tier || '?') + ' until ' + new Date(d.nitro.expiresAt).toLocaleDateString());
+      else tremLog('info', 'nitro=none');
       return;
     }
     if (cmd === '!online') {
@@ -5933,6 +6328,83 @@ async function runTremenalCommand(raw) {
       if (!n) tremLog('info', 'Nobody online');
       return;
     }
+
+    // !ban @user duration
+    if (cmd === '!ban') {
+      const handle = parts[1];
+      const durRaw = (parts[2] || '').toLowerCase();
+      if (!handle || !durRaw) {
+        tremLog('err', 'Usage: !ban @user <duration>');
+        tremLog('info', 'duration: 1h | 12h | 1d | 7d | 30d | permanent');
+        return;
+      }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found: @' + String(handle).replace(/^@/, '')); return; }
+      if (found.data.email && String(found.data.email).toLowerCase() === TREMENAL_OWNER) {
+        tremLog('err', 'Cannot ban owner');
+        return;
+      }
+      let ms = 0;
+      let label = durRaw;
+      if (durRaw === 'permanent' || durRaw === 'perm' || durRaw === 'forever') {
+        ms = 1000 * 60 * 60 * 24 * 365 * 100; // ~100 years
+        label = 'permanent';
+      } else {
+        const m = durRaw.match(/^(\d+)(h|d|m|w)$/);
+        if (!m) {
+          tremLog('err', 'Bad duration. Use 1h, 12h, 1d, 7d, 30d, or permanent');
+          return;
+        }
+        const n = parseInt(m[1], 10);
+        const unit = m[2];
+        const mult = unit === 'm' ? 60000 : unit === 'h' ? 3600000 : unit === 'd' ? 86400000 : 604800000;
+        ms = n * mult;
+        label = n + unit;
+      }
+      const until = Date.now() + ms;
+      await firebase.firestore().collection('users').doc(found.uid).set({
+        banned: true,
+        banUntil: until,
+        banReason: 'Banned via Tremenal by @' + ((currentUser && currentUser.handle) || 'operator'),
+        bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        bannedBy: (currentUser && currentUser.handle) || 'operator',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      tremLog('ok', 'Banned @' + (found.data.handle || handle.replace(/^@/, '')) + ' for ' + label);
+      tremLog('info', 'until ' + new Date(until).toLocaleString());
+      return;
+    }
+    // !unban @user
+    if (cmd === '!unban') {
+      const handle = parts[1];
+      if (!handle) { tremLog('err', 'Usage: !unban @user'); return; }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found'); return; }
+      await firebase.firestore().collection('users').doc(found.uid).set({
+        banned: false,
+        banUntil: null,
+        banReason: null,
+        bannedAt: null,
+        bannedBy: null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      tremLog('ok', 'Unbanned @' + (found.data.handle || handle.replace(/^@/, '')));
+      return;
+    }
+    // !removenitro @user  OR  !remove nitro @user
+    if (cmd === '!removenitro' || cmd === '!remove_nitro' || (cmd === '!remove' && String(parts[1] || '').toLowerCase() === 'nitro')) {
+      const handle = cmd === '!removenitro' || cmd === '!remove_nitro' ? parts[1] : parts[2];
+      if (!handle) { tremLog('err', 'Usage: !removenitro @user'); return; }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found'); return; }
+      await firebase.firestore().collection('users').doc(found.uid).set({
+        nitro: null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      tremLog('ok', 'Removed Nitro from @' + (found.data.handle || handle.replace(/^@/, '')));
+      return;
+    }
+
     tremLog('err', 'Unknown command. Type !help');
   } catch (e) {
     tremLog('err', e.message || 'Command failed');
@@ -5976,6 +6448,229 @@ function runTerminalCommand(raw){
   if(cmd==='coins'){ showToast('Balance', COINS+' coins'); return; }
   showToast('Unknown','Type help');
 }
+
+
+
+/* ========== Privacy / Friends / Block ========== */
+let IS_PRIVATE_ACCOUNT = localStorage.getItem('devflow_private') === 'true';
+let BLOCKED = [];
+try { BLOCKED = JSON.parse(localStorage.getItem('devflow_blocked') || '[]'); } catch (e) { BLOCKED = []; }
+// FRIENDS is const array - mutate in place
+let PENDING_FRIEND_OUT = [];
+try { PENDING_FRIEND_OUT = JSON.parse(localStorage.getItem('devflow_friend_out') || '[]'); } catch (e) { PENDING_FRIEND_OUT = []; }
+let viewingProfilePeer = null;
+let unsubFriendRequests = null;
+
+function saveBlocked() {
+  localStorage.setItem('devflow_blocked', JSON.stringify(BLOCKED));
+  syncPrivacyToCloud();
+}
+function savePrivateFlag() {
+  localStorage.setItem('devflow_private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
+  syncPrivacyToCloud();
+  applyOwnPrivacyUI();
+}
+function saveFriendOut() {
+  localStorage.setItem('devflow_friend_out', JSON.stringify(PENDING_FRIEND_OUT));
+}
+function isFriendWith(handle) {
+  handle = String(handle || '').replace(/^@/, '').toLowerCase();
+  return FRIENDS.some(f => String(f.handle || '').toLowerCase() === handle);
+}
+function isBlocked(handle) {
+  handle = String(handle || '').replace(/^@/, '').toLowerCase();
+  return BLOCKED.some(b => String(b.handle || '').toLowerCase() === handle);
+}
+function syncPrivacyToCloud() {
+  try {
+    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
+      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
+        privateAccount: IS_PRIVATE_ACCOUNT,
+        blocked: BLOCKED,
+        friends: FRIENDS,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(()=>{});
+    }
+  } catch (e) {}
+}
+
+function openSettingsModal() {
+  if (!isLoggedIn) { openModal('modal-auth'); return; }
+  const chk = document.getElementById('setting-private-account');
+  if (chk) chk.checked = !!IS_PRIVATE_ACCOUNT;
+  const lbl = document.getElementById('blocked-count-label');
+  if (lbl) lbl.textContent = String(BLOCKED.length);
+  openModal('modal-settings');
+}
+function togglePrivateAccount(on) {
+  IS_PRIVATE_ACCOUNT = !!on;
+  savePrivateFlag();
+  showToast(IS_PRIVATE_ACCOUNT ? 'Private Account' : 'Public Account',
+    IS_PRIVATE_ACCOUNT ? 'Only friends see your full profile' : 'Anyone can view your profile');
+}
+function applyOwnPrivacyUI() {
+  const badge = document.getElementById('profile-privacy-badge');
+  if (badge) badge.classList.toggle('visible', !!IS_PRIVATE_ACCOUNT);
+}
+
+function openBlockedModal() {
+  closeModal('modal-settings');
+  renderBlockedList();
+  openModal('modal-blocked');
+}
+function renderBlockedList() {
+  const list = document.getElementById('blocked-list');
+  if (!list) return;
+  if (!BLOCKED.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">No blocked users</p></div>';
+    return;
+  }
+  list.innerHTML = BLOCKED.map((b, i) =>
+    '<div class="blocked-item">' +
+      '<img src="' + (b.avatar || '') + '" alt="" onerror="this.style.opacity=0.3" />' +
+      '<div class="blocked-item-info">' +
+        '<div class="blocked-item-name">' + (b.name || b.handle) + '</div>' +
+        '<div class="blocked-item-handle">@' + b.handle + '</div>' +
+      '</div>' +
+      '<button class="btn btn-sm btn-outline" onclick="unblockUser(' + i + ')">Unblock</button>' +
+    '</div>'
+  ).join('');
+}
+function unblockUser(i) {
+  if (i < 0 || i >= BLOCKED.length) return;
+  const u = BLOCKED.splice(i, 1)[0];
+  saveBlocked();
+  renderBlockedList();
+  const lbl = document.getElementById('blocked-count-label');
+  if (lbl) lbl.textContent = String(BLOCKED.length);
+  showToast('Unblocked', '@' + (u && u.handle));
+}
+
+function blockUserFromView() {
+  if (!viewingProfilePeer) return;
+  const h = viewingProfilePeer.handle;
+  if (!h) return;
+  if (isBlocked(h)) {
+    showToast('Already blocked', '@' + h);
+    return;
+  }
+  BLOCKED.unshift({
+    handle: h,
+    name: viewingProfilePeer.displayName || h,
+    avatar: viewingProfilePeer.avatar || '',
+    uid: viewingProfilePeer.uid || null,
+    at: Date.now()
+  });
+  // remove from friends if present
+  const fi = FRIENDS.findIndex(f => String(f.handle).toLowerCase() === h.toLowerCase());
+  if (fi >= 0) FRIENDS.splice(fi, 1);
+  if (typeof saveFriends === 'function') saveFriends();
+  saveBlocked();
+  closeModal('modal-view-profile');
+  showToast('Blocked', '@' + h);
+}
+
+async function sendFriendRequestFromView() {
+  if (!isLoggedIn || !currentUser) { openModal('modal-auth'); return; }
+  if (!viewingProfilePeer || !viewingProfilePeer.handle) return;
+  const handle = viewingProfilePeer.handle;
+  if (isFriendWith(handle)) {
+    showToast('Already friends', '@' + handle);
+    return;
+  }
+  if (PENDING_FRIEND_OUT.includes(handle.toLowerCase())) {
+    showToast('Request pending', 'Friend request already sent');
+    return;
+  }
+  if (isBlocked(handle)) {
+    showToast('Blocked', 'Unblock this user first');
+    return;
+  }
+  // Local pending
+  PENDING_FRIEND_OUT.push(handle.toLowerCase());
+  saveFriendOut();
+  // Write to target user's friendRequests in Firestore
+  try {
+    if (window.firebase && firebase.apps.length && viewingProfilePeer.uid) {
+      const reqId = (currentUser.uid || 'local') + '_' + viewingProfilePeer.uid;
+      await firebase.firestore().collection('friendRequests').doc(reqId).set({
+        fromUid: currentUser.uid || null,
+        fromHandle: currentUser.handle,
+        fromName: currentUser.displayName,
+        fromAvatar: currentUser.avatar || '',
+        toUid: viewingProfilePeer.uid,
+        toHandle: handle,
+        status: 'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  // Also push local-style notif simulation won't reach other client - firestore listener will
+  updateViewFriendButton();
+  showToast('Friend request sent', 'Waiting for @' + handle);
+}
+
+function updateViewFriendButton() {
+  const btn = document.getElementById('view-profile-friend-btn');
+  if (!btn || !viewingProfilePeer) return;
+  const h = viewingProfilePeer.handle;
+  if (isFriendWith(h)) {
+    btn.textContent = 'Friends';
+    btn.disabled = true;
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-outline');
+  } else if (PENDING_FRIEND_OUT.includes(String(h).toLowerCase())) {
+    btn.textContent = 'Pending';
+    btn.disabled = true;
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-outline');
+  } else {
+    btn.textContent = 'Add Friend';
+    btn.disabled = false;
+    btn.classList.add('btn-primary');
+    btn.classList.remove('btn-outline');
+  }
+}
+
+function startFriendRequestListener() {
+  if (unsubFriendRequests) { try { unsubFriendRequests(); } catch (e) {} unsubFriendRequests = null; }
+  if (!window.firebase || !firebase.apps.length || !firebase.auth().currentUser) return;
+  const uid = firebase.auth().currentUser.uid;
+  unsubFriendRequests = firebase.firestore().collection('friendRequests')
+    .where('toUid', '==', uid)
+    .where('status', '==', 'pending')
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(change => {
+        if (change.type !== 'added' && change.type !== 'modified') return;
+        const d = change.doc.data() || {};
+        if (d.status !== 'pending') return;
+        // avoid duplicate notifs
+        if (NOTIFICATIONS.some(n => n.type === 'friend_request' && n.fromHandle === d.fromHandle && !n.handled)) return;
+        NOTIFICATIONS.unshift({
+          id: 'fr_' + change.doc.id,
+          type: 'friend_request',
+          title: 'Friend Request',
+          message: (d.fromName || d.fromHandle) + ' (@' + d.fromHandle + ') wants to connect',
+          fromName: d.fromName || d.fromHandle,
+          fromHandle: d.fromHandle,
+          fromAvatar: d.fromAvatar || '',
+          fromUid: d.fromUid || null,
+          requestId: change.doc.id,
+          read: false,
+          handled: false,
+          time: Date.now()
+        });
+        saveNotifs();
+        updateNotifBadge();
+        showToast('Friend Request', (d.fromName || d.fromHandle) + ' sent you a request');
+      });
+    }, err => console.warn('friendRequests listen', err));
+}
+
+// Patch accept/decline to update firestore + friends both ways
+const _acceptFriendOrig = typeof acceptFriend === 'function' ? acceptFriend : null;
 
 
 /* ========== Store / Nitro ========== */
@@ -6089,11 +6784,57 @@ function nitroBadgeUrl(tier) {
     bronze: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/bronze.svg',
     silver: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/silver.svg',
     gold: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/gold.svg',
+    platinum: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/platinum.svg',
     diamond: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/diamond.svg',
-    platinum: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/platinum.svg'
+    emerald: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/emerald.svg',
+    ruby: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/ruby.svg',
+    opal: 'https://cdn.jsdelivr.net/gh/mezotv/discord-badges@main/assets/subscriptions/opal.svg'
   };
   return map[tier] || map.bronze;
 }
+
+const NITRO_SHOWCASE_TIERS = [
+  { id: 'bronze', name: 'Bronze', months: 1, label: '1 Month' },
+  { id: 'silver', name: 'Silver', months: 3, label: '3 Months' },
+  { id: 'gold', name: 'Gold', months: 6, label: '6 Months' },
+  { id: 'platinum', name: 'Platinum', months: 12, label: '1 Year' },
+  { id: 'diamond', name: 'Diamond', months: 24, label: '2 Years' },
+  { id: 'emerald', name: 'Emerald', months: 36, label: '3 Years' },
+  { id: 'ruby', name: 'Ruby', months: 60, label: '5 Years' },
+  { id: 'opal', name: 'Opal', months: 72, label: '6+ Years' }
+];
+
+function nitroTierRank(tier) {
+  const i = NITRO_SHOWCASE_TIERS.findIndex(t => t.id === tier);
+  return i < 0 ? 0 : i;
+}
+
+function openNitroShowcase() {
+  const grid = document.getElementById('nitro-showcase-grid');
+  const nitro = typeof loadNitro === 'function' ? loadNitro() : null;
+  const currentTier = nitro && nitro.tier ? nitro.tier : null;
+  const currentRank = currentTier ? nitroTierRank(currentTier) : -1;
+  const since = nitro && nitro.purchasedAt
+    ? new Date(nitro.purchasedAt).toLocaleDateString('en', { month: 'numeric', day: 'numeric', year: '2-digit' })
+    : null;
+
+  if (grid) {
+    grid.innerHTML = NITRO_SHOWCASE_TIERS.map((t, idx) => {
+      const isCurrent = currentTier === t.id;
+      const locked = currentRank < 0 || idx > currentRank;
+      let meta = t.label;
+      if (isCurrent && since) meta = t.label + '<br/>Subscriber since<br/>' + since;
+      else if (isCurrent) meta = t.label + '<br/>Active';
+      return '<div class="nitro-showcase-item' + (isCurrent ? ' current' : '') + (locked && !isCurrent ? ' locked' : '') + '">' +
+        '<img src="' + nitroBadgeUrl(t.id) + '" alt="' + t.name + '" draggable="false" />' +
+        '<div class="ns-name">' + t.name + '</div>' +
+        '<div class="ns-meta">' + meta + '</div>' +
+        '</div>';
+    }).join('');
+  }
+  openModal('modal-nitro-showcase');
+}
+
 function nitroBadgeSvg(tier, uid) {
   const url = nitroBadgeUrl(tier);
   const label = (tier || 'bronze');
@@ -6492,11 +7233,16 @@ document.addEventListener('DOMContentLoaded',()=>{
         }
         refreshTremenalAccess();
         startUserDocSync();
+        if (typeof startFriendRequestListener === 'function') startFriendRequestListener();
       }
       if (user && !isLoggedIn) {
         firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
           if (doc.exists && doc.data().handle) {
             const d = doc.data();
+            if (d.banned && (!d.banUntil || d.banUntil > Date.now())) {
+              enforceBan(d);
+              return;
+            }
             login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
               bio: d.bio || '',
               banner: d.banner || '',
@@ -6531,6 +7277,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   applyUserStatusUI();
   if (typeof applyNitroUI === 'function') applyNitroUI();
+  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
 });
 
 window.navigate=navigate; window.openModal=openModal; window.closeModal=closeModal;
@@ -6567,8 +7314,81 @@ window.addCertificate=addCertificate; window.removeCert=removeCert;
 window.toggleTerminalPref=toggleTerminalPref; window.runTerminalCommand=runTerminalCommand;
 window.renderOnboardingChips=renderOnboardingChips;
 window.buyNitro=buyNitro; window.buyStoreItem=buyStoreItem; window.renderStorePage=renderStorePage;
-window.applyNitroUI=applyNitroUI; window.onEditThemeColorInput=onEditThemeColorInput; window.onEditThemeHexInput=onEditThemeHexInput; window.onEditThemePairInput=onEditThemePairInput; window.resetEditThemeColor=resetEditThemeColor; window.applyProfileTheme=applyProfileTheme;
+window.applyNitroUI=applyNitroUI; window.openNitroShowcase=openNitroShowcase;
+window.openSettingsModal=openSettingsModal; window.togglePrivateAccount=togglePrivateAccount;
+window.openBlockedModal=openBlockedModal; window.unblockUser=unblockUser;
+window.sendFriendRequestFromView=sendFriendRequestFromView; window.blockUserFromView=blockUserFromView;
+ window.onEditThemeColorInput=onEditThemeColorInput; window.onEditThemeHexInput=onEditThemeHexInput; window.onEditThemePairInput=onEditThemePairInput; window.resetEditThemeColor=resetEditThemeColor; window.applyProfileTheme=applyProfileTheme;
 
   </script>
+
+  <!-- Nitro Showcase (Discord-style evolving badges) -->
+  <div class="modal-overlay nitro-showcase-overlay" id="modal-nitro-showcase">
+    <div class="modal">
+      <div class="modal-header" style="border-bottom:none;padding-bottom:0">
+        <span></span>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-nitro-showcase')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="nitro-showcase-header">
+        <h2>Join Nitro &amp; Unlock an<br/>Evolving Profile Badge</h2>
+        <p>Plus unlock perks like custom banner colors, avatar effects, and more. <a href="#" onclick="closeModal('modal-nitro-showcase'); navigate('store'); return false;">Learn more</a>.</p>
+      </div>
+      <div class="nitro-showcase-grid" id="nitro-showcase-grid"></div>
+      <div class="nitro-showcase-footer">
+        <button class="btn btn-primary" onclick="closeModal('modal-nitro-showcase'); navigate('store');">Get Nitro</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Settings -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-settings')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-list">
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <div class="settings-row-title">Private Account</div>
+              <div class="settings-row-desc">Only friends can see your badges and full profile details</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-private-account" onchange="togglePrivateAccount(this.checked)" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button type="button" class="settings-link-row" onclick="openBlockedModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
+            <span style="flex:1">Blocked</span>
+            <span class="text-xs text-muted" id="blocked-count-label">0</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blocked users -->
+  <div class="modal-overlay" id="modal-blocked">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Blocked</h2>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-blocked')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="blocked-list" id="blocked-list"></div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
