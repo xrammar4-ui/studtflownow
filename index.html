@@ -2234,6 +2234,85 @@ h3 { font-size: 1.05rem; }
 .view-profile-handle-row .discord-handle { margin-bottom: 0; }
 
 
+
+/* Force name styles over base display-name */
+.discord-display-name.name-styled.dn-font-default { font-family: inherit !important; }
+.discord-display-name.name-styled.dn-font-tempo { font-family: 'Russo One', sans-serif !important; letter-spacing: 0.02em !important; }
+.discord-display-name.name-styled.dn-font-sakura { font-family: 'Yomogi', cursive !important; }
+.discord-display-name.name-styled.dn-font-jellybean { font-family: 'Fredoka', sans-serif !important; font-weight: 600 !important; }
+.discord-display-name.name-styled.dn-font-modern { font-family: 'Montserrat', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.02em !important; }
+.discord-display-name.name-styled.dn-font-medieval { font-family: 'Cinzel', serif !important; font-weight: 700 !important; }
+.discord-display-name.name-styled.dn-font-8bit { font-family: 'Press Start 2P', monospace !important; font-size: 0.95rem !important; line-height: 1.4 !important; }
+.discord-display-name.name-styled.dn-font-vampyre { font-family: 'Creepster', cursive !important; letter-spacing: 0.03em !important; }
+
+.discord-display-name.name-styled.dn-fx-solid {
+  color: var(--dn-c1, #fff) !important;
+  -webkit-text-fill-color: var(--dn-c1, #fff) !important;
+  background: none !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+.discord-display-name.name-styled.dn-fx-gradient {
+  background: linear-gradient(90deg, var(--dn-c1, #fff), var(--dn-c2, #a78bfa)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+}
+.discord-display-name.name-styled.dn-fx-neon {
+  color: var(--dn-c1, #fff) !important;
+  -webkit-text-fill-color: var(--dn-c1, #fff) !important;
+  background: none !important;
+  text-shadow:
+    0 0 6px var(--dn-c1, #fff),
+    0 0 14px var(--dn-c1, #fff),
+    0 0 28px var(--dn-c2, #a78bfa) !important;
+}
+.discord-display-name.name-styled.dn-fx-toon {
+  color: var(--dn-c1, #fff) !important;
+  -webkit-text-fill-color: var(--dn-c1, #fff) !important;
+  background: none !important;
+  -webkit-text-stroke: 1.5px rgba(0,0,0,0.85) !important;
+  paint-order: stroke fill;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.35) !important;
+}
+.discord-display-name.name-styled.dn-fx-pop {
+  color: var(--dn-c1, #fff) !important;
+  -webkit-text-fill-color: var(--dn-c1, #fff) !important;
+  background: none !important;
+  text-shadow:
+    3px 3px 0 var(--dn-c2, #a78bfa),
+    0 0 12px rgba(0,0,0,0.35) !important;
+}
+
+/* preview span also */
+#name-style-preview-text.name-styled.dn-font-tempo { font-family: 'Russo One', sans-serif !important; }
+#name-style-preview-text.name-styled.dn-font-sakura { font-family: 'Yomogi', cursive !important; }
+#name-style-preview-text.name-styled.dn-font-jellybean { font-family: 'Fredoka', sans-serif !important; }
+#name-style-preview-text.name-styled.dn-font-modern { font-family: 'Montserrat', sans-serif !important; }
+#name-style-preview-text.name-styled.dn-font-medieval { font-family: 'Cinzel', serif !important; }
+#name-style-preview-text.name-styled.dn-font-8bit { font-family: 'Press Start 2P', monospace !important; font-size: 0.85rem !important; }
+#name-style-preview-text.name-styled.dn-font-vampyre { font-family: 'Creepster', cursive !important; }
+#name-style-preview-text.name-styled.dn-fx-solid { color: var(--dn-c1,#fff) !important; -webkit-text-fill-color: var(--dn-c1,#fff) !important; }
+#name-style-preview-text.name-styled.dn-fx-gradient {
+  background: linear-gradient(90deg, var(--dn-c1,#fff), var(--dn-c2,#a78bfa)) !important;
+  -webkit-background-clip: text !important; background-clip: text !important;
+  color: transparent !important; -webkit-text-fill-color: transparent !important;
+}
+#name-style-preview-text.name-styled.dn-fx-neon {
+  color: var(--dn-c1,#fff) !important; -webkit-text-fill-color: var(--dn-c1,#fff) !important;
+  text-shadow: 0 0 6px var(--dn-c1,#fff), 0 0 14px var(--dn-c1,#fff), 0 0 28px var(--dn-c2,#a78bfa) !important;
+}
+#name-style-preview-text.name-styled.dn-fx-toon {
+  color: var(--dn-c1,#fff) !important; -webkit-text-fill-color: var(--dn-c1,#fff) !important;
+  -webkit-text-stroke: 1.5px rgba(0,0,0,0.85) !important;
+}
+#name-style-preview-text.name-styled.dn-fx-pop {
+  color: var(--dn-c1,#fff) !important; -webkit-text-fill-color: var(--dn-c1,#fff) !important;
+  text-shadow: 3px 3px 0 var(--dn-c2,#a78bfa) !important;
+}
+
 /* Name style pickers */
 .name-font-grid, .name-effect-grid, .nameplate-grid {
   display: grid;
@@ -5340,8 +5419,12 @@ async function saveEditProfile(){
     // Persist always; UI is locked without Nitro so free users keep defaults
     saveThemeColors(topColor, botColor);
   }
-  if (typeof saveNameStyle === 'function') saveNameStyle(pendingNameStyle);
+  if (typeof saveNameStyle === 'function') {
+    saveNameStyle(Object.assign({}, pendingNameStyle || loadNameStyle()));
+  }
   if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
+  setTimeout(function(){ if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle(); }, 30);
+  setTimeout(function(){ if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle(); }, 150);
   if(!currentUser.createdAt) currentUser.createdAt = Date.now();
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
   updateUserUI();
@@ -7204,27 +7287,71 @@ function saveNameStyle(style) {
 function applyNameStyleToEl(el, style, nameplateEl) {
   if (!el) return;
   style = Object.assign({}, DEFAULT_NAME_STYLE, style || {});
-  el.classList.add('name-styled');
-  // strip old font/effect classes
-  el.className = (el.className || '').split(/\s+/).filter(c => c && !c.startsWith('dn-font-') && !c.startsWith('dn-fx-') && c !== 'name-styled').join(' ');
-  el.classList.add('discord-display-name', 'name-styled', 'dn-font-' + style.font, 'dn-fx-' + style.effect);
-  el.style.setProperty('--dn-c1', style.color1 || '#FFFFFF');
-  el.style.setProperty('--dn-c2', style.color2 || '#A78BFA');
-  if (style.effect === 'solid') {
-    el.style.color = style.color1 || '#FFFFFF';
-    el.style.webkitTextFillColor = style.color1 || '#FFFFFF';
-    el.style.background = 'none';
-  } else if (style.effect === 'gradient') {
-    el.style.color = 'transparent';
-  } else {
-    el.style.color = style.color1 || '#FFFFFF';
-    el.style.webkitTextFillColor = '';
-    el.style.background = 'none';
+  var font = style.font || 'default';
+  var effect = style.effect || 'solid';
+  var c1 = style.color1 || '#FFFFFF';
+  var c2 = style.color2 || '#A78BFA';
+
+  // keep id and role attrs; rebuild class list cleanly
+  var base = 'discord-display-name name-styled dn-font-' + font + ' dn-fx-' + effect;
+  if (el.id === 'name-style-preview-text') {
+    base = 'name-styled dn-font-' + font + ' dn-fx-' + effect;
   }
+  el.className = base;
+  el.style.setProperty('--dn-c1', c1);
+  el.style.setProperty('--dn-c2', c2);
+
+  // Inline fallbacks so it always shows even if CSS fails to load
+  var fontMap = {
+    default: 'inherit',
+    tempo: "'Russo One', sans-serif",
+    sakura: "'Yomogi', cursive",
+    jellybean: "'Fredoka', sans-serif",
+    modern: "'Montserrat', sans-serif",
+    medieval: "'Cinzel', serif",
+    '8bit': "'Press Start 2P', monospace",
+    vampyre: "'Creepster', cursive"
+  };
+  el.style.fontFamily = fontMap[font] || 'inherit';
+
+  if (effect === 'gradient') {
+    el.style.background = 'linear-gradient(90deg, ' + c1 + ', ' + c2 + ')';
+    el.style.webkitBackgroundClip = 'text';
+    el.style.backgroundClip = 'text';
+    el.style.color = 'transparent';
+    el.style.webkitTextFillColor = 'transparent';
+    el.style.textShadow = 'none';
+  } else if (effect === 'neon') {
+    el.style.background = 'none';
+    el.style.color = c1;
+    el.style.webkitTextFillColor = c1;
+    el.style.textShadow = '0 0 6px ' + c1 + ', 0 0 14px ' + c1 + ', 0 0 28px ' + c2;
+  } else if (effect === 'toon') {
+    el.style.background = 'none';
+    el.style.color = c1;
+    el.style.webkitTextFillColor = c1;
+    el.style.webkitTextStroke = '1.5px rgba(0,0,0,0.85)';
+    el.style.textShadow = '0 2px 0 rgba(0,0,0,0.35)';
+  } else if (effect === 'pop') {
+    el.style.background = 'none';
+    el.style.color = c1;
+    el.style.webkitTextFillColor = c1;
+    el.style.textShadow = '3px 3px 0 ' + c2 + ', 0 0 12px rgba(0,0,0,0.35)';
+  } else {
+    // solid
+    el.style.background = 'none';
+    el.style.backgroundImage = 'none';
+    el.style.color = c1;
+    el.style.webkitTextFillColor = c1;
+    el.style.textShadow = 'none';
+    el.style.webkitTextStroke = '0';
+  }
+
   if (nameplateEl) {
     nameplateEl.className = 'nameplate-wrap nameplate-' + (style.nameplate || 'none');
   }
 }
+
 
 function applyOwnNameStyle() {
   const style = (currentUser && currentUser.nameStyle) || loadNameStyle();
