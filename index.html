@@ -643,6 +643,8 @@ h3 { font-size: 1.05rem; }
 .discord-banner {
   height: 140px;
   background: linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%);
+  background-size: cover;
+  background-position: center;
   position: relative;
 }
 .discord-banner-edit {
@@ -1371,6 +1373,57 @@ h3 { font-size: 1.05rem; }
   font-size: 0.9rem;
   line-height: 1.4;
   position: relative;
+}
+.wa-reply-quote {
+  border-left: 3px solid var(--accent);
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  overflow: hidden;
+  max-height: 3.2em;
+}
+.wa-reply-quote strong {
+  color: var(--accent-hover);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 1px;
+}
+.wa-reply-btn {
+  position: absolute;
+  top: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  z-index: 2;
+}
+.wa-bubble.sent .wa-reply-btn { left: -52px; }
+.wa-bubble.received .wa-reply-btn { right: -52px; }
+.wa-bubble:hover .wa-reply-btn { opacity: 1; }
+.wa-reply-bar {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.wa-reply-bar.open { display: flex; }
+.wa-reply-bar-text { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.wa-reply-bar-text strong { color: var(--accent-hover); }
+  position: relative;
   word-wrap: break-word;
 }
 .wa-bubble.sent {
@@ -1762,6 +1815,12 @@ h3 { font-size: 1.05rem; }
                 </div>
               </div>
               <div class="chat-messages wa-messages" id="chat-messages"></div>
+              <div class="wa-reply-bar" id="reply-bar">
+                <div class="wa-reply-bar-text" id="reply-bar-text"></div>
+                <button class="icon-btn" style="width:28px;height:28px;border:none;background:transparent;flex-shrink:0" onclick="cancelReply()" title="Cancel reply">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
               <div class="chat-input-area">
                 <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type a message" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
                 <button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
@@ -1809,15 +1868,26 @@ h3 { font-size: 1.05rem; }
         </button>
       </div>
       <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Banner (supports GIF)</label>
+          <div id="edit-banner-preview" style="height:90px;border-radius:10px;background:linear-gradient(135deg,#5865F2,#4752C4);background-size:cover;background-position:center;position:relative;overflow:hidden;border:1px solid var(--border)">
+            <label for="edit-banner-input" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.25);opacity:0;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0" title="Change banner">
+              <span class="btn btn-sm btn-primary">Change banner</span>
+            </label>
+            <input type="file" id="edit-banner-input" accept="image/*,image/gif" style="display:none" onchange="onEditBannerSelected(event)" />
+          </div>
+          <p class="text-xs text-muted" style="margin-top:0.3rem">JPG, PNG or animated GIF · max 800KB</p>
+        </div>
         <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
           <div style="position:relative">
             <img id="edit-avatar-preview" src="" alt="" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-elevated)" />
-            <label for="edit-avatar-input" style="position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card)" title="Change photo">
+            <label for="edit-avatar-input" style="position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card)" title="Change avatar (GIF ok)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </label>
-            <input type="file" id="edit-avatar-input" accept="image/*" style="display:none" onchange="onEditAvatarSelected(event)" />
+            <input type="file" id="edit-avatar-input" accept="image/*,image/gif" style="display:none" onchange="onEditAvatarSelected(event)" />
           </div>
         </div>
+        <p class="text-xs text-muted" style="text-align:center;margin-top:-0.75rem;margin-bottom:1rem">Avatar supports animated GIF · max 800KB</p>
         <div class="form-group">
           <label class="form-label">Display Name</label>
           <input class="form-input" id="edit-display-name" placeholder="Your name" maxlength="32" />
@@ -2244,7 +2314,15 @@ function listenMessages() {
           }
         }
         const ticks = mine ? tickHtml(m.status || 'sent') : '';
-        html += `<div class="wa-bubble ${mine ? 'sent' : 'received'}">
+        let replyHtml = '';
+        if (m.replyTo && m.replyTo.text) {
+          replyHtml = `<div class="wa-reply-quote"><strong>${escapeHtml(m.replyTo.fromHandle || 'user')}</strong>${escapeHtml((m.replyTo.text || '').slice(0, 80))}</div>`;
+        }
+        const safeText = String(m.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
+        const safeHandle = String(m.fromHandle || '').replace(/'/g, "\\'");
+        html += `<div class="wa-bubble ${mine ? 'sent' : 'received'}" data-msg-id="${doc.id}">
+          <button type="button" class="wa-reply-btn" onclick="event.stopPropagation(); setReplyTo('${doc.id}','${safeHandle}','${safeText}')">Reply</button>
+          ${replyHtml}
           <div>${escapeHtml(m.text || '')}</div>
           <div class="wa-meta"><span>${formatMsgTime(m.createdAt)}</span>${ticks}</div>
         </div>`;
@@ -2336,16 +2414,25 @@ async function sendChatMessage() {
     }, { merge: true });
   }
 
-  await db().collection('chats').doc(room).collection('messages').add({
+  const msgData = {
     fromUid: me,
     toUid: isGroup ? null : activePeerUid,
     fromHandle: (currentUser && currentUser.handle) || '',
     text,
     status,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  };
+  if (pendingReply) {
+    msgData.replyTo = {
+      id: pendingReply.id,
+      fromHandle: pendingReply.fromHandle,
+      text: (pendingReply.text || '').slice(0, 120)
+    };
+  }
+  await db().collection('chats').doc(room).collection('messages').add(msgData);
 
   if (input) input.value = '';
+  cancelReply();
 }
 
 async function renderChatList() {
@@ -2440,6 +2527,17 @@ async function viewUserProfile(handle) {
   document.getElementById('view-profile-handle').textContent = '@' + (peer.handle || viewingProfileHandle);
   document.getElementById('view-profile-avatar').src = peer.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(peer.handle || 'user'));
   document.getElementById('view-profile-bio').textContent = peer.bio || 'No bio yet.';
+  const bannerEl = document.getElementById('view-profile-banner');
+  if (bannerEl) {
+    if (peer.banner) {
+      bannerEl.style.backgroundImage = 'url(' + peer.banner + ')';
+      bannerEl.style.backgroundSize = 'cover';
+      bannerEl.style.backgroundPosition = 'center';
+    } else {
+      bannerEl.style.backgroundImage = '';
+      bannerEl.style.background = 'linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%)';
+    }
+  }
   // presence
   try {
     const pres = await db().collection('presence').doc(peer.uid).get();
@@ -2630,8 +2728,16 @@ function listenGroupMessages(groupId) {
         const mine = m.fromUid === meUid;
         const ticks = mine ? tickHtml(m.status || 'sent') : '';
         const who = mine ? '' : ('<div class="text-xs" style="opacity:0.7;margin-bottom:2px">' + escapeHtml(m.fromHandle || 'user') + '</div>');
-        html += `<div class="wa-bubble ${mine ? 'sent' : 'received'}">
+        let replyHtml = '';
+        if (m.replyTo && m.replyTo.text) {
+          replyHtml = `<div class="wa-reply-quote"><strong>${escapeHtml(m.replyTo.fromHandle || 'user')}</strong>${escapeHtml((m.replyTo.text || '').slice(0, 80))}</div>`;
+        }
+        const safeText = String(m.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
+        const safeHandle = String(m.fromHandle || '').replace(/'/g, "\\'");
+        html += `<div class="wa-bubble ${mine ? 'sent' : 'received'}" data-msg-id="${doc.id}">
+          <button type="button" class="wa-reply-btn" onclick="event.stopPropagation(); setReplyTo('${doc.id}','${safeHandle}','${safeText}')">Reply</button>
           ${who}
+          ${replyHtml}
           <div>${escapeHtml(m.text || '')}</div>
           <div class="wa-meta"><span>${formatMsgTime(m.createdAt)}</span>${ticks}</div>
         </div>`;
@@ -2639,6 +2745,24 @@ function listenGroupMessages(groupId) {
       box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
     });
+}
+
+/* Reply to message */
+let pendingReply = null;
+
+function setReplyTo(msgId, fromHandle, text) {
+  pendingReply = { id: msgId, fromHandle: fromHandle || 'user', text: text || '' };
+  const bar = document.getElementById('reply-bar');
+  const txt = document.getElementById('reply-bar-text');
+  if (txt) txt.innerHTML = '<strong>Replying to @' + escapeHtml(fromHandle || 'user') + '</strong> · ' + escapeHtml((text || '').slice(0, 60));
+  if (bar) bar.classList.add('open');
+  document.getElementById('chat-input')?.focus();
+}
+
+function cancelReply() {
+  pendingReply = null;
+  const bar = document.getElementById('reply-bar');
+  if (bar) bar.classList.remove('open');
 }
 
 window.sendChatMessage = sendChatMessage;
@@ -2654,6 +2778,8 @@ window.createGroupChat = createGroupChat;
 window.copyGroupInvite = copyGroupInvite;
 window.openGroupChat = openGroupChat;
 window.tryJoinFromUrl = tryJoinFromUrl;
+window.setReplyTo = setReplyTo;
+window.cancelReply = cancelReply;
   </script>
   <script>
 /* ========== APP.JS ========== */
@@ -2772,6 +2898,7 @@ function startGoogleSignup(optionalName) {
         const d = doc.data();
         login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
           bio: d.bio || '',
+          banner: d.banner || '',
           createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
         });
         return;
@@ -2909,6 +3036,7 @@ function login(name, handle, avatarUrl, uid, extra){
     displayName: name || 'Developer',
     handle: handle || 'developer',
     avatar: avatarUrl || ('https://api.dicebear.com/7.x/avataaars/svg?seed='+encodeURIComponent(handle||name||'dev')+'&backgroundColor=09090b'),
+    banner: (extra && extra.banner) || (prev && prev.banner) || '',
     bio: (extra && extra.bio) || (prev && prev.bio) || '',
     createdAt: (extra && extra.createdAt) || (prev && prev.createdAt) || Date.now()
   };
@@ -2952,10 +3080,21 @@ function renderDiscordProfile(){
   const avatarEl = document.getElementById('profile-avatar');
   const bioEl = document.getElementById('profile-bio');
   const sinceEl = document.getElementById('profile-member-since');
+  const bannerEl = document.getElementById('profile-banner');
   if(nameEl) nameEl.textContent = currentUser.displayName || 'Developer';
   if(handleEl) handleEl.textContent = '@' + (currentUser.handle || 'user');
   if(avatarEl) avatarEl.src = currentUser.avatar || '';
   if(bioEl) bioEl.textContent = currentUser.bio || 'No bio yet. Click Edit Profile to add one.';
+  if(bannerEl) {
+    if (currentUser.banner) {
+      bannerEl.style.backgroundImage = 'url(' + currentUser.banner + ')';
+      bannerEl.style.backgroundSize = 'cover';
+      bannerEl.style.backgroundPosition = 'center';
+    } else {
+      bannerEl.style.backgroundImage = '';
+      bannerEl.style.background = 'linear-gradient(135deg, #5865F2 0%, #7289DA 40%, #4752C4 100%)';
+    }
+  }
   if(sinceEl) {
     const d = currentUser.createdAt ? new Date(currentUser.createdAt) : new Date();
     sinceEl.innerHTML = '<strong>' + d.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) + '</strong>';
@@ -2963,6 +3102,7 @@ function renderDiscordProfile(){
 }
 
 let pendingEditAvatar = '';
+let pendingEditBanner = '';
 
 function openEditProfile(){
   if(!currentUser) return;
@@ -2971,7 +3111,17 @@ function openEditProfile(){
   document.getElementById('edit-bio').value = currentUser.bio || '';
   const prev = document.getElementById('edit-avatar-preview');
   if(prev) prev.src = currentUser.avatar || '';
+  const banPrev = document.getElementById('edit-banner-preview');
+  if (banPrev) {
+    if (currentUser.banner) {
+      banPrev.style.backgroundImage = 'url(' + currentUser.banner + ')';
+    } else {
+      banPrev.style.backgroundImage = '';
+      banPrev.style.background = 'linear-gradient(135deg,#5865F2,#4752C4)';
+    }
+  }
   pendingEditAvatar = '';
+  pendingEditBanner = '';
   openModal('modal-edit-profile');
 }
 
@@ -2979,11 +3129,11 @@ function onEditAvatarSelected(e){
   const file = e.target.files && e.target.files[0];
   if(!file) return;
   if(!file.type.startsWith('image/')){
-    showToast('Invalid file', 'Please choose an image');
+    showToast('Invalid file', 'Please choose an image or GIF');
     return;
   }
-  if(file.size > 2 * 1024 * 1024){
-    showToast('Too large', 'Image must be under 2MB');
+  if(file.size > 800 * 1024){
+    showToast('Too large', 'Avatar must be under 800KB (GIF ok)');
     return;
   }
   const reader = new FileReader();
@@ -2991,6 +3141,30 @@ function onEditAvatarSelected(e){
     pendingEditAvatar = reader.result;
     const prev = document.getElementById('edit-avatar-preview');
     if(prev) prev.src = pendingEditAvatar;
+  };
+  reader.readAsDataURL(file);
+}
+
+function onEditBannerSelected(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    showToast('Invalid file', 'Please choose an image or GIF');
+    return;
+  }
+  if(file.size > 800 * 1024){
+    showToast('Too large', 'Banner must be under 800KB (GIF ok)');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    pendingEditBanner = reader.result;
+    const prev = document.getElementById('edit-banner-preview');
+    if(prev) {
+      prev.style.backgroundImage = 'url(' + pendingEditBanner + ')';
+      prev.style.backgroundSize = 'cover';
+      prev.style.backgroundPosition = 'center';
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -3004,7 +3178,6 @@ async function saveEditProfile(){
     showToast('Username required', 'At least 3 characters (a-z, 0-9, _)');
     return;
   }
-  // uniqueness check
   if(window.firebase && firebase.apps.length && currentUser.uid){
     try {
       const snap = await firebase.firestore().collection('users').where('handle','==',handle).limit(1).get();
@@ -3015,22 +3188,24 @@ async function saveEditProfile(){
     } catch(e){}
   }
   const avatar = pendingEditAvatar || currentUser.avatar;
+  const banner = pendingEditBanner || currentUser.banner || '';
   currentUser.displayName = display;
   currentUser.handle = handle;
   currentUser.avatar = avatar;
+  currentUser.banner = banner;
   currentUser.bio = bio;
   if(!currentUser.createdAt) currentUser.createdAt = Date.now();
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
   updateUserUI();
   renderDiscordProfile();
 
-  // save to Firestore
   if(window.firebase && firebase.apps.length && currentUser.uid){
     try {
       await firebase.firestore().collection('users').doc(currentUser.uid).set({
         handle: handle,
         displayName: display,
         avatar: avatar,
+        banner: banner,
         bio: bio,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
@@ -3795,6 +3970,7 @@ document.addEventListener('DOMContentLoaded',()=>{
             const d = doc.data();
             login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
               bio: d.bio || '',
+              banner: d.banner || '',
               createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
             });
           }
@@ -3825,7 +4001,8 @@ window.startFreeTimerFromInput=startFreeTimerFromInput; window.snoozeTask=snooze
 window.openSearch=openSearch; window.handleSearchInput=handleSearchInput;
 window.handleProfileClick=handleProfileClick; window.login=login;
 window.openEditProfile=openEditProfile; window.saveEditProfile=saveEditProfile;
-window.onEditAvatarSelected=onEditAvatarSelected; window.renderDiscordProfile=renderDiscordProfile;
+window.onEditAvatarSelected=onEditAvatarSelected; window.onEditBannerSelected=onEditBannerSelected;
+window.renderDiscordProfile=renderDiscordProfile;
 window.confirmAvatar=confirmAvatar;
 window.skipAvatar=skipAvatar;
 window.onAvatarSelected=onAvatarSelected;
