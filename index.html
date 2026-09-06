@@ -2450,417 +2450,136 @@ h3 { font-size: 1.05rem; }
 
 
 
-/* ========== Discord-style Nameplates (horizontal banner under/behind name) ========== */
-.nameplate-wrap {
-  display: block;
-  position: relative;
-  width: 100%;
-  max-width: 320px;
-  margin: 0.15rem 0 0.35rem;
-  border-radius: 8px;
-  overflow: hidden;
-  isolation: isolate;
-}
-.nameplate-wrap.nameplate-none {
-  display: inline-block;
-  width: auto;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  overflow: visible;
-}
-.nameplate-wrap.nameplate-none::before,
-.nameplate-wrap.nameplate-none::after {
-  display: none !important;
-}
 
-/* The decorative banner strip */
-.nameplate-banner {
-  display: flex;
+/* ========== Discord-style Nameplates: shape ornament on the RIGHT of name row ========== */
+.discord-name-row {
+  display: flex !important;
   align-items: center;
   gap: 0.55rem;
-  min-height: 40px;
-  padding: 0.35rem 0.75rem 0.35rem 0.45rem;
-  position: relative;
-  z-index: 1;
+  flex-wrap: nowrap;
   width: 100%;
-  box-sizing: border-box;
 }
-.nameplate-wrap.nameplate-none .nameplate-banner {
-  padding: 0;
-  min-height: 0;
-  background: transparent;
-}
-.nameplate-banner .discord-display-name,
-.nameplate-banner #name-style-preview-text,
-.nameplate-banner .np-preview-name {
-  position: relative;
-  z-index: 2;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.65);
-  font-size: 0.95rem;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.nameplate-wrap.nameplate-none .discord-display-name {
-  text-shadow: none;
-  font-size: inherit;
-}
-
-/* Mini avatar inside plate (Discord-like) */
-.np-mini-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
+.discord-name-row .nameplate-wrap {
+  margin-left: auto; /* push to the right end of the profile bar */
   flex-shrink: 0;
+}
+
+.nameplate-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 72px;
+  height: 36px;
+  border-radius: 8px;
+  overflow: visible;
+  isolation: isolate;
+  pointer-events: none;
+}
+.nameplate-wrap.nameplate-none {
+  display: none !important;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hide old full-width banner layout pieces */
+.nameplate-wrap .nameplate-banner {
+  display: none !important;
+}
+.nameplate-wrap .np-mini-avatar {
+  display: none !important;
+}
+.nameplate-wrap .discord-display-name {
+  /* name stays OUTSIDE the plate wrap in new layout — if nested, keep readable */
   position: relative;
   z-index: 2;
-  border: 2px solid rgba(0,0,0,0.35);
-  background: #27272A;
 }
-.nameplate-wrap.nameplate-none .np-mini-avatar { display: none; }
 
-/* Decorative layers */
-.nameplate-wrap::before,
-.nameplate-wrap::after {
-  content: '';
+/* The shape art lives in .np-art */
+.np-art {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   pointer-events: none;
-  z-index: 0;
+}
+.np-art svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
 }
 
-/* ---- Individual plate arts (wide banners) ---- */
-.nameplate-cyber {
-  background:
-    linear-gradient(90deg, rgba(8,20,30,0.55) 0%, transparent 45%),
-    linear-gradient(105deg, #0e7490 0%, #164e63 40%, #083344 100%);
-  border: 1px solid rgba(34,211,238,0.35);
-  box-shadow: inset 0 0 30px rgba(34,211,238,0.12);
-}
-.nameplate-cyber::before {
-  inset: 0;
-  background: repeating-linear-gradient(90deg, transparent, transparent 12px, rgba(34,211,238,0.06) 12px, rgba(34,211,238,0.06) 13px);
-  animation: npScan 3s linear infinite;
-  background-size: 200% 100%;
-}
-.nameplate-cyber::after {
-  right: 8px; top: 50%; transform: translateY(-50%);
-  width: 48px; height: 28px;
-  background: linear-gradient(135deg, transparent 40%, rgba(34,211,238,0.5), transparent 60%);
-  clip-path: polygon(0 50%, 40% 0, 100% 0, 60% 50%, 100% 100%, 40% 100%);
-  opacity: .7;
-  animation: npTwinkle 2s ease-in-out infinite;
-}
+/* ---- Shape plates (SVG-driven) ---- */
+.nameplate-cyber .np-art { filter: drop-shadow(0 0 6px rgba(34,211,238,0.55)); }
+.nameplate-galaxy .np-art { filter: drop-shadow(0 0 6px rgba(167,139,250,0.5)); }
+.nameplate-anime .np-art { filter: drop-shadow(0 0 5px rgba(244,114,182,0.5)); }
+.nameplate-fire .np-art { filter: drop-shadow(0 0 6px rgba(249,115,22,0.55)); }
+.nameplate-ocean .np-art { filter: drop-shadow(0 0 5px rgba(56,189,248,0.5)); }
+.nameplate-gold .np-art { filter: drop-shadow(0 0 6px rgba(251,191,36,0.55)); }
+.nameplate-void .np-art { filter: drop-shadow(0 0 4px rgba(113,113,122,0.4)); }
+.nameplate-sakura .np-art { filter: drop-shadow(0 0 5px rgba(251,113,133,0.45)); }
+.nameplate-mint .np-art { filter: drop-shadow(0 0 5px rgba(52,211,153,0.45)); }
+.nameplate-sunset .np-art { filter: drop-shadow(0 0 5px rgba(251,146,60,0.5)); }
+.nameplate-neon .np-art { filter: drop-shadow(0 0 8px rgba(34,211,238,0.6)); }
+.nameplate-royal .np-art { filter: drop-shadow(0 0 6px rgba(99,102,241,0.55)); }
+.nameplate-ember .np-art { filter: drop-shadow(0 0 6px rgba(234,88,12,0.5)); }
+.nameplate-frost .np-art { filter: drop-shadow(0 0 5px rgba(125,211,252,0.55)); }
+.nameplate-matrix .np-art { filter: drop-shadow(0 0 5px rgba(34,197,94,0.5)); }
+.nameplate-prism .np-art { filter: drop-shadow(0 0 6px rgba(168,85,247,0.45)); }
+.nameplate-shadow .np-art { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)); }
+.nameplate-aurora .np-art { filter: drop-shadow(0 0 6px rgba(52,211,153,0.45)); }
+.nameplate-lava .np-art { filter: drop-shadow(0 0 6px rgba(249,115,22,0.55)); }
+.nameplate-crystal .np-art { filter: drop-shadow(0 0 6px rgba(165,243,252,0.55)); }
 
-.nameplate-galaxy {
-  background:
-    radial-gradient(circle at 85% 40%, rgba(253,224,71,0.35), transparent 25%),
-    radial-gradient(circle at 70% 70%, rgba(167,139,250,0.4), transparent 30%),
-    linear-gradient(100deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%);
-  border: 1px solid rgba(167,139,250,0.4);
-}
-.nameplate-galaxy::before {
-  width: 4px; height: 4px; border-radius: 50%; background: #FDE68A;
-  top: 30%; right: 22%; animation: npTwinkle 1.4s ease-in-out infinite;
-  box-shadow: 18px -6px 0 1px #E9D5FF, 32px 8px 0 0 #93C5FD, -8px 10px 0 0 #F9A8D4;
-}
-.nameplate-galaxy::after {
-  right: 0; top: 0; bottom: 0; width: 45%;
-  background: radial-gradient(ellipse at 70% 50%, rgba(192,132,252,0.35), transparent 70%);
-  animation: npGalaxy 8s linear infinite;
-}
-
-.nameplate-anime {
-  background:
-    radial-gradient(circle at 90% 20%, rgba(255,255,255,0.25), transparent 20%),
-    linear-gradient(95deg, #831843 0%, #9d174d 35%, #be185d 70%, #f472b6 100%);
-  border: 1px solid rgba(251,113,133,0.45);
-}
-.nameplate-anime::before {
-  right: 12px; top: 6px; width: 14px; height: 14px;
-  background: #fff;
-  clip-path: polygon(50% 0, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0 50%, 39% 35%);
-  animation: npTwinkle 1.3s ease-in-out infinite;
-  opacity: .85;
-}
-.nameplate-anime::after {
-  right: 28px; bottom: 6px; width: 8px; height: 8px;
-  background: #FDE68A;
-  clip-path: polygon(50% 0, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0 50%, 39% 35%);
-  animation: npTwinkle 1.8s ease-in-out infinite .4s;
-}
-
-.nameplate-fire {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.35) 0%, transparent 40%),
-    linear-gradient(180deg, #fbbf24 0%, #f97316 40%, #9a3412 100%);
-  border: 1px solid rgba(251,146,60,0.5);
-  animation: npFlicker 1.2s ease-in-out infinite;
-}
-.nameplate-fire::after {
-  right: 10px; bottom: -4px; width: 50px; height: 28px;
-  background: radial-gradient(ellipse at 50% 100%, rgba(254,243,199,0.7), rgba(249,115,22,0.3) 50%, transparent 70%);
-  animation: npFlicker 0.8s ease-in-out infinite;
-}
-
-.nameplate-ocean {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 35%),
-    linear-gradient(180deg, #0ea5e9 0%, #0369a1 50%, #0c4a6e 100%);
-  border: 1px solid rgba(56,189,248,0.45);
-}
-.nameplate-ocean::before {
-  left: 0; right: 0; bottom: 0; height: 45%;
-  background: repeating-linear-gradient(90deg, transparent 0 16px, rgba(255,255,255,0.06) 16px 18px);
-  animation: npWaveMove 3s ease-in-out infinite;
-  border-radius: 50% 50% 0 0 / 20px;
-}
-@keyframes npWaveMove {
-  0%,100% { transform: translateY(3px); }
-  50% { transform: translateY(-2px); }
-}
-
-.nameplate-gold {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 30%),
-    linear-gradient(135deg, #fde68a 0%, #f59e0b 40%, #b45309 100%);
-  border: 1px solid rgba(253,224,71,0.55);
-  box-shadow: inset 0 0 20px rgba(255,255,255,0.15);
-  animation: npShine 2.8s ease-in-out infinite;
-}
-.nameplate-gold::after {
-  right: 8px; top: 4px;
-  width: 36px; height: 14px;
-  background: linear-gradient(#fef3c7, #f59e0b);
-  clip-path: polygon(10% 100%, 25% 30%, 40% 70%, 50% 0, 60% 70%, 75% 30%, 90% 100%);
-  opacity: .9;
-}
-
-.nameplate-void {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.5) 0%, transparent 40%),
-    linear-gradient(180deg, #27272a 0%, #09090b 100%);
-  border: 1px solid #3f3f46;
-  box-shadow: inset 0 0 24px rgba(0,0,0,0.7);
-}
-.nameplate-void::after {
-  right: 12px; top: 50%; transform: translateY(-50%);
-  width: 22px; height: 22px; border-radius: 50%;
-  box-shadow: inset -5px 0 0 0 #a1a1aa;
-  background: transparent;
-  opacity: .5;
-}
-
-.nameplate-sakura {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.2) 0%, transparent 35%),
-    linear-gradient(100deg, #9d174d 0%, #fb7185 45%, #fbcfe8 100%);
-  border: 1px solid rgba(251,113,133,0.4);
-}
-.nameplate-sakura::before {
-  right: 16px; top: 4px; width: 12px; height: 8px;
-  background: #fce7f3;
-  border-radius: 80% 0 80% 0;
-  animation: npFallPetal 2.8s linear infinite;
-}
-.nameplate-sakura::after {
-  right: 36px; top: 10px; width: 10px; height: 7px;
-  background: #f9a8d4;
-  border-radius: 80% 0 80% 0;
-  animation: npFallPetal 3.4s linear infinite .6s;
-}
-
-.nameplate-mint {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 35%),
-    linear-gradient(100deg, #065f46 0%, #10b981 50%, #6ee7b7 100%);
-  border: 1px solid rgba(52,211,153,0.45);
-}
-.nameplate-mint::after {
-  right: 10px; bottom: 0; width: 40px; height: 20px;
-  background: radial-gradient(ellipse at bottom, rgba(167,243,208,0.5), transparent 70%);
-}
-
-.nameplate-sunset {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 35%),
-    linear-gradient(90deg, #ea580c, #e11d48 40%, #7c3aed 100%);
-  border: 1px solid rgba(251,146,60,0.45);
-  background-size: 200% 100%;
-  animation: npGradientShift 5s ease infinite;
-}
-
-.nameplate-neon {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(10,10,20,0.4) 40%, rgba(0,0,0,0.5) 100%),
-    #09090b;
-  border: 1px solid #22d3ee;
-  box-shadow: 0 0 12px rgba(34,211,238,0.35), inset 0 0 16px rgba(236,72,153,0.12);
-  animation: npNeon 2s ease-in-out infinite;
-}
-.nameplate-neon::after {
-  right: 14px; top: 50%; transform: translateY(-50%);
-  width: 10px; height: 10px; border-radius: 50%;
-  background: #22d3ee;
-  box-shadow: 0 0 8px #22d3ee, 16px 0 0 0 #f472b6, 16px 0 8px #f472b6;
-}
-
-.nameplate-royal {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.35) 0%, transparent 35%),
-    linear-gradient(180deg, #6366f1 0%, #4338ca 50%, #312e81 100%);
-  border: 1px solid rgba(165,180,252,0.5);
-}
-.nameplate-royal::after {
-  right: 10px; top: 50%; transform: translateY(-50%);
-  width: 28px; height: 22px;
-  background: linear-gradient(#c7d2fe, #6366f1);
-  clip-path: polygon(50% 0, 100% 35%, 80% 100%, 20% 100%, 0 35%);
-  opacity: .75;
-}
-
-.nameplate-ember {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.35) 0%, transparent 30%),
-    linear-gradient(180deg, #fef3c7 0%, #ea580c 45%, #7f1d1d 100%);
-  border: 1px solid rgba(249,115,22,0.5);
-  animation: npFlicker 1s ease-in-out infinite;
-}
-
-.nameplate-frost {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 35%),
-    linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 40%, #0284c7 100%);
-  border: 1px solid rgba(186,230,253,0.55);
-}
-.nameplate-frost::after {
-  right: 8px; top: 4px; width: 20px; height: 20px;
-  background: #e0f2fe;
-  clip-path: polygon(50% 0, 61% 35%, 100% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 0 35%, 39% 35%);
-  opacity: .7;
-  animation: npTwinkle 2s ease-in-out infinite;
-}
-
-.nameplate-matrix {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.5) 0%, transparent 40%),
-    linear-gradient(180deg, #052e16 0%, #14532d 100%);
-  border: 1px solid rgba(34,197,94,0.45);
-  box-shadow: inset 0 0 20px rgba(34,197,94,0.15);
-}
-.nameplate-matrix::before {
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent 0 6px, rgba(34,197,94,0.07) 6px 7px);
-  animation: npMatrix 1.5s steps(4) infinite;
-}
-
-.nameplate-prism {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 30%),
-    linear-gradient(90deg, #ef4444, #eab308, #22c55e, #3b82f6, #a855f7);
-  border: 1px solid rgba(255,255,255,0.3);
-  background-size: 200% 100%;
-  animation: npGradientShift 4s linear infinite;
-}
-
-.nameplate-shadow {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.6) 0%, transparent 40%),
-    linear-gradient(180deg, #3f3f46 0%, #09090b 100%);
-  border: 1px solid #27272a;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-}
-
-.nameplate-aurora {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 30%),
-    linear-gradient(120deg, #34d399, #60a5fa, #c084fc, #34d399);
-  border: 1px solid rgba(167,139,250,0.4);
-  background-size: 200% 200%;
-  animation: npAurora 6s ease infinite;
-}
-
-.nameplate-lava {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.35) 0%, transparent 30%),
-    linear-gradient(180deg, #facc15 0%, #ea580c 40%, #7f1d1d 100%);
-  border: 1px solid rgba(249,115,22,0.55);
-  animation: npFlicker 0.85s ease-in-out infinite;
-}
-.nameplate-lava::after {
-  right: 12px; bottom: -2px; width: 40px; height: 18px;
-  background: radial-gradient(ellipse at top, rgba(250,204,21,0.6), transparent 70%);
-}
-
-.nameplate-crystal {
-  background:
-    linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 35%),
-    linear-gradient(135deg, rgba(255,255,255,0.35) 0%, #a5f3fc 40%, #c4b5fd 100%);
-  border: 1px solid rgba(224,242,254,0.5);
-  box-shadow: inset 0 0 20px rgba(255,255,255,0.2);
-  animation: npCrystal 3s ease-in-out infinite;
-}
-.nameplate-crystal::after {
-  right: 14px; top: 50%; transform: translateY(-50%);
-  width: 18px; height: 22px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(165,243,252,0.4));
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-  opacity: .7;
-}
-
-@keyframes npScan {
-  0% { background-position: 0 0; }
-  100% { background-position: 40px 0; }
+@keyframes npSpin { to { transform: rotate(360deg); } }
+@keyframes npBob {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 @keyframes npTwinkle {
-  0%,100% { opacity: .4; transform: scale(.85); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%,100% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
 }
-@keyframes npGalaxy { from { filter: hue-rotate(0); } to { filter: hue-rotate(20deg); } }
 @keyframes npFlicker {
-  0%,100% { filter: brightness(1); }
-  50% { filter: brightness(1.12); }
+  0%,100% { transform: scaleY(1); opacity: 0.95; }
+  50% { transform: scaleY(1.12); opacity: 0.75; }
 }
-@keyframes npShine {
-  0%,100% { filter: brightness(1); }
-  50% { filter: brightness(1.12); }
+@keyframes npFloat {
+  0%,100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-4px) rotate(6deg); }
 }
-@keyframes npFallPetal {
-  0% { transform: translateY(0) rotate(0); opacity: .9; }
-  100% { transform: translateY(12px) rotate(50deg); opacity: .15; }
+@keyframes npPulse {
+  0%,100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.08); opacity: 1; }
 }
-@keyframes npGradientShift {
-  0%,100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+@keyframes npOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-@keyframes npNeon {
-  0%,100% { border-color: #22d3ee; box-shadow: 0 0 10px rgba(34,211,238,0.35); }
-  50% { border-color: #f472b6; box-shadow: 0 0 14px rgba(244,114,182,0.4); }
-}
-@keyframes npMatrix {
-  0%,100% { opacity: .7; }
-  50% { opacity: 1; }
-}
-@keyframes npAurora {
-  0%,100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-@keyframes npCrystal {
-  0%,100% { filter: brightness(1); }
-  50% { filter: brightness(1.1); }
+@keyframes npWiggle {
+  0%,100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
 }
 
-/* Shop-style nameplate picker cards */
+.np-spin { animation: npSpin 6s linear infinite; transform-origin: center; }
+.np-bob { animation: npBob 2.2s ease-in-out infinite; transform-origin: center; }
+.np-twinkle { animation: npTwinkle 1.4s ease-in-out infinite; transform-origin: center; }
+.np-flicker { animation: npFlicker 0.7s ease-in-out infinite; transform-origin: bottom center; }
+.np-float { animation: npFloat 2.8s ease-in-out infinite; transform-origin: center; }
+.np-pulse { animation: npPulse 2s ease-in-out infinite; transform-origin: center; }
+.np-orbit { animation: npOrbit 5s linear infinite; transform-origin: center; }
+.np-wiggle { animation: npWiggle 1.6s ease-in-out infinite; transform-origin: center; }
+
+/* Shop picker: compact shape previews on the right */
 .nameplate-grid {
-  display: flex !important;
-  flex-direction: column;
-  gap: 0.45rem;
-  max-height: 280px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+  gap: 0.5rem !important;
+  max-height: 300px;
   overflow-y: auto;
   padding: 0.15rem;
 }
@@ -2870,88 +2589,83 @@ h3 { font-size: 1.05rem; }
   border: 1.5px solid rgba(255,255,255,0.1) !important;
   background: #111214 !important;
   color: #E4E4E7;
-  border-radius: 10px !important;
-  padding: 0 !important;
+  border-radius: 12px !important;
+  padding: 0.45rem 0.35rem 0.4rem !important;
   cursor: pointer;
   font-family: inherit;
-  text-align: left;
-  overflow: hidden;
-  position: relative;
-  min-height: 44px;
-  display: block !important;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  text-align: center;
+  min-height: 78px;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: border-color 0.15s, transform 0.12s;
 }
 .nameplate-btn:hover {
   border-color: rgba(129,140,248,0.55) !important;
+  transform: translateY(-1px);
 }
 .nameplate-btn.active {
   border-color: #818CF8 !important;
-  box-shadow: 0 0 0 1px rgba(129,140,248,0.4);
+  box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
 }
-.nameplate-btn.locked { opacity: 0.9; }
-.nameplate-btn .np-shop-row {
+.nameplate-btn.locked { opacity: 0.78; }
+.nameplate-btn .np-thumb {
+  width: 64px;
+  height: 32px;
+  position: relative;
   display: flex;
   align-items: center;
-  min-height: 42px;
-  padding: 0.3rem 0.55rem;
-  position: relative;
-  gap: 0.5rem;
+  justify-content: center;
 }
-.nameplate-btn .np-shop-art {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.95;
-}
-.nameplate-btn .np-shop-meta {
+.nameplate-btn .np-thumb .np-art {
   position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 0.5rem;
+  width: 64px;
+  height: 32px;
 }
 .nameplate-btn .np-shop-label {
-  font-weight: 700;
-  font-size: 0.82rem;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 .nameplate-btn .np-price {
   display: inline-flex;
-  font-size: 0.68rem;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.64rem;
   font-weight: 700;
   color: #FBBF24;
-  background: rgba(0,0,0,0.45);
-  padding: 0.15rem 0.4rem;
-  border-radius: 6px;
 }
 .nameplate-btn .np-price.free { color: #4ADE80; }
 .nameplate-btn .np-price.owned { color: #A1A1AA; }
-.nameplate-btn .np-lock {
-  font-size: 0.75rem;
-  opacity: 0.85;
-}
 
-/* Preview in edit modal = Discord member-row style */
-.name-style-preview.nameplate-wrap {
-  min-height: 44px;
-  max-width: 100%;
-  margin: 0.35rem 0 0.9rem;
+/* Edit preview: name left, plate right */
+.name-style-preview.nameplate-preview-row {
+  display: flex !important;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 52px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.08);
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.35rem 0 0.5rem;
 }
-.name-style-preview .nameplate-banner {
-  min-height: 44px;
+.name-style-preview .np-preview-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-.np-price {
-  display: block;
-  font-size: 0.62rem;
-  margin-top: 0.2rem;
-  font-weight: 600;
-  color: #FBBF24;
+.name-style-preview .nameplate-wrap {
+  margin-left: 0;
 }
-.np-price.free { color: var(--success); }
-.np-price.owned { color: #A1A1AA; }
 
 /* Name style pickers */
 .name-font-grid, .name-effect-grid, .nameplate-grid {
@@ -4135,12 +3849,8 @@ h3 { font-size: 1.05rem; }
           </div>
           <div class="discord-body">
             <div class="discord-name-row">
-              <span class="nameplate-wrap nameplate-none" id="profile-nameplate">
-                <span class="nameplate-banner">
-                  <img class="np-mini-avatar" id="profile-np-avatar" alt="" />
-                  <span class="discord-display-name" id="profile-name">—</span>
-                </span>
-              </span>
+              <span class="discord-display-name" id="profile-name">—</span>
+              <span class="nameplate-wrap nameplate-none" id="profile-nameplate" aria-hidden="true"></span>
             </div>
             <div class="discord-handle-row">
               <span class="discord-handle" id="profile-handle">@—</span>
@@ -4266,13 +3976,11 @@ h3 { font-size: 1.05rem; }
 
         <div class="edit-section-title" id="name-style-section-title">Display Name Style <span class="text-xs" style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-muted)">(Nitro)</span></div>
         <div class="form-group" id="edit-name-style-group">
-          <div class="name-style-preview nameplate-wrap nameplate-none" id="name-style-preview">
-            <span class="nameplate-banner">
-              <img class="np-mini-avatar" id="edit-np-avatar" alt="" />
-              <span id="name-style-preview-text">Preview</span>
-            </span>
+          <div class="name-style-preview nameplate-preview-row" id="name-style-preview">
+            <span class="np-preview-name name-styled" id="name-style-preview-text">Preview</span>
+            <span class="nameplate-wrap nameplate-none" id="edit-nameplate-preview" aria-hidden="true"></span>
           </div>
-          <p class="text-xs text-muted" style="margin-top:-0.5rem;margin-bottom:0.65rem">Nameplate is the banner behind your name (Discord-style), not the text color</p>
+          <p class="text-xs text-muted" style="margin-top:-0.35rem;margin-bottom:0.65rem">Nameplate = shape on the right of your name (Discord-style)</p>
           <label class="form-label">Name color</label>
           <div class="theme-color-row" style="margin-bottom:0.65rem">
             <input type="color" id="edit-name-color-1" value="#FFFFFF" class="theme-color-input" oninput="onNameStyleInput()" />
@@ -4343,12 +4051,8 @@ h3 { font-size: 1.05rem; }
         </div>
         <div class="discord-body">
           <div class="discord-name-row">
-            <span class="nameplate-wrap nameplate-none" id="view-profile-nameplate">
-              <span class="nameplate-banner">
-                <img class="np-mini-avatar" id="view-profile-np-avatar" alt="" />
-                <span class="discord-display-name" id="view-profile-name">—</span>
-              </span>
-            </span>
+            <span class="discord-display-name" id="view-profile-name">—</span>
+            <span class="nameplate-wrap nameplate-none" id="view-profile-nameplate" aria-hidden="true"></span>
           </div>
           <div class="view-profile-handle-row">
             <span class="discord-handle" id="view-profile-handle">@—</span>
@@ -9396,6 +9100,48 @@ function saveNameStyle(style) {
   return style;
 }
 
+
+/* SVG shape arts for nameplates (right-side Discord-style ornaments) */
+const NAMEPLATE_ART = {
+  none: '',
+  cyber: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-pulse"><path d="M8 18 L20 8 H52 L64 18 L52 28 H20 Z" fill="none" stroke="#22D3EE" stroke-width="2"/><path d="M24 18 H48" stroke="#67E8F9" stroke-width="1.5"/><circle cx="36" cy="18" r="3" fill="#22D3EE"/><path d="M12 14 L16 18 L12 22" fill="none" stroke="#A5F3FC" stroke-width="1.5"/><path d="M60 14 L56 18 L60 22" fill="none" stroke="#A5F3FC" stroke-width="1.5"/></g></svg>',
+  galaxy: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-orbit" style="transform-origin:36px 18px"><circle cx="36" cy="18" r="10" fill="none" stroke="#A78BFA" stroke-width="1.2" stroke-dasharray="3 3"/><circle cx="36" cy="8" r="2.5" fill="#FDE68A"/><circle cx="46" cy="22" r="1.8" fill="#60A5FA"/><circle cx="26" cy="22" r="1.5" fill="#F9A8D4"/></g><circle cx="36" cy="18" r="4" fill="#7C3AED"/><circle class="np-twinkle" cx="14" cy="10" r="1.2" fill="#E9D5FF"/><circle class="np-twinkle" cx="58" cy="12" r="1" fill="#FDE68A" style="animation-delay:.4s"/></svg>',
+  anime: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-float"><path d="M36 6 C28 14 22 20 22 26 A14 14 0 0 0 50 26 C50 20 44 14 36 6Z" fill="#FB7185"/><circle cx="36" cy="22" r="4" fill="#FCE7F3"/></g><path class="np-twinkle" d="M54 8 L55.5 11.5 L59 12 L56 14.5 L57 18 L54 16 L51 18 L52 14.5 L49 12 L52.5 11.5Z" fill="#FDE68A"/><path class="np-twinkle" d="M12 14 L13 16 L15 16.2 L13.5 17.5 L14 19.5 L12 18.5 L10 19.5 L10.5 17.5 L9 16.2 L11 16Z" fill="#fff" style="animation-delay:.3s"/></svg>',
+  fire: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-flicker"><path d="M28 30 C28 18 22 14 26 6 C32 12 30 16 36 10 C42 18 48 14 48 30 C42 34 34 34 28 30Z" fill="#F97316"/><path d="M32 30 C32 22 30 20 32 14 C36 18 36 20 38 16 C42 22 44 20 44 30 C40 32 34 32 32 30Z" fill="#FDE68A"/></g></svg>',
+  ocean: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><path class="np-bob" d="M6 22 Q18 14 30 22 T54 22 T70 22" fill="none" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round"/><path class="np-bob" d="M6 28 Q18 20 30 28 T54 28 T70 28" fill="none" stroke="#7DD3FC" stroke-width="1.8" stroke-linecap="round" style="animation-delay:.35s"/><circle class="np-twinkle" cx="56" cy="10" r="4" fill="#FDE68A"/></svg>',
+  gold: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-pulse"><path d="M16 26 L22 12 L28 22 L36 6 L44 22 L50 12 L56 26 Z" fill="#FBBF24"/><path d="M20 26 H52 V30 H20Z" fill="#D97706"/><circle cx="36" cy="14" r="2" fill="#FEF3C7"/></g></svg>',
+  void: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-pulse"><circle cx="36" cy="18" r="12" fill="#18181B" stroke="#52525B" stroke-width="1.5"/><circle cx="36" cy="18" r="7" fill="none" stroke="#3F3F46" stroke-width="1"/><circle cx="40" cy="14" r="5" fill="#09090B"/><circle class="np-twinkle" cx="22" cy="10" r="1" fill="#E4E4E7"/><circle class="np-twinkle" cx="54" cy="24" r="0.9" fill="#A1A1AA" style="animation-delay:.5s"/></g></svg>',
+  sakura: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-float"><ellipse cx="36" cy="18" rx="8" ry="5" fill="#F9A8D4" transform="rotate(0 36 18)"/><ellipse cx="36" cy="18" rx="8" ry="5" fill="#FB7185" transform="rotate(60 36 18)" opacity=".9"/><ellipse cx="36" cy="18" rx="8" ry="5" fill="#FBCFE8" transform="rotate(120 36 18)" opacity=".85"/><circle cx="36" cy="18" r="3" fill="#FCE7F3"/></g><ellipse class="np-wiggle" cx="14" cy="12" rx="5" ry="3" fill="#F9A8D4" opacity=".7"/><ellipse class="np-wiggle" cx="58" cy="24" rx="4" ry="2.5" fill="#FB7185" opacity=".65" style="animation-delay:.4s"/></svg>',
+  mint: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-bob"><path d="M36 6 C28 14 20 18 18 28 C28 24 32 20 36 30 C40 20 44 24 54 28 C52 18 44 14 36 6Z" fill="#34D399"/><path d="M36 12 C32 18 30 20 28 26 C33 24 35 22 36 26 C37 22 39 24 44 26 C42 20 40 18 36 12Z" fill="#A7F3D0"/></g></svg>',
+  sunset: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><circle class="np-pulse" cx="50" cy="14" r="10" fill="#FB923C"/><circle cx="50" cy="14" r="6" fill="#FDE68A" opacity=".8"/><path d="M6 28 Q20 18 36 26 T66 24" fill="none" stroke="#E11D48" stroke-width="2" opacity=".7"/><path d="M6 32 Q24 22 40 30 T68 28" fill="none" stroke="#A855F7" stroke-width="1.5" opacity=".6"/></svg>',
+  neon: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-pulse"><rect x="10" y="8" width="52" height="20" rx="10" fill="none" stroke="#22D3EE" stroke-width="2.2"/><rect x="16" y="12" width="40" height="12" rx="6" fill="none" stroke="#F472B6" stroke-width="1.5"/><circle cx="36" cy="18" r="3" fill="#22D3EE"/></g></svg>',
+  royal: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-bob"><path d="M14 26 L20 10 L28 20 L36 6 L44 20 L52 10 L58 26 Z" fill="#818CF8"/><path d="M18 26 H54 V30 H18Z" fill="#4F46E5"/><circle cx="36" cy="12" r="2.2" fill="#E0E7FF"/></g></svg>',
+  ember: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-flicker"><path d="M30 32 C26 20 32 16 28 6 C36 12 34 18 38 10 C44 18 50 14 48 32 C42 34 34 34 30 32Z" fill="#EA580C"/><path d="M34 32 C32 24 34 22 34 14 C38 18 38 20 40 16 C44 22 46 20 44 32Z" fill="#FDE68A"/></g><circle class="np-twinkle" cx="18" cy="20" r="1.5" fill="#FDBA74"/><circle class="np-twinkle" cx="56" cy="18" r="1.2" fill="#F97316" style="animation-delay:.5s"/></svg>',
+  frost: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-spin" style="transform-origin:36px 18px"><path d="M36 4 V32 M20 10 L52 26 M52 10 L20 26" stroke="#7DD3FC" stroke-width="2" stroke-linecap="round"/><path d="M36 10 L40 14 L36 18 L32 14Z M36 18 L40 22 L36 26 L32 22Z" fill="#E0F2FE"/></g></svg>',
+  matrix: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-pulse"><text x="12" y="14" fill="#22C55E" font-size="8" font-family="monospace">01</text><text x="28" y="22" fill="#4ADE80" font-size="9" font-family="monospace">10</text><text x="44" y="14" fill="#86EFAC" font-size="8" font-family="monospace">01</text><text x="20" y="30" fill="#22C55E" font-size="7" font-family="monospace">101</text><text x="48" y="28" fill="#4ADE80" font-size="8" font-family="monospace">01</text></g></svg>',
+  prism: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-wiggle"><path d="M36 4 L60 30 H12 Z" fill="#A855F7"/><path d="M36 4 L60 30 L36 30 Z" fill="#3B82F6" opacity=".85"/><path d="M36 4 L12 30 L36 30 Z" fill="#EF4444" opacity=".85"/><path d="M36 12 L48 28 H24 Z" fill="#FDE68A" opacity=".5"/></g></svg>',
+  shadow: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-float"><path d="M20 28 C20 14 28 8 36 8 C44 8 52 14 52 28 C44 24 40 26 36 26 C32 26 28 24 20 28Z" fill="#3F3F46"/><circle cx="30" cy="16" r="2" fill="#09090B"/><circle cx="42" cy="16" r="2" fill="#09090B"/><path d="M32 22 Q36 25 40 22" fill="none" stroke="#09090B" stroke-width="1.2"/></g></svg>',
+  aurora: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><path class="np-bob" d="M4 20 Q18 8 36 16 T68 12" fill="none" stroke="#34D399" stroke-width="3" stroke-linecap="round" opacity=".85"/><path class="np-bob" d="M4 26 Q20 14 38 22 T68 18" fill="none" stroke="#60A5FA" stroke-width="2.5" stroke-linecap="round" opacity=".75" style="animation-delay:.25s"/><path class="np-bob" d="M4 30 Q22 20 40 26 T68 24" fill="none" stroke="#C084FC" stroke-width="2" stroke-linecap="round" opacity=".7" style="animation-delay:.5s"/></svg>',
+  lava: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><path d="M8 28 Q20 10 28 22 Q36 6 44 20 Q52 8 64 28 Z" fill="#EA580C"/><path class="np-flicker" d="M24 28 Q30 16 34 24 Q38 14 42 28" fill="#FACC15"/><circle class="np-twinkle" cx="18" cy="24" r="1.5" fill="#FDE68A"/><circle class="np-twinkle" cx="54" cy="22" r="1.3" fill="#F97316" style="animation-delay:.3s"/></svg>',
+  crystal: '<svg viewBox="0 0 72 36" xmlns="http://www.w3.org/2000/svg"><g class="np-pulse"><path d="M36 2 L50 14 L44 32 H28 L22 14 Z" fill="#A5F3FC"/><path d="M36 2 L50 14 L36 18 Z" fill="#E0F2FE"/><path d="M36 2 L22 14 L36 18 Z" fill="#C4B5FD" opacity=".9"/><path d="M36 18 L44 32 H28 Z" fill="#67E8F9" opacity=".7"/></g></svg>'
+};
+
+function nameplateArtHtml(id) {
+  id = id || 'none';
+  const svg = NAMEPLATE_ART[id] || '';
+  if (!svg) return '';
+  return '<span class="np-art" aria-hidden="true">' + svg + '</span>';
+}
+
+function renderNameplateEl(nameplateEl, plateId) {
+  if (!nameplateEl) return;
+  plateId = plateId || 'none';
+  nameplateEl.className = 'nameplate-wrap nameplate-' + plateId;
+  // Remove old banner/name children from plate — name lives outside
+  // Keep only art
+  nameplateEl.innerHTML = nameplateArtHtml(plateId);
+}
+
 function applyNameStyleToEl(el, style, nameplateEl) {
   if (!el) return;
   style = Object.assign({}, DEFAULT_NAME_STYLE, style || {});
@@ -9460,28 +9206,7 @@ function applyNameStyleToEl(el, style, nameplateEl) {
   }
 
   if (nameplateEl) {
-    var pid = style.nameplate || 'none';
-    nameplateEl.className = 'nameplate-wrap nameplate-' + pid;
-    // ensure banner structure exists
-    var banner = nameplateEl.querySelector('.nameplate-banner');
-    if (!banner) {
-      banner = document.createElement('span');
-      banner.className = 'nameplate-banner';
-      while (nameplateEl.firstChild) banner.appendChild(nameplateEl.firstChild);
-      nameplateEl.appendChild(banner);
-    }
-    // sync mini avatar if present
-    var mini = nameplateEl.querySelector('.np-mini-avatar');
-    if (mini) {
-      var src = '';
-      if (nameplateEl.id === 'profile-nameplate' && currentUser && currentUser.avatar) src = currentUser.avatar;
-      else if (nameplateEl.id === 'view-profile-nameplate') {
-        var va = document.getElementById('view-profile-avatar');
-        if (va) src = va.src || '';
-      } else if (nameplateEl.id === 'name-style-preview' && currentUser && currentUser.avatar) src = currentUser.avatar;
-      if (src) mini.src = src;
-      mini.style.display = (pid === 'none') ? 'none' : '';
-    }
+    renderNameplateEl(nameplateEl, style.nameplate || 'none');
   }
 }
 
@@ -9525,17 +9250,14 @@ function renderNameStylePickers() {
       let priceHtml = '';
       if (!p.cost) priceHtml = '<span class="np-price free">Free</span>';
       else if (owned) priceHtml = '<span class="np-price owned">Owned</span>';
-      else priceHtml = '<span class="np-price">✦ ' + p.cost + ' <span class="np-lock">🔒</span></span>';
-      const av = (currentUser && currentUser.avatar) ? currentUser.avatar : '';
-      const name = (currentUser && currentUser.displayName) || 'Preview';
+      else priceHtml = '<span class="np-price">✦ ' + p.cost + ' 🔒</span>';
+      const thumb = p.id === 'none'
+        ? '<div class="np-thumb" style="font-size:1.1rem;opacity:.5">⊘</div>'
+        : '<div class="np-thumb nameplate-' + p.id + '">' + nameplateArtHtml(p.id) + '</div>';
       return '<button type="button" class="nameplate-btn' + (active ? ' active' : '') + (owned || !p.cost ? '' : ' locked') + '" data-plate="' + p.id + '">' +
-        '<div class="np-shop-row nameplate-' + p.id + '" style="position:relative">' +
-          (p.id === 'none' ? '' : '<div class="np-shop-art nameplate-' + p.id + '" style="position:absolute;inset:0;border-radius:8px"></div>') +
-          '<div class="np-shop-meta">' +
-            '<span class="np-shop-label">' + (p.id === 'none' ? '⊘ None' : name) + '</span>' +
-            priceHtml +
-          '</div>' +
-        '</div>' +
+        thumb +
+        '<span class="np-shop-label">' + p.label + '</span>' +
+        priceHtml +
       '</button>';
     }).join('');
     plateGrid.querySelectorAll('.nameplate-btn').forEach(function(btn) {
@@ -9610,16 +9332,8 @@ function updateNameStylePreview() {
     el.textContent = text;
     applyNameStyleToEl(el, pendingNameStyle, null);
   }
-  const wrap = document.getElementById('name-style-preview');
-  if (wrap) {
-    const pid = pendingNameStyle.nameplate || 'none';
-    wrap.className = 'name-style-preview nameplate-wrap nameplate-' + pid;
-    const mini = document.getElementById('edit-np-avatar');
-    if (mini) {
-      if (currentUser && currentUser.avatar) mini.src = currentUser.avatar;
-      mini.style.display = (pid === 'none') ? 'none' : '';
-    }
-  }
+  const platePrev = document.getElementById('edit-nameplate-preview');
+  if (platePrev) renderNameplateEl(platePrev, pendingNameStyle.nameplate || 'none');
 }
 function syncNameStyleUI() {
   pendingNameStyle = loadNameStyle();
@@ -10040,7 +9754,7 @@ window.toggleStatusMenu=toggleStatusMenu; window.setUserStatus=setUserStatus; wi
 window.openEditProfile=openEditProfile; window.saveEditProfile=saveEditProfile;
 window.toggleAvatarEffectPanel=toggleAvatarEffectPanel; window.pickAvatarEffect=pickAvatarEffect;
 window.onEditAvatarSelected=onEditAvatarSelected; window.onEditBannerSelected=onEditBannerSelected; window.clearEditBanner=clearEditBanner;
-window.selectNameFont=selectNameFont; window.selectNameEffect=selectNameEffect; window.selectNameplate=selectNameplate;
+window.selectNameFont=selectNameFont; window.selectNameEffect=selectNameEffect; window.selectNameplate=selectNameplate; window.renderNameplateEl=renderNameplateEl; window.nameplateArtHtml=nameplateArtHtml;
 window.onNameStyleInput=onNameStyleInput; window.updateNameStylePreview=updateNameStylePreview;
 
 window.renderDiscordProfile=renderDiscordProfile;
