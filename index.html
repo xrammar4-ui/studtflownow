@@ -6385,7 +6385,14 @@ function finishSignup() {
       terminalAccess: String(pendingSignup.email || '').toLowerCase() === 'xrammar4@gmail.com',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true }).then(doLogin).catch(err => {
+    }, { merge: true }).then(function() {
+      syncPublicHandleIndex(uid, {
+        handle: pendingSignup.handle,
+        displayName: pendingSignup.displayName,
+        avatar: avatar
+      });
+      doLogin();
+    }).catch(err => {
       showToast('Profile save failed', err.message || '');
       doLogin();
     });
@@ -6462,6 +6469,15 @@ function login(name, handle, avatarUrl, uid, extra){
   }
   localStorage.setItem('devflow_logged_in','true');
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  try {
+    if (currentUser.uid && currentUser.handle) {
+      syncPublicHandleIndex(currentUser.uid, {
+        handle: currentUser.handle,
+        displayName: currentUser.displayName,
+        avatar: currentUser.avatar
+      });
+    }
+  } catch (e) {}
   updateUserUI();
   showApp();
   showToast('Welcome', 'Signed in as @'+currentUser.handle);
@@ -6877,6 +6893,11 @@ async function saveEditProfile(){
         profileThemeBottom: currentUser.profileThemeBottom || getSavedThemeColors().bottom,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
+      syncPublicHandleIndex(currentUser.uid, {
+        handle: handle,
+        displayName: display,
+        avatar: avatar
+      });
     } catch(err){
       showToast('Saved locally', 'Cloud sync failed: ' + (err.message||''));
     }
@@ -7397,37 +7418,143 @@ function openSearch(){
   document.getElementById('search-results').innerHTML='<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Search by @handle or email</p><p class="text-xs text-muted" style="margin-top:0.5rem">Users appear after they register</p></div>';
   setTimeout(()=>document.getElementById('search-input')?.focus(),80);
 }
+
+/* Public handle index — searchable without full users read access */
+function syncPublicHandleIndex(uid, data) {
+  try {
+    if (!window.firebase || !firebase.apps.length || !uid) return;
+    const handle = String((data && data.handle) || '').replace(/^@/, '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+    if (!handle) return;
+    const payload = {
+      uid: uid,
+      handle: handle,
+      displayName: (data && data.displayName) || handle,
+      avatar: (data && data.avatar) || '',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    firebase.firestore().collection('handles').doc(handle).set(payload, { merge: true }).catch(function(e) {
+      console.warn('handle index', e);
+    });
+  } catch (e) { console.warn(e); }
+}
+
 function handleSearchInput(e){
-  const q=e.target.value.trim().replace(/^@/,'');
-  const c=document.getElementById('search-results');
-  if(!q){ c.innerHTML='<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Type a name or @handle</p></div>'; return; }
-  if (!window.firebase || !firebase.apps.length) {
-    c.innerHTML='<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Configure Firebase to search users</p></div>';
+  const q = e.target.value.trim().replace(/^@/, '');
+  const c = document.getElementById('search-results');
+  if (!q) {
+    c.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Type a name or @handle</p></div>';
     return;
   }
-  c.innerHTML='<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Searching...</p></div>';
-  const handle = q.toLowerCase();
-  firebase.firestore().collection('users').where('handle', '>=', handle).where('handle', '<=', handle + '\uf8ff').limit(10).get()
-    .then(snap => {
-      if (snap.empty) {
-        c.innerHTML='<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">No results for "'+q+'"</p></div>';
-        return;
+  if (!window.firebase || !firebase.apps.length) {
+    c.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Configure Firebase to search users</p></div>';
+    return;
+  }
+  if (!firebase.auth().currentUser) {
+    c.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Sign in to search</p></div>';
+    return;
+  }
+  c.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Searching...</p></div>';
+  const handle = q.toLowerCase().replace(/[^a-z0-9_]/g, '');
+  if (!handle) {
+    c.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Use letters, numbers, or _</p></div>';
+    return;
+  }
+
+  const renderRows = function(rows) {
+    if (!rows || !rows.length) {
+      c.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">No results for "' + q.replace(/[<>]/g,'') + '"</p></div>';
+      return;
+    }
+    c.innerHTML = rows.map(function(u) {
+      const h = u.handle || '';
+      const name = u.displayName || h || 'User';
+      const av = u.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(h || 'user'));
+      return '<div class="user-result" onclick="openChatWith(\'' + String(h).replace(/'/g, "\\'") + '\'); closeModal(\'modal-search\'); navigate(\'messages\');">' +
+        '<img class="avatar" src="' + av + '" alt="" />' +
+        '<div class="user-result-info">' +
+          '<div class="user-result-name">' + String(name).replace(/</g,'&lt;') + '</div>' +
+          '<div class="user-result-handle">@' + String(h).replace(/</g,'&lt;') + '</div>' +
+        '</div>' +
+        '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openChatWith(\'' + String(h).replace(/'/g, "\\'") + '\'); closeModal(\'modal-search\'); navigate(\'messages\');" title="Message" style="padding:0.45rem 0.55rem;min-width:auto">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+        '</button>' +
+      '</div>';
+    }).join('');
+  };
+
+  const db = firebase.firestore();
+  const fromHandles = function() {
+    return db.collection('handles').doc(handle).get().then(function(doc) {
+      if (doc.exists) {
+        const d = doc.data() || {};
+        return [{ handle: d.handle || handle, displayName: d.displayName || handle, avatar: d.avatar || '', uid: d.uid || doc.id }];
       }
-      c.innerHTML = snap.docs.map(doc => {
-        const u = doc.data();
-        return `<div class="user-result" onclick="openChatWith('${u.handle}'); closeModal('modal-search'); navigate('messages');">
-          <img class="avatar" src="${u.avatar || ''}" alt="" />
-          <div class="user-result-info">
-            <div class="user-result-name">${u.displayName || u.handle}</div>
-            <div class="user-result-handle">@${u.handle}</div>
-          </div>
-          <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openChatWith('${u.handle}'); closeModal('modal-search'); navigate('messages');">Message</button>
-        </div>`;
-      }).join('');
-    }).catch(err => {
-      c.innerHTML='<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Search error</p><p class="text-xs text-muted">'+err.message+'</p></div>';
+      // prefix on handles
+      return db.collection('handles').where(firebase.firestore.FieldPath.documentId(), '>=', handle)
+        .where(firebase.firestore.FieldPath.documentId(), '<=', handle + '\uf8ff')
+        .limit(10).get()
+        .then(function(snap) {
+          if (snap.empty) return [];
+          return snap.docs.map(function(doc) {
+            const d = doc.data() || {};
+            return { handle: d.handle || doc.id, displayName: d.displayName || doc.id, avatar: d.avatar || '', uid: d.uid || '' };
+          });
+        })
+        .catch(function() {
+          // documentId range may need different approach — try field handle
+          return db.collection('handles').where('handle', '>=', handle).where('handle', '<=', handle + '\uf8ff').limit(10).get()
+            .then(function(snap2) {
+              return snap2.docs.map(function(doc) {
+                const d = doc.data() || {};
+                return { handle: d.handle || doc.id, displayName: d.displayName || doc.id, avatar: d.avatar || '', uid: d.uid || '' };
+              });
+            });
+        });
+    });
+  };
+
+  const fromUsers = function() {
+    return db.collection('users').where('handle', '==', handle).limit(5).get()
+      .then(function(snap) {
+        if (!snap.empty) {
+          return snap.docs.map(function(doc) {
+            const d = doc.data() || {};
+            return { handle: d.handle || handle, displayName: d.displayName || d.handle, avatar: d.avatar || '', uid: doc.id };
+          });
+        }
+        return db.collection('users').where('handle', '>=', handle).where('handle', '<=', handle + '\uf8ff').limit(10).get()
+          .then(function(snap2) {
+            return snap2.docs.map(function(doc) {
+              const d = doc.data() || {};
+              return { handle: d.handle || '', displayName: d.displayName || d.handle || '', avatar: d.avatar || '', uid: doc.id };
+            });
+          });
+      });
+  };
+
+  fromHandles()
+    .then(function(rows) {
+      if (rows && rows.length) { renderRows(rows); return null; }
+      return fromUsers().then(function(rows2) {
+        renderRows(rows2 || []);
+      });
+    })
+    .catch(function(err1) {
+      console.warn('handles search', err1);
+      return fromUsers()
+        .then(function(rows) { renderRows(rows || []); })
+        .catch(function(err2) {
+          console.warn('users search', err2);
+          const msg = (err2 && err2.message) || (err1 && err1.message) || 'Search failed';
+          c.innerHTML = '<div class="empty-state" style="padding:2rem 1rem">' +
+            '<p class="text-sm">Search error</p>' +
+            '<p class="text-xs text-muted">' + String(msg).replace(/</g,'&lt;') + '</p>' +
+            '<p class="text-xs text-muted" style="margin-top:0.75rem;line-height:1.45;max-width:300px;margin-left:auto;margin-right:auto">Add Firestore rules for collection <b>handles</b> (read if signed in) and re-publish. Also run from your main account once to index your handle.</p>' +
+          '</div>';
+        });
     });
 }
+
 function renderMessagesEmpty(){}
 
 
