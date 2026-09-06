@@ -1263,85 +1263,113 @@ h3 { font-size: 1.05rem; }
 }
 
 
-/* Realtime message popup notification */
+/* Realtime message popup — stacked avatars + "now message" */
 .msg-notif-container {
   position: fixed;
-  top: 1.15rem;
-  right: 1.15rem;
+  top: 1.1rem;
+  right: 1.1rem;
   z-index: 220;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  max-width: min(380px, calc(100vw - 2rem));
   pointer-events: none;
 }
 .msg-notif {
   pointer-events: auto;
-  background: var(--bg-card);
-  border: 1px solid rgba(99, 102, 241, 0.35);
-  border-radius: 14px;
+  background: #18181B;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(99,102,241,0.12);
-  min-width: 280px;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.15);
+  min-width: 220px;
+  max-width: min(300px, calc(100vw - 2rem));
   animation: msgNotifIn 0.32s var(--ease);
   cursor: pointer;
   position: relative;
 }
 @keyframes msgNotifIn {
-  from { transform: translateX(40px) translateY(-8px); opacity: 0; }
+  from { transform: translateX(36px) translateY(-6px); opacity: 0; }
   to { transform: translateX(0) translateY(0); opacity: 1; }
 }
 .msg-notif.leaving {
   animation: msgNotifOut 0.28s var(--ease) forwards;
 }
 @keyframes msgNotifOut {
-  to { transform: translateX(36px); opacity: 0; }
+  to { transform: translateX(28px); opacity: 0; }
 }
 .msg-notif-inner {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem 0.75rem;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem 0.8rem;
 }
-.msg-notif-avatar {
+.msg-notif-avatars {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+}
+.msg-notif-avatars.stack-2 { width: 40px; height: 58px; }
+.msg-notif-avatars.stack-many { width: 54px; height: 48px; }
+.msg-notif-avatars img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  flex-shrink: 0;
-  background: var(--bg-deep);
-  border: 1.5px solid var(--border);
+  background: #27272A;
+  border: 2.5px solid #18181B;
+  display: block;
+  position: absolute;
+}
+.msg-notif-avatars.single img {
+  left: 0; top: 2px;
+  width: 40px; height: 40px;
+}
+/* two senders: avatars stacked vertically */
+.msg-notif-avatars.stack-2 img:nth-child(1) {
+  left: 2px; top: 0; width: 32px; height: 32px; z-index: 1;
+}
+.msg-notif-avatars.stack-2 img:nth-child(2) {
+  left: 2px; top: 22px; width: 32px; height: 32px; z-index: 2;
+}
+.msg-notif-avatars.stack-many img:nth-child(1) {
+  left: 0; top: 4px; width: 30px; height: 30px; z-index: 1;
+}
+.msg-notif-avatars.stack-many img:nth-child(2) {
+  left: 12px; top: 12px; width: 30px; height: 30px; z-index: 2;
+}
+.msg-notif-count {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 100px;
+  background: #6366F1;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px solid #18181B;
+  z-index: 3;
+  line-height: 1;
 }
 .msg-notif-body { flex: 1; min-width: 0; }
 .msg-notif-title {
-  font-weight: 650;
-  font-size: 0.88rem;
-  margin-bottom: 0.15rem;
+  font-weight: 700;
+  font-size: 0.95rem;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
-.msg-notif-text {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.msg-notif-close {
-  width: 26px; height: 26px;
-  border: none; background: transparent;
+.msg-notif-sub {
+  font-size: 0.75rem;
   color: var(--text-muted);
-  cursor: pointer;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  margin-top: 0.15rem;
 }
-.msg-notif-close:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
 .msg-notif-progress {
   height: 3px;
   width: 100%;
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(99, 102, 241, 0.18);
   position: relative;
   overflow: hidden;
 }
@@ -3647,24 +3675,56 @@ h3 { font-size: 1.05rem; }
   <div class="modal-overlay" id="modal-auth">
     <div class="modal">
       <div class="modal-header">
-        <h2>Sign in to DevFlow</h2>
+        <h2 id="auth-modal-title">Sign in to DevFlow</h2>
         <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-auth')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
       <div class="modal-body">
+        <div style="display:flex;gap:0.4rem;margin-bottom:1rem;background:var(--bg-deep);padding:0.3rem;border-radius:10px;border:1px solid var(--border)">
+          <button type="button" class="btn btn-sm" id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;border:none">Sign in</button>
+          <button type="button" class="btn btn-sm btn-ghost" id="auth-tab-signup" onclick="switchAuthTab('signup')" style="flex:1;border:none">Create account</button>
+        </div>
+
         <button class="oauth-btn" onclick="startGoogleSignup()">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Continue with Google
         </button>
-        <div class="auth-divider">or</div>
-        <form onsubmit="event.preventDefault(); startGoogleSignup(document.getElementById('auth-name').value);">
+        <div class="auth-divider">or with email / username</div>
+
+        <!-- LOGIN -->
+        <form id="form-auth-login" onsubmit="event.preventDefault(); submitEmailLogin();">
+          <div class="form-group">
+            <label class="form-label">Email or @username</label>
+            <input class="form-input" id="auth-login-id" type="text" autocomplete="username" placeholder="you@email.com or @handle" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" id="auth-login-password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="6" />
+          </div>
+          <button type="submit" class="btn btn-primary w-full" id="auth-login-btn">Sign in</button>
+        </form>
+
+        <!-- SIGNUP -->
+        <form id="form-auth-signup" class="hidden" onsubmit="event.preventDefault(); submitEmailSignup();">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="auth-signup-email" type="email" autocomplete="email" placeholder="you@email.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" id="auth-signup-password" type="password" autocomplete="new-password" placeholder="At least 6 characters" required minlength="6" />
+          </div>
           <div class="form-group">
             <label class="form-label">Display name (optional)</label>
-            <input class="form-input" id="auth-name" placeholder="Your name" />
+            <input class="form-input" id="auth-signup-name" type="text" placeholder="Your name" />
           </div>
-          <button type="submit" class="btn btn-primary w-full">Continue</button>
+          <button type="submit" class="btn btn-primary w-full" id="auth-signup-btn">Create account</button>
         </form>
+
+        <p class="text-xs text-muted text-center" style="margin-top:1rem" id="auth-switch-hint">
+          New here? <a href="#" style="color:var(--accent-hover)" onclick="event.preventDefault(); switchAuthTab('signup')">Create an account</a>
+        </p>
       </div>
     </div>
   </div>
@@ -4578,15 +4638,15 @@ function startInboxListener() {
         markChatUnread(chatId);
 
         if (!viewingThis && USER_STATUS !== 'dnd' && USER_STATUS !== 'invisible') {
-          showMessageNotification({
-            title: title,
-            text: preview,
+          queueMessageNotifSender({
+            uid: fromUid || chatId,
+            handle: data.lastFromHandle || '',
             avatar: data.lastFromAvatar || '',
             chatId: chatId,
-            handle: data.lastFromHandle || '',
             isGroup: isGroup,
             groupId: data.groupId || String(chatId).replace(/^group_/, ''),
-            groupName: data.name || 'Group'
+            groupName: data.name || 'Group',
+            text: preview
           });
         }
 
@@ -4604,73 +4664,145 @@ function startInboxListener() {
     });
 }
 
-function showMessageNotification(opts) {
-  opts = opts || {};
-  const container = document.getElementById('msg-notif-container');
-  if (!container) {
-    showToast(opts.title || 'New message', opts.text || '');
-    return;
-  }
-  const duration = 5500;
-  const el = document.createElement('div');
-  el.className = 'msg-notif';
-  const avatar = opts.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(opts.handle || opts.title || 'user'));
-  el.innerHTML =
-    '<div class="msg-notif-inner">' +
-      '<img class="msg-notif-avatar" src="' + avatar.replace(/"/g, '') + '" alt="" onerror="this.src=\'https://api.dicebear.com/7.x/avataaars/svg?seed=user\'" />' +
-      '<div class="msg-notif-body">' +
-        '<div class="msg-notif-title">' + escapeHtml(opts.title || 'New message') + '</div>' +
-        '<div class="msg-notif-text">' + escapeHtml(opts.text || '') + '</div>' +
-      '</div>' +
-      '<button type="button" class="msg-notif-close" aria-label="Dismiss">' +
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
-      '</button>' +
-    '</div>' +
-    '<div class="msg-notif-progress"><div class="msg-notif-progress-bar" style="animation-duration:' + duration + 'ms"></div></div>';
+let msgNotifSenders = []; // {uid, handle, avatar, chatId, isGroup, groupId, groupName}
+let msgNotifTimer = null;
+let msgNotifEl = null;
+const MSG_NOTIF_DURATION = 6000;
 
-  const remove = () => {
-    if (!el.parentNode) return;
-    el.classList.add('leaving');
-    setTimeout(() => el.remove(), 280);
-  };
-
-  el.querySelector('.msg-notif-close').addEventListener('click', (e) => {
-    e.stopPropagation();
-    remove();
-  });
-  el.addEventListener('click', () => {
-    remove();
-    if (opts.isGroup) {
-      openGroupChat(opts.groupId, opts.groupName);
-      navigate('messages');
-    } else if (opts.handle) {
-      openChatWith(opts.handle);
-      navigate('messages');
-    } else {
-      navigate('messages');
-    }
-  });
-
-  container.appendChild(el);
-  // keep max 4 visible
-  while (container.children.length > 4) container.firstChild.remove();
-  setTimeout(remove, duration);
-
-  // Optional system notification when tab is in background
-  try {
-    if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
-      const n = new Notification(opts.title || 'New message', {
-        body: opts.text || '',
-        icon: opts.avatar || undefined,
-        tag: 'devflow-msg-' + (opts.chatId || '')
-      });
-      n.onclick = () => { window.focus(); el.click(); n.close(); };
-    } else if (document.hidden && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().catch(()=>{});
-    }
-  } catch (e) {}
+function defaultAvatarUrl(seed) {
+  return 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(seed || 'user');
 }
 
+function queueMessageNotifSender(sender) {
+  sender = sender || {};
+  const key = String(sender.uid || sender.handle || sender.chatId || '');
+  if (!key) return;
+  // de-dupe by uid/handle
+  const idx = msgNotifSenders.findIndex(s => String(s.uid || s.handle) === key);
+  if (idx >= 0) {
+    msgNotifSenders[idx] = Object.assign({}, msgNotifSenders[idx], sender);
+  } else {
+    msgNotifSenders.push({
+      uid: sender.uid || key,
+      handle: sender.handle || '',
+      avatar: sender.avatar || '',
+      chatId: sender.chatId || '',
+      isGroup: !!sender.isGroup,
+      groupId: sender.groupId || '',
+      groupName: sender.groupName || '',
+      text: sender.text || ''
+    });
+  }
+  renderNowMessageBanner();
+}
+
+function dismissNowMessageBanner() {
+  if (msgNotifTimer) { clearTimeout(msgNotifTimer); msgNotifTimer = null; }
+  if (msgNotifEl && msgNotifEl.parentNode) {
+    msgNotifEl.classList.add('leaving');
+    const el = msgNotifEl;
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 280);
+  }
+  msgNotifEl = null;
+  msgNotifSenders = [];
+}
+
+function renderNowMessageBanner() {
+  const container = document.getElementById('msg-notif-container');
+  if (!container) return;
+  if (!msgNotifSenders.length) {
+    dismissNowMessageBanner();
+    return;
+  }
+
+  const n = msgNotifSenders.length;
+  const first = msgNotifSenders[0];
+  const second = msgNotifSenders[1];
+  let avatarsHtml = '';
+  let stackClass = 'single';
+
+  if (n === 1) {
+    stackClass = 'single';
+    const src = (first.avatar || defaultAvatarUrl(first.handle || first.uid)).replace(/"/g, '');
+    avatarsHtml = '<img src="' + src + '" alt="" onerror="this.src=\'' + defaultAvatarUrl('user') + '\'" />';
+  } else if (n === 2) {
+    stackClass = 'stack-2';
+    const s1 = (first.avatar || defaultAvatarUrl(first.handle || 'a')).replace(/"/g, '');
+    const s2 = (second.avatar || defaultAvatarUrl(second.handle || 'b')).replace(/"/g, '');
+    avatarsHtml =
+      '<img src="' + s1 + '" alt="" onerror="this.src=\'' + defaultAvatarUrl('user') + '\'" />' +
+      '<img src="' + s2 + '" alt="" onerror="this.src=\'' + defaultAvatarUrl('user2') + '\'" />';
+  } else {
+    stackClass = 'stack-many';
+    const s1 = (first.avatar || defaultAvatarUrl(first.handle || 'a')).replace(/"/g, '');
+    const s2 = (second.avatar || defaultAvatarUrl(second.handle || 'b')).replace(/"/g, '');
+    avatarsHtml =
+      '<img src="' + s1 + '" alt="" onerror="this.src=\'' + defaultAvatarUrl('user') + '\'" />' +
+      '<img src="' + s2 + '" alt="" onerror="this.src=\'' + defaultAvatarUrl('user2') + '\'" />' +
+      '<span class="msg-notif-count">' + n + '</span>';
+  }
+
+  const sub = n === 1
+    ? ('@' + (first.handle || 'someone'))
+    : (n + ' people');
+
+  // reuse same element if present — reset progress bar
+  if (msgNotifEl && msgNotifEl.parentNode) {
+    msgNotifEl.querySelector('.msg-notif-avatars').className = 'msg-notif-avatars ' + stackClass;
+    msgNotifEl.querySelector('.msg-notif-avatars').innerHTML = avatarsHtml;
+    const subEl = msgNotifEl.querySelector('.msg-notif-sub');
+    if (subEl) subEl.textContent = sub;
+    // restart progress
+    const barWrap = msgNotifEl.querySelector('.msg-notif-progress');
+    if (barWrap) {
+      barWrap.innerHTML = '<div class="msg-notif-progress-bar" style="animation-duration:' + MSG_NOTIF_DURATION + 'ms"></div>';
+    }
+  } else {
+    container.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = 'msg-notif';
+    el.innerHTML =
+      '<div class="msg-notif-inner">' +
+        '<div class="msg-notif-avatars ' + stackClass + '">' + avatarsHtml + '</div>' +
+        '<div class="msg-notif-body">' +
+          '<div class="msg-notif-title">now message</div>' +
+          '<div class="msg-notif-sub">' + escapeHtml(sub) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="msg-notif-progress"><div class="msg-notif-progress-bar" style="animation-duration:' + MSG_NOTIF_DURATION + 'ms"></div></div>';
+    el.addEventListener('click', () => {
+      const list = msgNotifSenders.slice();
+      dismissNowMessageBanner();
+      navigate('messages');
+      if (list.length === 1) {
+        const s = list[0];
+        if (s.isGroup) openGroupChat(s.groupId, s.groupName);
+        else if (s.handle) openChatWith(s.handle);
+      }
+    });
+    container.appendChild(el);
+    msgNotifEl = el;
+  }
+
+  if (msgNotifTimer) clearTimeout(msgNotifTimer);
+  msgNotifTimer = setTimeout(() => {
+    dismissNowMessageBanner();
+  }, MSG_NOTIF_DURATION);
+}
+
+function showMessageNotification(opts) {
+  // backward-compatible wrapper
+  queueMessageNotifSender({
+    uid: (opts && (opts.uid || opts.handle || opts.chatId)) || '',
+    handle: (opts && opts.handle) || '',
+    avatar: (opts && opts.avatar) || '',
+    chatId: (opts && opts.chatId) || '',
+    isGroup: !!(opts && opts.isGroup),
+    groupId: (opts && opts.groupId) || '',
+    groupName: (opts && opts.groupName) || '',
+    text: (opts && opts.text) || ''
+  });
+}
 
 /* ---- View peer profile from chat ---- */
 function openPeerProfileFromChat() {
@@ -5131,7 +5263,7 @@ function showToast(title, message, duration=5000){
   setTimeout(()=>toast.remove(), duration);
 }
 
-function openModal(id){ document.getElementById(id)?.classList.add('open'); }
+function openModal(id){ document.getElementById(id)?.classList.add('open'); if(id==='modal-auth' && typeof switchAuthTab==='function') switchAuthTab(AUTH_TAB||'login'); }
 function closeModal(id){ document.getElementById(id)?.classList.remove('open'); }
 
 /* Auth / Landing */
@@ -5157,7 +5289,169 @@ function showApp(){
   if(typeof startChatEngine==='function') startChatEngine();
 }
 
+let AUTH_TAB = 'login';
+
+function switchAuthTab(tab) {
+  AUTH_TAB = tab === 'signup' ? 'signup' : 'login';
+  const loginForm = document.getElementById('form-auth-login');
+  const signupForm = document.getElementById('form-auth-signup');
+  const title = document.getElementById('auth-modal-title');
+  const tabLogin = document.getElementById('auth-tab-login');
+  const tabSignup = document.getElementById('auth-tab-signup');
+  const hint = document.getElementById('auth-switch-hint');
+  if (loginForm) loginForm.classList.toggle('hidden', AUTH_TAB !== 'login');
+  if (signupForm) signupForm.classList.toggle('hidden', AUTH_TAB !== 'signup');
+  if (title) title.textContent = AUTH_TAB === 'login' ? 'Sign in to DevFlow' : 'Create your account';
+  if (tabLogin) {
+    tabLogin.className = 'btn btn-sm' + (AUTH_TAB === 'login' ? '' : ' btn-ghost');
+    tabLogin.style.flex = '1';
+    tabLogin.style.border = 'none';
+  }
+  if (tabSignup) {
+    tabSignup.className = 'btn btn-sm' + (AUTH_TAB === 'signup' ? '' : ' btn-ghost');
+    tabSignup.style.flex = '1';
+    tabSignup.style.border = 'none';
+  }
+  if (hint) {
+    hint.innerHTML = AUTH_TAB === 'login'
+      ? 'New here? <a href="#" style="color:var(--accent-hover)" onclick="event.preventDefault(); switchAuthTab(\'signup\')">Create an account</a>'
+      : 'Already have an account? <a href="#" style="color:var(--accent-hover)" onclick="event.preventDefault(); switchAuthTab(\'login\')">Sign in</a>';
+  }
+}
+
+function authErrorMessage(err) {
+  const code = (err && err.code) || '';
+  const map = {
+    'auth/email-already-in-use': 'This email is already registered. Sign in instead.',
+    'auth/invalid-email': 'Invalid email address',
+    'auth/weak-password': 'Password must be at least 6 characters',
+    'auth/user-not-found': 'No account found with these credentials',
+    'auth/wrong-password': 'Wrong password',
+    'auth/invalid-credential': 'Wrong email/username or password',
+    'auth/too-many-requests': 'Too many attempts. Try again later',
+    'auth/network-request-failed': 'Network error. Check your connection',
+    'auth/user-disabled': 'This account has been disabled'
+  };
+  return map[code] || (err && err.message) || 'Authentication failed';
+}
+
+async function resolveLoginEmail(id) {
+  id = String(id || '').trim();
+  if (!id) return null;
+  if (id.includes('@') && !id.startsWith('@')) return id.toLowerCase();
+  // treat as handle
+  let handle = id.replace(/^@/, '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+  if (!handle) return null;
+  if (!fbReady()) throw new Error('Firebase not configured');
+  const q = await db().collection('users').where('handle', '==', handle).limit(1).get();
+  if (q.empty) return null;
+  const email = (q.docs[0].data() || {}).email;
+  return email ? String(email).toLowerCase() : null;
+}
+
+async function afterEmailAuthUser(user, optionalName) {
+  pendingSignup = {
+    displayName: (optionalName || user.displayName || '').trim(),
+    handle: '',
+    avatar: user.photoURL || '',
+    uid: user.uid,
+    email: user.email || ''
+  };
+  pendingAvatarData = user.photoURL || '';
+  closeModal('modal-auth');
+  const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+  if (doc.exists && doc.data().handle) {
+    const d = doc.data();
+    login(d.displayName, d.handle, d.avatar || user.photoURL || '', user.uid, {
+      bio: d.bio || '',
+      banner: d.banner || '',
+      avatarEffect: d.avatarEffect || 'none',
+      unlockedEffects: d.unlockedEffects || ['none'],
+      email: d.email || user.email || '',
+      coins: d.coins,
+      terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === 'xrammar4@gmail.com',
+      createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
+      nitro: d.nitro || null,
+      profileThemeColor: d.profileThemeColor || null,
+      profileThemeTop: d.profileThemeTop || null,
+      profileThemeBottom: d.profileThemeBottom || null,
+      nameStyle: d.nameStyle || null
+    });
+    return;
+  }
+  if (pendingSignup.displayName) {
+    const el = document.getElementById('setup-displayname');
+    if (el) el.value = pendingSignup.displayName;
+  }
+  openModal('modal-username');
+  setTimeout(() => document.getElementById('setup-username')?.focus(), 100);
+}
+
+async function submitEmailLogin() {
+  if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+    showToast('Firebase not configured', 'Firebase config missing');
+    return;
+  }
+  const id = (document.getElementById('auth-login-id')?.value || '').trim();
+  const password = document.getElementById('auth-login-password')?.value || '';
+  if (!id || !password) {
+    showToast('Missing fields', 'Enter email/username and password');
+    return;
+  }
+  const btn = document.getElementById('auth-login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+  try {
+    let email = await resolveLoginEmail(id);
+    if (!email) {
+      showToast('Not found', id.startsWith('@') || !id.includes('@')
+        ? 'No account with this username'
+        : 'No account with this email');
+      return;
+    }
+    const result = await firebase.auth().signInWithEmailAndPassword(email, password);
+    await afterEmailAuthUser(result.user, '');
+  } catch (err) {
+    console.warn(err);
+    showToast('Sign in failed', authErrorMessage(err));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign in'; }
+  }
+}
+
+async function submitEmailSignup() {
+  if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+    showToast('Firebase not configured', 'Firebase config missing');
+    return;
+  }
+  const email = (document.getElementById('auth-signup-email')?.value || '').trim().toLowerCase();
+  const password = document.getElementById('auth-signup-password')?.value || '';
+  const name = (document.getElementById('auth-signup-name')?.value || '').trim();
+  if (!email || !password) {
+    showToast('Missing fields', 'Email and password required');
+    return;
+  }
+  if (password.length < 6) {
+    showToast('Weak password', 'Use at least 6 characters');
+    return;
+  }
+  const btn = document.getElementById('auth-signup-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+  try {
+    const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    if (name && result.user) {
+      try { await result.user.updateProfile({ displayName: name }); } catch (e) {}
+    }
+    await afterEmailAuthUser(result.user, name);
+  } catch (err) {
+    console.warn(err);
+    showToast('Sign up failed', authErrorMessage(err));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Create account'; }
+  }
+}
+
 function startGoogleSignup(optionalName) {
+
   if (!window.firebase || !firebase.apps || !firebase.apps.length) {
     showToast('Firebase not configured', 'Firebase config missing');
     return;
@@ -8182,6 +8476,7 @@ window.skipAvatar=skipAvatar;
 window.onAvatarSelected=onAvatarSelected;
 window.submitUsername=submitUsername;
 window.startGoogleSignup=startGoogleSignup; window.logout=logout;
+window.switchAuthTab=switchAuthTab; window.submitEmailLogin=submitEmailLogin; window.submitEmailSignup=submitEmailSignup;
 window.pauseTimer=pauseTimer; window.completeSession=completeSession;
 window.logDistraction=logDistraction; window.toggleFocusMode=toggleFocusMode;
 window.toggleNotifPanel=toggleNotifPanel; window.acceptFriend=acceptFriend; window.declineFriend=declineFriend;
