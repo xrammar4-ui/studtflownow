@@ -5552,18 +5552,45 @@ function authErrorMessage(err) {
 async function resolveLoginEmail(id) {
   id = String(id || '').trim();
   if (!id) return null;
+  // Full email → use directly (no Firestore read needed)
   if (id.includes('@') && !id.startsWith('@')) return id.toLowerCase();
-  // treat as handle
   let handle = id.replace(/^@/, '').toLowerCase().replace(/[^a-z0-9_]/g, '');
   if (!handle) return null;
   if (!fbReady()) throw new Error('Firebase not configured');
-  const q = await db().collection('users').where('handle', '==', handle).limit(1).get();
-  if (q.empty) return null;
-  const email = (q.docs[0].data() || {}).email;
-  return email ? String(email).toLowerCase() : null;
+  try {
+    const q = await db().collection('users').where('handle', '==', handle).limit(1).get();
+    if (q.empty) return null;
+    const email = (q.docs[0].data() || {}).email;
+    return email ? String(email).toLowerCase() : null;
+  } catch (e) {
+    console.warn('resolveLoginEmail', e);
+    // Rules may block public handle lookup — ask for email
+    throw new Error('USE_EMAIL');
+  }
 }
 
-async function afterEmailAuthUser(user, optionalName) {
+function loginExtraFromDoc(d, user) {
+  d = d || {};
+  user = user || {};
+  return {
+    bio: d.bio || '',
+    banner: d.banner || '',
+    avatarEffect: d.avatarEffect || 'none',
+    unlockedEffects: d.unlockedEffects || ['none'],
+    email: d.email || user.email || '',
+    coins: d.coins,
+    terminalAccess: !!d.terminalAccess || String(user.email || d.email || '').toLowerCase() === 'xrammar4@gmail.com',
+    createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
+    nitro: d.nitro || null,
+    profileThemeColor: d.profileThemeColor || null,
+    profileThemeTop: d.profileThemeTop || null,
+    profileThemeBottom: d.profileThemeBottom || null,
+    nameStyle: d.nameStyle || null
+  };
+}
+
+async function completeAuthFromUser(user, optionalName) {
+  if (!user) return;
   pendingSignup = {
     displayName: (optionalName || user.displayName || '').trim(),
     handle: '',
@@ -5573,32 +5600,31 @@ async function afterEmailAuthUser(user, optionalName) {
   };
   pendingAvatarData = user.photoURL || '';
   closeModal('modal-auth');
-  const doc = await firebase.firestore().collection('users').doc(user.uid).get();
-  if (doc.exists && doc.data().handle) {
-    const d = doc.data();
-    login(d.displayName, d.handle, d.avatar || user.photoURL || '', user.uid, {
-      bio: d.bio || '',
-      banner: d.banner || '',
-      avatarEffect: d.avatarEffect || 'none',
-      unlockedEffects: d.unlockedEffects || ['none'],
-      email: d.email || user.email || '',
-      coins: d.coins,
-      terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === 'xrammar4@gmail.com',
-      createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
-      nitro: d.nitro || null,
-      profileThemeColor: d.profileThemeColor || null,
-      profileThemeTop: d.profileThemeTop || null,
-      profileThemeBottom: d.profileThemeBottom || null,
-      nameStyle: d.nameStyle || null
-    });
-    return;
+  try {
+    const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+    const d = doc.exists ? (doc.data() || {}) : {};
+    if (d.banned && (!d.banUntil || d.banUntil > Date.now())) {
+      enforceBan(d);
+      return;
+    }
+    if (d.handle) {
+      login(d.displayName || pendingSignup.displayName || 'Developer', d.handle, d.avatar || user.photoURL || '', user.uid, loginExtraFromDoc(d, user));
+      return;
+    }
+  } catch (e) {
+    console.warn('profile load', e);
   }
+  // No handle yet → username setup
   if (pendingSignup.displayName) {
     const el = document.getElementById('setup-displayname');
     if (el) el.value = pendingSignup.displayName;
   }
   openModal('modal-username');
   setTimeout(() => document.getElementById('setup-username')?.focus(), 100);
+}
+
+async function afterEmailAuthUser(user, optionalName) {
+  return completeAuthFromUser(user, optionalName);
 }
 
 async function submitEmailLogin() {
@@ -5615,11 +5641,20 @@ async function submitEmailLogin() {
   const btn = document.getElementById('auth-login-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
   try {
-    let email = await resolveLoginEmail(id);
+    let email;
+    try {
+      email = await resolveLoginEmail(id);
+    } catch (e) {
+      if (e && e.message === 'USE_EMAIL') {
+        showToast('Use your email', 'Sign in with the email you registered, not @username');
+        return;
+      }
+      throw e;
+    }
     if (!email) {
-      showToast('Not found', id.startsWith('@') || !id.includes('@')
-        ? 'No account with this username'
-        : 'No account with this email');
+      showToast('Not found', id.includes('@') && !id.startsWith('@')
+        ? 'No account with this email'
+        : 'Username not found — try your email instead');
       return;
     }
     const result = await firebase.auth().signInWithEmailAndPassword(email, password);
@@ -5671,41 +5706,17 @@ function startGoogleSignup(optionalName) {
     return;
   }
   const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('profile');
+  provider.addScope('email');
   firebase.auth().signInWithPopup(provider).then(result => {
-    const user = result.user;
-    pendingSignup = {
-      displayName: (optionalName || user.displayName || '').trim(),
-      handle: '',
-      avatar: user.photoURL || '',
-      uid: user.uid,
-      email: user.email || ''
-    };
-    pendingAvatarData = user.photoURL || '';
-    closeModal('modal-auth');
-    // if profile already exists, skip username
-    return firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
-      if (doc.exists && doc.data().handle) {
-        const d = doc.data();
-        login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
-          bio: d.bio || '',
-          banner: d.banner || '',
-          avatarEffect: d.avatarEffect || 'none',
-          unlockedEffects: d.unlockedEffects || ['none'],
-          email: d.email || user.email || '',
-          coins: d.coins,
-          terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
-          createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
-        });
-        return;
-      }
-      if (pendingSignup.displayName) {
-        const el = document.getElementById('setup-displayname');
-        if (el) el.value = pendingSignup.displayName;
-      }
-      openModal('modal-username');
-      setTimeout(() => document.getElementById('setup-username')?.focus(), 100);
-    });
+    return completeAuthFromUser(result.user, optionalName);
   }).catch(err => {
+    // Fallback to redirect if popup blocked / credential issues
+    const code = (err && err.code) || '';
+    if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user') {
+      showToast('Popup closed', 'Try again or allow popups');
+      return;
+    }
     showToast('Google sign-in failed', err.message || 'Try again');
   });
 }
@@ -5787,23 +5798,40 @@ function confirmAvatar() {
 
 function finishSignup() {
   closeModal('modal-avatar');
+  closeModal('modal-username');
+  closeModal('modal-auth');
   const avatar = pendingAvatarData || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(pendingSignup.handle || 'dev') + '&backgroundColor=09090b');
   const uid = pendingSignup.uid || (firebase.auth().currentUser && firebase.auth().currentUser.uid);
   const createdAt = Date.now();
-  const doLogin = () => login(pendingSignup.displayName, pendingSignup.handle, avatar, uid, { bio: '', createdAt });
+  const email = pendingSignup.email || (firebase.auth().currentUser && firebase.auth().currentUser.email) || '';
+  const doLogin = () => login(pendingSignup.displayName, pendingSignup.handle, avatar, uid, {
+    bio: '',
+    createdAt,
+    email: email,
+    coins: 0
+  });
   if (window.firebase && firebase.apps.length && uid) {
-    firebase.firestore().collection('users').doc(uid).set({
-      handle: pendingSignup.handle.toLowerCase(),
+    const payload = {
+      handle: String(pendingSignup.handle || '').toLowerCase(),
       displayName: pendingSignup.displayName,
       avatar: avatar,
-      email: pendingSignup.email || '',
+      email: email,
       bio: '',
       avatarEffect: 'none',
-      coins: 0,
-      terminalAccess: String(pendingSignup.email || '').toLowerCase() === 'xrammar4@gmail.com',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      terminalAccess: String(email || '').toLowerCase() === 'xrammar4@gmail.com',
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true }).then(doLogin).catch(err => {
+    };
+    // Only set coins/createdAt if new profile
+    firebase.firestore().collection('users').doc(uid).get().then(snap => {
+      if (!snap.exists) {
+        payload.coins = 0;
+        payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        payload.tasks = [];
+        payload.friends = [];
+        payload.onboardingDone = false;
+      }
+      return firebase.firestore().collection('users').doc(uid).set(payload, { merge: true });
+    }).then(doLogin).catch(err => {
       showToast('Profile save failed', err.message || '');
       doLogin();
     });
@@ -5827,6 +5855,9 @@ function enterGuest(){
 }
 function login(name, handle, avatarUrl, uid, extra){
   isLoggedIn = true;
+  closeModal('modal-auth');
+  closeModal('modal-username');
+  closeModal('modal-avatar');
   const prev = currentUser;
   currentUser = {
     uid: uid || null,
@@ -5842,8 +5873,8 @@ function login(name, handle, avatarUrl, uid, extra){
     terminalAccess: !!(extra && extra.terminalAccess) || !!(prev && prev.terminalAccess)
   };
   if (typeof extra !== 'undefined' && extra && extra.coins != null) {
-    COINS = parseInt(extra.coins, 10) || COINS;
-    saveCoins();
+    COINS = parseInt(extra.coins, 10);
+    if (isNaN(COINS)) COINS = 0;
   }
   if (currentUser.avatarEffect && currentUser.avatarEffect !== 'none') {
     const u = currentUser.unlockedEffects || [];
@@ -6358,7 +6389,12 @@ function renderSkillsOnDashboard(){
 
 /* Navigation */
 function navigate(page){
-  if(!isLoggedIn && !currentUser && page!=='landing'){ openModal('modal-auth'); return; }
+  const fbUser = (window.firebase && firebase.apps.length && firebase.auth().currentUser) || null;
+  if(!isLoggedIn && !currentUser && !fbUser && page!=='landing'){ openModal('modal-auth'); return; }
+  if(fbUser && !isLoggedIn && !currentUser && page!=='landing'){
+    // Auth exists but profile not loaded yet — complete then continue
+    if (typeof completeAuthFromUser === 'function') completeAuthFromUser(fbUser, fbUser.displayName || '');
+  }
   document.querySelectorAll('.page-view').forEach(p=>p.classList.add('hidden'));
   document.getElementById('page-'+page)?.classList.remove('hidden');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -8530,27 +8566,11 @@ document.addEventListener('DOMContentLoaded',()=>{
         }
       }
       if (user && !isLoggedIn) {
-        firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
-          if (doc.exists && doc.data().handle) {
-            const d = doc.data();
-            if (d.banned && (!d.banUntil || d.banUntil > Date.now())) {
-              enforceBan(d);
-              return;
-            }
-            login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
-              bio: d.bio || '',
-              banner: d.banner || '',
-              avatarEffect: d.avatarEffect || 'none',
-              unlockedEffects: d.unlockedEffects || ['none'],
-              email: d.email || user.email || '',
-              coins: d.coins,
-              terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === TREMENAL_OWNER,
-              createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
-              nitro: d.nitro || null,
-              profileThemeColor: d.profileThemeColor || null, profileThemeTop: d.profileThemeTop || null, profileThemeBottom: d.profileThemeBottom || null, nameStyle: d.nameStyle || null
-            });
-          }
-        }).catch(()=>{});
+        completeAuthFromUser(user, user.displayName || '');
+      } else if (!user && isLoggedIn) {
+        isLoggedIn = false;
+        currentUser = null;
+        showLanding();
       }
       if (user && typeof tryJoinFromUrl === 'function') {
         setTimeout(() => tryJoinFromUrl(), 600);
