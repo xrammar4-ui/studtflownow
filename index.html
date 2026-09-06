@@ -2976,6 +2976,179 @@ h3 { font-size: 1.05rem; }
   /* overridden via inline style */
 }
 
+
+/* Message icon-only button on profile */
+.btn-icon-msg {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.btn-icon-msg svg { width: 18px; height: 18px; }
+
+/* Mutual groups / friends (Discord-style) */
+.mutual-section {
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+.mutual-section.hidden { display: none !important; }
+.mutual-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+.mutual-block {
+  flex: 1;
+  min-width: 120px;
+}
+.mutual-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.mutual-avatars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.mutual-avatars.stack-h {
+  flex-direction: row;
+  align-items: center;
+}
+.mutual-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--bg-elevated);
+  border: 2px solid var(--bg-card);
+  display: block;
+}
+.mutual-avatar.round {
+  border-radius: 50%;
+}
+.mutual-avatar-wrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+.mutual-avatars.stack-2 .mutual-avatar-wrap:nth-child(1) { z-index: 1; }
+.mutual-avatars.stack-2 .mutual-avatar-wrap:nth-child(2) {
+  margin-top: -10px;
+  z-index: 2;
+}
+.mutual-avatars.stack-h .mutual-avatar-wrap:nth-child(2) {
+  margin-left: -12px;
+  margin-top: 0;
+  z-index: 2;
+}
+.mutual-count {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+.mutual-name {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* Custom emoji system */
+.emoji-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s var(--ease);
+  font-size: 1.15rem;
+  font-family: inherit;
+  position: relative;
+}
+.emoji-btn:hover {
+  border-color: rgba(99,102,241,0.4);
+  color: var(--accent-hover);
+}
+.emoji-picker-panel {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: min(320px, calc(100vw - 2rem));
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  padding: 0.65rem;
+  z-index: 60;
+  display: none;
+}
+.emoji-picker-panel.open { display: block; animation: fadeUp 0.18s var(--ease); }
+.emoji-picker-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  padding: 0 0.2rem;
+}
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.35rem;
+}
+.emoji-cell {
+  width: 100%;
+  aspect-ratio: 1;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  transition: background 0.15s;
+}
+.emoji-cell:hover { background: rgba(255,255,255,0.06); }
+.cemoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35em;
+  height: 1.35em;
+  vertical-align: -0.2em;
+  font-style: normal;
+  line-height: 1;
+  border-radius: 20%;
+  flex-shrink: 0;
+}
+.cemoji svg { width: 100%; height: 100%; display: block; }
+.wa-bubble .cemoji, .message .cemoji { width: 1.45em; height: 1.45em; }
+.chat-input-area { position: relative; }
+.emoji-picker-anchor { position: relative; flex-shrink: 0; }
+
   </style>
 </head>
 <body>
@@ -3397,7 +3570,16 @@ h3 { font-size: 1.05rem; }
                   <button type="button" class="btn btn-ghost btn-sm" onclick="cancelVoiceRecord()">Cancel</button>
                   <button type="button" class="btn btn-primary btn-sm" onclick="stopAndSendVoice()">Send</button>
                 </div>
-                <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type a message" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
+                <div class="emoji-picker-anchor">
+                  <button type="button" class="emoji-btn" id="emoji-btn" onclick="toggleEmojiPicker(event)" title="Custom emojis" aria-label="Emojis">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  </button>
+                  <div class="emoji-picker-panel" id="emoji-picker-panel">
+                    <div class="emoji-picker-title">DevFlow Custom Emojis</div>
+                    <div class="emoji-grid" id="emoji-grid"></div>
+                  </div>
+                </div>
+                <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type a message · :name: for emojis" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
                 <button class="btn btn-primary" id="chat-send-btn" onclick="sendChatMessage()">Send</button>
               </div>
             </div>
@@ -3660,9 +3842,26 @@ h3 { font-size: 1.05rem; }
           </div>
           <div class="discord-bio" id="view-profile-bio"></div>
           <div class="discord-divider"></div>
+          <div class="mutual-section hidden" id="view-mutual-section">
+            <div class="mutual-row">
+              <div class="mutual-block" id="view-mutual-groups-block">
+                <div class="mutual-label" id="view-mutual-groups-label">Mutual Groups</div>
+                <div class="mutual-avatars" id="view-mutual-groups"></div>
+                <div class="mutual-count" id="view-mutual-groups-count"></div>
+              </div>
+              <div class="mutual-block" id="view-mutual-friends-block">
+                <div class="mutual-label" id="view-mutual-friends-label">Mutual Friends</div>
+                <div class="mutual-avatars stack-h" id="view-mutual-friends"></div>
+                <div class="mutual-count" id="view-mutual-friends-count"></div>
+              </div>
+            </div>
+          </div>
+          <div class="discord-divider hidden" id="view-mutual-divider"></div>
           <div class="discord-actions" id="view-profile-actions">
             <button class="btn btn-primary btn-sm" id="view-profile-friend-btn" onclick="sendFriendRequestFromView()">Add Friend</button>
-            <button class="btn btn-outline btn-sm" id="view-profile-msg-btn" onclick="messageFromViewProfile()">Message</button>
+            <button type="button" class="btn btn-outline btn-sm btn-icon-msg" id="view-profile-msg-btn" onclick="messageFromViewProfile()" title="Message" aria-label="Message">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </button>
             <button class="btn btn-ghost btn-sm" id="view-profile-block-btn" onclick="blockUserFromView()">Block</button>
             <button class="btn btn-outline btn-sm" onclick="closeModal('modal-view-profile')">Close</button>
           </div>
@@ -4003,7 +4202,7 @@ function waBubbleHtml(docId, m, mine, extraTop) {
   const safeHandle = String(m.fromHandle || '').replace(/'/g, "\\'");
   const bodyHtml = (m.type === 'voice' && m.audioUrl)
     ? voiceMessageHtml(m)
-    : ('<div class="wa-text">' + escapeHtml(text) + '</div>');
+    : ('<div class="wa-text">' + (typeof renderEmojiText === 'function' ? renderEmojiText(text) : escapeHtml(text)) + '</div>');
   return '<div class="wa-row ' + (mine ? 'sent' : 'received') + '">' +
     '<div class="wa-bubble ' + (mine ? 'sent' : 'received') + '" data-msg-id="' + docId + '">' +
       '<button type="button" class="wa-reply-btn" onclick="event.stopPropagation(); setReplyTo(\'' + docId + '\',\'' + safeHandle + '\',\'' + safeText + '\')">Reply</button>' +
@@ -4933,10 +5132,227 @@ async function viewUserProfile(handle) {
       updateViewFriendButton();
     }
 
+    try { await loadMutualForProfile(peer); } catch (e) { console.warn(e); }
     openModal('modal-view-profile');
   })().catch(err => showToast('Error', err.message || 'Could not load profile'));
 }
 
+
+
+/* ---- Mutual Groups & Friends (Discord-style) ---- */
+async function loadMutualForProfile(peer) {
+  const section = document.getElementById('view-mutual-section');
+  const divider = document.getElementById('view-mutual-divider');
+  const gBlock = document.getElementById('view-mutual-groups-block');
+  const fBlock = document.getElementById('view-mutual-friends-block');
+  const gBox = document.getElementById('view-mutual-groups');
+  const fBox = document.getElementById('view-mutual-friends');
+  const gCount = document.getElementById('view-mutual-groups-count');
+  const fCount = document.getElementById('view-mutual-friends-count');
+  if (!section || !gBox || !fBox) return;
+
+  gBox.innerHTML = '';
+  fBox.innerHTML = '';
+  if (gCount) gCount.textContent = '';
+  if (fCount) fCount.textContent = '';
+  section.classList.add('hidden');
+  if (divider) divider.classList.add('hidden');
+  if (gBlock) gBlock.style.display = 'none';
+  if (fBlock) fBlock.style.display = 'none';
+
+  if (!peer || !peer.uid) return;
+  const me = (window.firebase && firebase.apps.length && firebase.auth().currentUser) ? firebase.auth().currentUser : null;
+  if (!me || me.uid === peer.uid) return;
+
+  let mutualGroups = [];
+  let mutualFriends = [];
+
+  try {
+    if (typeof db === 'function') {
+      const snap = await db().collection('groups').where('members', 'array-contains', me.uid).limit(40).get();
+      snap.forEach(doc => {
+        const d = doc.data() || {};
+        const members = d.members || [];
+        if (members.includes(peer.uid)) {
+          mutualGroups.push({
+            id: doc.id,
+            name: d.name || 'Group',
+            avatar: d.avatar || ('https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(doc.id))
+          });
+        }
+      });
+    }
+  } catch (e) { console.warn('mutual groups', e); }
+
+  try {
+    const peerFriends = Array.isArray(peer.friends) ? peer.friends : [];
+    const myHandles = new Set(FRIENDS.map(f => String(f.handle || '').toLowerCase()).filter(Boolean));
+    peerFriends.forEach(f => {
+      const h = String(f.handle || '').toLowerCase().replace(/^@/, '');
+      if (!h || h === String(peer.handle || '').toLowerCase()) return;
+      if (!myHandles.has(h)) return;
+      if (mutualFriends.some(x => x.handle === h)) return;
+      const mine = FRIENDS.find(x => String(x.handle || '').toLowerCase() === h);
+      mutualFriends.push({
+        handle: h,
+        name: (mine && mine.name) || f.name || h,
+        avatar: (mine && mine.avatar) || f.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(h))
+      });
+    });
+  } catch (e) { console.warn('mutual friends', e); }
+
+  const showG = mutualGroups.slice(0, 2);
+  const showF = mutualFriends.slice(0, 2);
+  let hasAny = false;
+
+  if (showG.length) {
+    hasAny = true;
+    if (gBlock) gBlock.style.display = '';
+    gBox.className = 'mutual-avatars' + (showG.length === 2 ? ' stack-2' : '');
+    gBox.innerHTML = showG.map(g => {
+      const src = String(g.avatar || '').replace(/"/g, '');
+      return '<div class="mutual-avatar-wrap" title="' + escapeHtml(g.name) + '">' +
+        '<img class="mutual-avatar" src="' + src + '" alt="" />' +
+        '<div class="mutual-name">' + escapeHtml(g.name) + '</div>' +
+      '</div>';
+    }).join('');
+    if (gCount) {
+      const n = mutualGroups.length;
+      gCount.textContent = n === 1 ? '1 mutual group' : (n + ' mutual groups');
+    }
+  }
+
+  if (showF.length) {
+    hasAny = true;
+    if (fBlock) fBlock.style.display = '';
+    fBox.className = 'mutual-avatars stack-h' + (showF.length === 2 ? ' stack-2' : '');
+    fBox.innerHTML = showF.map(f => {
+      const src = String(f.avatar || '').replace(/"/g, '');
+      return '<div class="mutual-avatar-wrap" title="@' + escapeHtml(f.handle) + '">' +
+        '<img class="mutual-avatar round" src="' + src + '" alt="" />' +
+      '</div>';
+    }).join('');
+    if (fCount) {
+      const n = mutualFriends.length;
+      fCount.textContent = n === 1 ? '1 mutual friend' : (n + ' mutual friends');
+    }
+  }
+
+  if (hasAny) {
+    section.classList.remove('hidden');
+    if (divider) divider.classList.remove('hidden');
+  }
+}
+
+/* ---- Custom emojis (hand-crafted SVG shapes) ---- */
+const CUSTOM_EMOJIS = [
+  { id: 'spark-orb', name: 'Spark Orb', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="so" cx="40%" cy="35%"><stop offset="0%" stop-color="#FDE68A"/><stop offset="55%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#B45309"/></radialGradient></defs><circle cx="16" cy="16" r="12" fill="url(#so)"/><path d="M16 6l1.2 3.6L21 11l-3.8 1.4L16 16l-1.2-3.6L11 11l3.8-1.4z" fill="#FFF7ED" opacity=".9"/></svg>' },
+  { id: 'neon-ring', name: 'Neon Ring', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="10" fill="none" stroke="#22D3EE" stroke-width="3"/><circle cx="16" cy="16" r="5" fill="#0E7490" opacity=".5"/><circle cx="16" cy="16" r="2.5" fill="#A5F3FC"/></svg>' },
+  { id: 'pixel-heart', name: 'Pixel Heart', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="#F43F5E" d="M8 10h4v2H8zm12 0h4v2h-4zM6 12h4v2H6zm8 0h4v2h-4zm8 0h4v2h-4zM4 14h24v4H4zm2 4h20v2H6zm2 2h16v2H8zm2 2h12v2H10zm2 2h8v2h-8z"/></svg>' },
+  { id: 'frost-flake', name: 'Frost Flake', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g stroke="#7DD3FC" stroke-width="2" stroke-linecap="round" fill="none"><path d="M16 4v24M6 10l20 12M26 10L6 22"/><path d="M16 8l3 3-3 3-3-3zM16 18l3 3-3 3-3-3zM9 12l2 4-4 2-2-4zM23 12l-2 4 4 2 2-4z"/></g><circle cx="16" cy="16" r="2.5" fill="#E0F2FE"/></svg>' },
+  { id: 'ember-drop', name: 'Ember Drop', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ed" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FDE68A"/><stop offset="50%" stop-color="#F97316"/><stop offset="100%" stop-color="#9A3412"/></linearGradient></defs><path d="M16 4c0 0 10 12 10 18a10 10 0 11-20 0C6 16 16 4 16 4z" fill="url(#ed)"/><ellipse cx="13" cy="18" rx="2.5" ry="4" fill="#FEF3C7" opacity=".55"/></svg>' },
+  { id: 'void-eye', name: 'Void Eye', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="16" cy="16" rx="13" ry="8" fill="#1E1B4B"/><ellipse cx="16" cy="16" rx="13" ry="8" fill="none" stroke="#A78BFA" stroke-width="1.5"/><circle cx="16" cy="16" r="5" fill="#4C1D95"/><circle cx="16" cy="16" r="2.2" fill="#C4B5FD"/><circle cx="14.5" cy="14.5" r="0.9" fill="#fff"/></svg>' },
+  { id: 'leaf-bolt', name: 'Leaf Bolt', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M8 24c8-2 14-10 16-18-8 2-14 10-16 18z" fill="#34D399"/><path d="M10 22c4-3 8-8 10-13" stroke="#064E3B" stroke-width="1.5" fill="none"/><path d="M18 6l2 6 6 1-5 4 2 6-5-3-5 3 2-6-5-4 6-1z" fill="#A7F3D0" opacity=".85" transform="translate(2,4) scale(.55)"/></svg>' },
+  { id: 'star-shard', name: 'Star Shard', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 3l3.5 9.5L29 14l-7.5 6.2L24 30l-8-5.2L8 30l2.5-9.8L3 14l9.5-1.5z" fill="#FBBF24"/><path d="M16 8l1.8 5 5.2.8-4 3.3 1.2 5.2L16 19.5" fill="#FEF3C7" opacity=".7"/></svg>' },
+  { id: 'wave-crest', name: 'Wave Crest', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M2 20c4-6 8-6 12 0s8 6 12 0v8H2z" fill="#0EA5E9"/><path d="M2 18c4-5 8-5 12 0s8 5 12 0" fill="none" stroke="#7DD3FC" stroke-width="2"/><circle cx="24" cy="10" r="3" fill="#FDE68A"/></svg>' },
+  { id: 'cube-glow', name: 'Cube Glow', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 4l10 6v12l-10 6-10-6V10z" fill="#6366F1"/><path d="M16 4v12l10 6V10z" fill="#818CF8"/><path d="M16 16L6 10v12l10 6z" fill="#4F46E5"/><path d="M16 10l5 3v6l-5 3-5-3v-6z" fill="#C7D2FE" opacity=".5"/></svg>' },
+  { id: 'moon-bite', name: 'Moon Bite', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" fill="#FDE68A"/><circle cx="21" cy="12" r="10" fill="#09090B"/><circle cx="10" cy="12" r="1.2" fill="#F59E0B"/><circle cx="8" cy="18" r="0.9" fill="#F59E0B"/></svg>' },
+  { id: 'bolt-zap', name: 'Bolt Zap', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M18 2L8 18h7l-2 12 12-18h-7z" fill="#FACC15"/><path d="M16 6l-6 10h5l-1.5 8 8-12h-5z" fill="#FEF9C3" opacity=".75"/></svg>' },
+  { id: 'rose-petal', name: 'Rose Petal', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="16" cy="18" rx="8" ry="10" fill="#FB7185" transform="rotate(-20 16 18)"/><ellipse cx="14" cy="14" rx="6" ry="8" fill="#F43F5E" transform="rotate(15 14 14)"/><circle cx="15" cy="14" r="3" fill="#BE123C"/><path d="M16 24v5" stroke="#166534" stroke-width="2"/><path d="M16 26c3 1 5 3 4 5" stroke="#22C55E" stroke-width="1.5" fill="none"/></svg>' },
+  { id: 'ghost-orb', name: 'Ghost Orb', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M8 14a8 8 0 0116 0v10c0 0-2-2-4-2s-3 2-4 2-2-2-4-2-4 2-4 2z" fill="#E4E4E7"/><circle cx="12.5" cy="14" r="1.6" fill="#27272A"/><circle cx="19.5" cy="14" r="1.6" fill="#27272A"/><path d="M13 19c1.2 1.2 4.8 1.2 6 0" stroke="#A1A1AA" stroke-width="1.2" fill="none"/></svg>' },
+  { id: 'prism-tri', name: 'Prism Tri', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 4L28 26H4z" fill="#A855F7"/><path d="M16 4L28 26H16z" fill="#6366F1"/><path d="M16 4L4 26h12z" fill="#EC4899"/><path d="M16 10l6 12H10z" fill="#F5D0FE" opacity=".45"/></svg>' },
+  { id: 'coin-spin', name: 'Coin Spin', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="16" cy="16" rx="12" ry="12" fill="#F59E0B"/><ellipse cx="16" cy="16" rx="9" ry="9" fill="#FDE68A"/><text x="16" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#B45309">✦</text></svg>' },
+  { id: 'code-bracket', name: 'Code Bracket', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M12 6L4 16l8 10" fill="none" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 6l8 10-8 10" fill="none" stroke="#60A5FA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 8l-4 16" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round"/></svg>' },
+  { id: 'shield-core', name: 'Shield Core', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 3l11 5v8c0 7-5 12-11 14C10 28 5 23 5 16V8z" fill="#3B82F6"/><path d="M16 7l7 3v5c0 4.5-3.2 8-7 9.5-3.8-1.5-7-5-7-9.5v-5z" fill="#93C5FD"/><path d="M13 16l2.5 2.5L20 13" fill="none" stroke="#1E3A8A" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { id: 'flame-tip', name: 'Flame Tip', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 2s8 8 8 16a8 8 0 11-16 0c0-4 3-8 5-10 0 4 2 6 3 6 0-4 2-8 0-12z" fill="#F97316"/><path d="M16 12s4 4 4 8a4 4 0 11-8 0c0-2 1.5-4 2.5-5" fill="#FDE68A"/></svg>' },
+  { id: 'bubble-pop', name: 'Bubble Pop', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="16" r="10" fill="#38BDF8" opacity=".55"/><circle cx="14" cy="16" r="10" fill="none" stroke="#7DD3FC" stroke-width="1.5"/><circle cx="11" cy="12" r="3" fill="#E0F2FE" opacity=".8"/><circle cx="22" cy="10" r="4" fill="#38BDF8" opacity=".4"/><circle cx="24" cy="22" r="3" fill="#7DD3FC" opacity=".5"/></svg>' },
+  { id: 'hex-chip', name: 'Hex Chip', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 3l10 5.5v11L16 25 6 19.5v-11z" fill="#27272A" stroke="#22D3EE" stroke-width="1.5"/><circle cx="16" cy="14" r="4" fill="#22D3EE"/><path d="M16 10v8M12 14h8" stroke="#083344" stroke-width="1.5"/></svg>' },
+  { id: 'cat-wink', name: 'Cat Wink', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="16" cy="18" rx="11" ry="9" fill="#FBBF24"/><path d="M6 12l4 6M26 12l-4 6" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="17" r="1.5" fill="#27272A"/><path d="M18 16.5h5" stroke="#27272A" stroke-width="1.5" stroke-linecap="round"/><path d="M14 21c1.5 1.2 3.5 1.2 5 0" stroke="#B45309" stroke-width="1.2" fill="none"/><path d="M16 18v2" stroke="#F97316" stroke-width="1.5"/></svg>' },
+  { id: 'rocket-mini', name: 'Rocket Mini', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 2c6 4 8 12 8 18l-4 2-4-4-4 4-4-2c0-6 2-14 8-18z" fill="#E4E4E7"/><circle cx="16" cy="12" r="2.5" fill="#60A5FA"/><path d="M10 22l-3 6 5-3M22 22l3 6-5-3" fill="#F97316"/><path d="M14 26h4v3h-4z" fill="#EF4444"/></svg>' },
+  { id: 'diamond-cut', name: 'Diamond Cut', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M8 10h16l4 6-12 14L4 16z" fill="#67E8F9"/><path d="M8 10l4 6h8l4-6" fill="#A5F3FC"/><path d="M12 16l4 14 4-14z" fill="#22D3EE"/><path d="M4 16h24" stroke="#ECFEFF" stroke-width="1" opacity=".6"/></svg>' },
+  { id: 'sun-burst', name: 'Sun Burst', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="7" fill="#FBBF24"/><g stroke="#F59E0B" stroke-width="2" stroke-linecap="round"><path d="M16 3v4M16 25v4M3 16h4M25 16h4M6.5 6.5l2.8 2.8M22.7 22.7l2.8 2.8M6.5 25.5l2.8-2.8M22.7 9.3l2.8-2.8"/></g></svg>' },
+  { id: 'cloud-soft', name: 'Cloud Soft', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="18" rx="8" ry="6" fill="#E2E8F0"/><ellipse cx="20" cy="17" rx="9" ry="7" fill="#F1F5F9"/><ellipse cx="16" cy="14" rx="6" ry="5" fill="#fff"/></svg>' },
+  { id: 'target-lock', name: 'Target Lock', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" fill="none" stroke="#EF4444" stroke-width="2"/><circle cx="16" cy="16" r="7" fill="none" stroke="#F87171" stroke-width="2"/><circle cx="16" cy="16" r="2.5" fill="#EF4444"/><path d="M16 2v4M16 26v4M2 16h4M26 16h4" stroke="#EF4444" stroke-width="2"/></svg>' },
+  { id: 'melody-note', name: 'Melody Note', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="24" rx="5" ry="4" fill="#A78BFA"/><path d="M15 24V8l10-3v16" stroke="#C4B5FD" stroke-width="3" fill="none"/><ellipse cx="25" cy="21" rx="5" ry="4" fill="#818CF8"/></svg>' },
+  { id: 'gear-spin', name: 'Gear Spin', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M13 3h6l1 4 4 1 3-3 4 4-3 3 1 4 4 1v6l-4 1-1 4 3 3-4 4-3-3-4 1-1 4h-6l-1-4-4-1-3 3-4-4 3-3-1-4-4-1v-6l4-1 1-4-3-3 4-4 3 3 4-1z" fill="#71717A"/><circle cx="16" cy="16" r="5" fill="#27272A"/><circle cx="16" cy="16" r="2.5" fill="#A1A1AA"/></svg>' },
+  { id: 'crown-mini', name: 'Crown Mini', svg: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4 22l3-12 5 6 4-10 4 10 5-6 3 12z" fill="#FBBF24"/><path d="M4 22h24v3H4z" fill="#F59E0B"/><circle cx="7" cy="10" r="2" fill="#FDE68A"/><circle cx="16" cy="6" r="2" fill="#FDE68A"/><circle cx="25" cy="10" r="2" fill="#FDE68A"/></svg>' }
+];
+
+function cemojiHtml(id) {
+  const e = CUSTOM_EMOJIS.find(x => x.id === id);
+  if (!e) return ':' + id + ':';
+  // uniquify gradient ids inside svg to avoid collisions
+  let svg = e.svg;
+  const uid = 'ce' + id.replace(/[^a-z0-9]/gi, '') + Math.random().toString(36).slice(2, 6);
+  svg = svg.replace(/id="([^"]+)"/g, function(_, n) { return 'id="' + uid + n + '"'; });
+  svg = svg.replace(/url\(#([^)]+)\)/g, function(_, n) { return 'url(#' + uid + n + ')'; });
+  return '<span class="cemoji" title=":' + e.id + ':" data-emoji="' + e.id + '">' + svg + '</span>';
+}
+
+function renderEmojiText(text) {
+  if (!text) return '';
+  // escape first
+  let s = String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  s = s.replace(/:([a-z0-9_-]+):/gi, function(m, id) {
+    const found = CUSTOM_EMOJIS.find(x => x.id === id.toLowerCase());
+    if (!found) return m;
+    return cemojiHtml(found.id);
+  });
+  return s;
+}
+
+function buildEmojiPicker() {
+  const grid = document.getElementById('emoji-grid');
+  if (!grid) return;
+  grid.innerHTML = CUSTOM_EMOJIS.map(e =>
+    '<button type="button" class="emoji-cell" title=":' + e.id + ': · ' + e.name + '" data-emoji="' + e.id + '" onclick="insertCustomEmoji(\'' + e.id + '\')">' +
+      cemojiHtml(e.id) +
+    '</button>'
+  ).join('');
+}
+
+function toggleEmojiPicker(ev) {
+  if (ev) ev.stopPropagation();
+  const panel = document.getElementById('emoji-picker-panel');
+  if (!panel) return;
+  const open = panel.classList.toggle('open');
+  if (open) {
+    buildEmojiPicker();
+  }
+}
+
+function insertCustomEmoji(id) {
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  const token = ':' + id + ':';
+  const start = input.selectionStart || input.value.length;
+  const end = input.selectionEnd || input.value.length;
+  const v = input.value;
+  input.value = v.slice(0, start) + token + v.slice(end);
+  const pos = start + token.length;
+  input.focus();
+  try { input.setSelectionRange(pos, pos); } catch (e) {}
+  const panel = document.getElementById('emoji-picker-panel');
+  if (panel) panel.classList.remove('open');
+}
+
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('emoji-picker-panel');
+  const btn = document.getElementById('emoji-btn');
+  if (!panel || !panel.classList.contains('open')) return;
+  if (panel.contains(e.target) || (btn && btn.contains(e.target))) return;
+  panel.classList.remove('open');
+});
+
+window.loadMutualForProfile = loadMutualForProfile;
+window.toggleEmojiPicker = toggleEmojiPicker;
+window.insertCustomEmoji = insertCustomEmoji;
+window.cemojiHtml = cemojiHtml;
+window.renderEmojiText = renderEmojiText;
+window.CUSTOM_EMOJIS = CUSTOM_EMOJIS;
 
 function messageFromViewProfile() {
   if (!viewingProfileHandle) return;
