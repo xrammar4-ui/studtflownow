@@ -3904,7 +3904,7 @@ h3 { font-size: 1.05rem; }
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-onboarding'); localStorage.setItem('devflow_onboarding','true');">Skip</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-onboarding'); lsSet('onboarding', 'true');">Skip</button>
         <button type="button" class="btn btn-primary" onclick="submitOnboarding()">Save goals</button>
       </div>
     </div>
@@ -4575,7 +4575,7 @@ let unsubInbox = null;
 let inboxBootstrapped = false;
 const inboxKnownUpdated = {}; // chatId -> millis
 function saveUnreadChatIds() {
-  localStorage.setItem('devflow_unread_ids', JSON.stringify(UNREAD_CHAT_IDS));
+  lsSet('unread_ids', JSON.stringify(UNREAD_CHAT_IDS));
   setUnreadChats(UNREAD_CHAT_IDS.length);
 }
 
@@ -5159,29 +5159,100 @@ window.cancelReply = cancelReply;
 /* ========== APP.JS ========== */
 /* DevFlow — Core Logic */
 
+/* Per-account local storage (prevents data leaking between accounts on same device) */
+let STORAGE_UID = '';
+function accountKey(key) {
+  const uid = STORAGE_UID || (currentUser && currentUser.uid) || '';
+  if (!uid) return 'devflow_' + key;
+  return 'devflow_u_' + uid + '_' + key;
+}
+function lsGet(key, fallback) {
+  try {
+    const v = localStorage.getItem(accountKey(key));
+    if (v == null || v === '') return fallback;
+    return v;
+  } catch (e) { return fallback; }
+}
+function lsSet(key, value) {
+  try { localStorage.setItem(accountKey(key), value); } catch (e) {}
+}
+function lsDel(key) {
+  try { localStorage.removeItem(accountKey(key)); } catch (e) {}
+}
+function resetAccountMemory() {
+  TASKS = [];
+  NOTIFICATIONS = [];
+  ACTIVITY = [];
+  UNREAD_CHAT_IDS = [];
+  UNREAD_CHATS = 0;
+  FOCUS_TODAY_MIN = 0;
+  COINS = 0;
+  SKILLS_LEARNED = [];
+  SKILLS_LEARNING = [];
+  CERTIFICATES = [];
+  ONBOARDING_DONE = false;
+  TERMINAL_ENABLED = false;
+  STREAK = 0;
+  LAST_FOCUS_DAY = '';
+  USER_STATUS = 'online';
+  try { FRIENDS.length = 0; } catch (e) {}
+  try { BLOCKED = []; } catch (e) {}
+  try { PENDING_FRIEND_OUT = []; } catch (e) {}
+  try { IS_PRIVATE_ACCOUNT = false; } catch (e) {}
+  ACTIVE_TIMER = null;
+  if (timerInterval) { try { clearInterval(timerInterval); } catch (e) {} timerInterval = null; }
+  remainingSeconds = 0;
+}
+function loadAccountLocalState(uid) {
+  STORAGE_UID = uid || '';
+  try { TASKS = JSON.parse(lsGet('tasks', '[]')); if (!Array.isArray(TASKS)) TASKS = []; } catch (e) { TASKS = []; }
+  try { NOTIFICATIONS = JSON.parse(lsGet('notifs', '[]')); if (!Array.isArray(NOTIFICATIONS)) NOTIFICATIONS = []; } catch (e) { NOTIFICATIONS = []; }
+  try { ACTIVITY = JSON.parse(lsGet('activity', '[]')); if (!Array.isArray(ACTIVITY)) ACTIVITY = []; } catch (e) { ACTIVITY = []; }
+  try { UNREAD_CHAT_IDS = JSON.parse(lsGet('unread_ids', '[]')); if (!Array.isArray(UNREAD_CHAT_IDS)) UNREAD_CHAT_IDS = []; } catch (e) { UNREAD_CHAT_IDS = []; }
+  UNREAD_CHATS = UNREAD_CHAT_IDS.length || parseInt(lsGet('unread_chats', '0'), 10) || 0;
+  FOCUS_TODAY_MIN = parseInt(lsGet('focus_today', '0'), 10) || 0;
+  COINS = parseInt(lsGet('coins', '0'), 10) || 0;
+  try { SKILLS_LEARNED = JSON.parse(lsGet('skills_learned', '[]')); } catch (e) { SKILLS_LEARNED = []; }
+  try { SKILLS_LEARNING = JSON.parse(lsGet('skills_learning', '[]')); } catch (e) { SKILLS_LEARNING = []; }
+  try { CERTIFICATES = JSON.parse(lsGet('certs', '[]')); } catch (e) { CERTIFICATES = []; }
+  ONBOARDING_DONE = lsGet('onboarding', '') === 'true';
+  TERMINAL_ENABLED = lsGet('terminal', '') === 'true';
+  STREAK = parseInt(lsGet('streak', '0'), 10) || 0;
+  LAST_FOCUS_DAY = lsGet('last_focus_day', '') || '';
+  USER_STATUS = lsGet('status', 'online') || 'online';
+  try {
+    const fr = JSON.parse(lsGet('friends', '[]'));
+    FRIENDS.length = 0;
+    if (Array.isArray(fr)) fr.forEach(x => FRIENDS.push(x));
+  } catch (e) { FRIENDS.length = 0; }
+  try { BLOCKED = JSON.parse(lsGet('blocked', '[]')); if (!Array.isArray(BLOCKED)) BLOCKED = []; } catch (e) { BLOCKED = []; }
+  try { PENDING_FRIEND_OUT = JSON.parse(lsGet('friend_out', '[]')); if (!Array.isArray(PENDING_FRIEND_OUT)) PENDING_FRIEND_OUT = []; } catch (e) { PENDING_FRIEND_OUT = []; }
+  try { IS_PRIVATE_ACCOUNT = lsGet('private', '') === 'true'; } catch (e) { IS_PRIVATE_ACCOUNT = false; }
+}
+
+
 let isLoggedIn = localStorage.getItem('devflow_logged_in') === 'true';
 let currentUser = null;
-let USER_STATUS = localStorage.getItem('devflow_status') || 'online';
-let TASKS = JSON.parse(localStorage.getItem('devflow_tasks') || '[]');
-let NOTIFICATIONS = JSON.parse(localStorage.getItem('devflow_notifs') || '[]');
+let USER_STATUS = 'online';
+let TASKS = [];
+let NOTIFICATIONS = [];
 let ACTIVE_TIMER = null;
 let UNREAD_CHAT_IDS = [];
-try { UNREAD_CHAT_IDS = JSON.parse(localStorage.getItem('devflow_unread_ids') || '[]'); if (!Array.isArray(UNREAD_CHAT_IDS)) UNREAD_CHAT_IDS = []; } catch (e) { UNREAD_CHAT_IDS = []; }
-let UNREAD_CHATS = UNREAD_CHAT_IDS.length || parseInt(localStorage.getItem('devflow_unread_chats') || '0', 10);
-let ACTIVITY = JSON.parse(localStorage.getItem('devflow_activity') || '[]');
-let FOCUS_TODAY_MIN = parseInt(localStorage.getItem('devflow_focus_today') || '0', 10);
-let COINS = parseInt(localStorage.getItem('devflow_coins') || '0', 10);
-let SKILLS_LEARNED = JSON.parse(localStorage.getItem('devflow_skills_learned') || '[]');
-let SKILLS_LEARNING = JSON.parse(localStorage.getItem('devflow_skills_learning') || '[]');
-let CERTIFICATES = JSON.parse(localStorage.getItem('devflow_certs') || '[]');
-let ONBOARDING_DONE = localStorage.getItem('devflow_onboarding') === 'true';
-let TERMINAL_ENABLED = localStorage.getItem('devflow_terminal') === 'true';
+let UNREAD_CHATS = 0;
+let ACTIVITY = [];
+let FOCUS_TODAY_MIN = 0;
+let COINS = 0;
+let SKILLS_LEARNED = [];
+let SKILLS_LEARNING = [];
+let CERTIFICATES = [];
+let ONBOARDING_DONE = false;
+let TERMINAL_ENABLED = false;
 let timerInterval = null;
 let remainingSeconds = 0;
 let pendingSignup = { displayName: '', handle: '', avatar: '' };
 let pendingAvatarData = '';
 
-const FRIENDS = JSON.parse(localStorage.getItem('devflow_friends') || '[]');
+const FRIENDS = [];
 const SKILL_CATALOG = [
   'HTML','CSS','JavaScript','TypeScript','Python','Java','C','C++','C#','PHP',
   'SQL','Kotlin','Swift','Go','Rust','Ruby','R','Scala','Perl','Dart','Lua',
@@ -5197,15 +5268,15 @@ const SKILL_CATALOG = [
   'Algorithms','Data Structures','System Design','Cybersecurity','Networking'
 ];
 
-let STREAK = parseInt(localStorage.getItem('devflow_streak') || '0', 10);
-let LAST_FOCUS_DAY = localStorage.getItem('devflow_last_focus_day') || '';
+let STREAK = 0;
+let LAST_FOCUS_DAY = '';
 let pendingStartTaskId = null;
 
-function saveTasks(){ localStorage.setItem('devflow_tasks', JSON.stringify(TASKS)); }
-function saveNotifs(){ localStorage.setItem('devflow_notifs', JSON.stringify(NOTIFICATIONS)); }
-function saveFriends(){ localStorage.setItem('devflow_friends', JSON.stringify(FRIENDS)); }
+function saveTasks(){ lsSet('tasks', JSON.stringify(TASKS)); }
+function saveNotifs(){ lsSet('notifs', JSON.stringify(NOTIFICATIONS)); }
+function saveFriends(){ lsSet('friends', JSON.stringify(FRIENDS)); }
 function saveCoins(){
-  localStorage.setItem('devflow_coins', String(COINS));
+  lsSet('coins', String(COINS));
   updateCoinsUI();
   if (window._coinsSyncLock) return;
   try {
@@ -5224,11 +5295,11 @@ function addCoins(n, reason){
     n = Math.round(n * 1.1);
   }
   try {
-    const flags = JSON.parse(localStorage.getItem('devflow_store_flags') || '{}');
+    const flags = JSON.parse(lsGet('store_flags', '{}'));
     if (flags.focus_boost_left > 0 && reason && /focus|session|Focus/i.test(reason)) {
       n = Math.round(n * 1.25);
       flags.focus_boost_left -= 1;
-      localStorage.setItem('devflow_store_flags', JSON.stringify(flags));
+      lsSet('store_flags', JSON.stringify(flags));
     }
   } catch (e) {}
   COINS += n;
@@ -5627,7 +5698,15 @@ function enterGuest(){
 }
 function login(name, handle, avatarUrl, uid, extra){
   isLoggedIn = true;
-  const prev = (() => { try { return JSON.parse(localStorage.getItem('devflow_user')||'null'); } catch(e){ return null; } })();
+  const nextUid = uid || (extra && extra.uid) || '';
+  // Isolate each account's local data on the same device
+  if (nextUid && STORAGE_UID !== nextUid) {
+    resetAccountMemory();
+    loadAccountLocalState(nextUid);
+  } else if (nextUid) {
+    STORAGE_UID = nextUid;
+  }
+  const prev = currentUser;
   currentUser = {
     uid: uid || null,
     displayName: name || 'Developer',
@@ -5642,17 +5721,18 @@ function login(name, handle, avatarUrl, uid, extra){
     terminalAccess: !!(extra && extra.terminalAccess) || !!(prev && prev.terminalAccess)
   };
   if (typeof extra !== 'undefined' && extra && extra.coins != null) {
-    COINS = parseInt(extra.coins, 10) || COINS;
-    localStorage.setItem('devflow_coins', String(COINS));
+    COINS = parseInt(extra.coins, 10);
+    if (isNaN(COINS)) COINS = 0;
+    lsSet('coins', String(COINS));
   }
   if (currentUser.avatarEffect && currentUser.avatarEffect !== 'none') {
     const u = currentUser.unlockedEffects || [];
     if (!u.includes(currentUser.avatarEffect)) u.push(currentUser.avatarEffect);
     currentUser.unlockedEffects = u;
-    localStorage.setItem('devflow_unlocked_fx', JSON.stringify(u));
+    lsSet('unlocked_fx', JSON.stringify(u));
   }
   if (extra && extra.nitro && extra.nitro.expiresAt && extra.nitro.expiresAt > Date.now()) {
-    localStorage.setItem('devflow_nitro', JSON.stringify(extra.nitro));
+    lsSet('nitro', JSON.stringify(extra.nitro));
   }
   if (extra && (extra.profileThemeTop || extra.profileThemeColor || extra.profileThemeBottom)) {
     const t = extra.profileThemeTop || extra.profileThemeColor || DEFAULT_BANNER_THEME_TOP;
@@ -5660,9 +5740,9 @@ function login(name, handle, avatarUrl, uid, extra){
     currentUser.profileThemeTop = t;
     currentUser.profileThemeBottom = b;
     currentUser.profileThemeColor = t;
-    localStorage.setItem('devflow_theme_top', t);
-    localStorage.setItem('devflow_theme_bottom', b);
-    localStorage.setItem('devflow_profile_theme_color', t);
+    lsSet('theme_top', t);
+    lsSet('theme_bottom', b);
+    lsSet('profile_theme_color', t);
   }
   localStorage.setItem('devflow_logged_in','true');
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
@@ -5673,14 +5753,19 @@ function login(name, handle, avatarUrl, uid, extra){
 }
 function logout(){
   if (unsubUserDoc) { try { unsubUserDoc(); } catch (e) {} unsubUserDoc = null; }
+  if (typeof stopInboxListener === 'function') stopInboxListener();
   if (typeof setOffline === 'function') setOffline();
   if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
     firebase.auth().signOut().catch(()=>{});
   }
   isLoggedIn = false;
   currentUser = null;
+  STORAGE_UID = '';
+  resetAccountMemory();
   localStorage.removeItem('devflow_logged_in');
   localStorage.removeItem('devflow_user');
+  if (typeof updateCoinsUI === 'function') updateCoinsUI();
+  if (typeof updateMsgBadge === 'function') updateMsgBadge();
   showLanding();
 }
 function updateUserUI(){
@@ -5741,7 +5826,7 @@ function applyUserStatusUI(){
 function setUserStatus(status){
   if(!['online','idle','dnd','invisible'].includes(status)) status = 'online';
   USER_STATUS = status;
-  localStorage.setItem('devflow_status', status);
+  lsSet('status', status);
   applyUserStatusUI();
   closeStatusMenu();
   if(typeof beatPresence === 'function') beatPresence();
@@ -5801,7 +5886,7 @@ const AVATAR_EFFECTS = [
 
 function loadUnlockedEffects() {
   let list = [];
-  try { list = JSON.parse(localStorage.getItem('devflow_unlocked_fx') || '[]'); } catch (e) { list = []; }
+  try { list = JSON.parse(lsGet('unlocked_fx', '[]')); } catch (e) { list = []; }
   if (currentUser && Array.isArray(currentUser.unlockedEffects)) {
     list = [...new Set(list.concat(currentUser.unlockedEffects))];
   }
@@ -5810,7 +5895,7 @@ function loadUnlockedEffects() {
 }
 function saveUnlockedEffects(list) {
   const uniq = [...new Set(['none'].concat(list || []))];
-  localStorage.setItem('devflow_unlocked_fx', JSON.stringify(uniq));
+  lsSet('unlocked_fx', JSON.stringify(uniq));
   if (currentUser) {
     currentUser.unlockedEffects = uniq;
     localStorage.setItem('devflow_user', JSON.stringify(currentUser));
@@ -6107,10 +6192,10 @@ function submitOnboarding(){
   const learning = [...document.querySelectorAll('#skills-learning .skill-chip.selected')].map(b=>b.dataset.skill);
   SKILLS_LEARNED = learned;
   SKILLS_LEARNING = learning;
-  localStorage.setItem('devflow_skills_learned', JSON.stringify(learned));
-  localStorage.setItem('devflow_skills_learning', JSON.stringify(learning));
+  lsSet('skills_learned', JSON.stringify(learned));
+  lsSet('skills_learning', JSON.stringify(learning));
   ONBOARDING_DONE = true;
-  localStorage.setItem('devflow_onboarding','true');
+  lsSet('onboarding', 'true');
   learning.forEach(skill=>{
     if(TASKS.some(t=>t.isLearningGoal && t.title.includes(skill))) return;
     TASKS.unshift({
@@ -6361,25 +6446,25 @@ function updateTimerDisplay(){
 
 function persistTimer() {
   if (ACTIVE_TIMER && remainingSeconds > 0) {
-    localStorage.setItem('devflow_active_timer', JSON.stringify({
+    lsSet('active_timer', JSON.stringify({
       ...ACTIVE_TIMER,
       remaining: remainingSeconds,
       savedAt: Date.now()
     }));
   } else {
-    localStorage.removeItem('devflow_active_timer');
+    lsDel('active_timer');
   }
 }
 
 function restoreTimer() {
   try {
-    const raw = localStorage.getItem('devflow_active_timer');
+    const raw = lsGet('active_timer', null);
     if (!raw) return;
     const data = JSON.parse(raw);
     const elapsed = Math.floor((Date.now() - data.savedAt) / 1000);
     const left = (data.remaining || 0) - elapsed;
     if (left <= 0) {
-      localStorage.removeItem('devflow_active_timer');
+      lsDel('active_timer');
       return;
     }
     ACTIVE_TIMER = {
@@ -6451,15 +6536,15 @@ function touchStreak(){
   const yesterday = dayKey(-1);
   STREAK = LAST_FOCUS_DAY === yesterday ? STREAK + 1 : 1;
   LAST_FOCUS_DAY = today;
-  localStorage.setItem('devflow_streak', String(STREAK));
-  localStorage.setItem('devflow_last_focus_day', LAST_FOCUS_DAY);
+  lsSet('streak', String(STREAK));
+  lsSet('last_focus_day', LAST_FOCUS_DAY);
 }
 function refreshStreakOnLoad(){
   const today = dayKey(0);
   const yesterday = dayKey(-1);
   if(LAST_FOCUS_DAY && LAST_FOCUS_DAY !== today && LAST_FOCUS_DAY !== yesterday){
     STREAK = 0;
-    localStorage.setItem('devflow_streak', '0');
+    lsSet('streak', '0');
   }
 }
 function finishSession(completeTask){
@@ -6469,7 +6554,7 @@ function finishSession(completeTask){
   const task = ACTIVE_TIMER.taskId ? TASKS.find(t=>t.id===ACTIVE_TIMER.taskId) : null;
   const spent = Math.max(1, Math.round((ACTIVE_TIMER.totalSeconds - remainingSeconds)/60));
   FOCUS_TODAY_MIN += spent;
-  localStorage.setItem('devflow_focus_today', String(FOCUS_TODAY_MIN));
+  lsSet('focus_today', String(FOCUS_TODAY_MIN));
   touchStreak();
   if(task){
     task.sessions = task.sessions || [];
@@ -6494,7 +6579,7 @@ function finishSession(completeTask){
   }
   ACTIVE_TIMER = null;
   remainingSeconds = 0;
-  localStorage.removeItem('devflow_active_timer');
+  lsDel('active_timer');
   renderTasks();
   updateStats();
   initTimerUI();
@@ -6581,7 +6666,7 @@ function updateMsgBadge(){
   if(UNREAD_CHATS>0){ badge.textContent=UNREAD_CHATS>9?'9+':String(UNREAD_CHATS); badge.classList.remove('hidden'); }
   else badge.classList.add('hidden');
 }
-function setUnreadChats(n){ UNREAD_CHATS=Math.max(0,n); localStorage.setItem('devflow_unread_chats',String(UNREAD_CHATS)); updateMsgBadge(); }
+function setUnreadChats(n){ UNREAD_CHATS=Math.max(0,n); lsSet('unread_chats', String(UNREAD_CHATS)); updateMsgBadge(); }
 function simulateIncomingMessage(){ setUnreadChats(UNREAD_CHATS+1); showToast('New message','You have '+UNREAD_CHATS+' unread chat'+(UNREAD_CHATS>1?'s':'')); }
 
 /* Search / empty pages */
@@ -6877,7 +6962,7 @@ function updateNextUp(){
 function addActivity(text, type, minutes){
   ACTIVITY.unshift({id:'a'+Date.now(), text, type:type||'done', time:Date.now(), minutes: minutes||0});
   if(ACTIVITY.length>20) ACTIVITY=ACTIVITY.slice(0,20);
-  localStorage.setItem('devflow_activity', JSON.stringify(ACTIVITY));
+  lsSet('activity', JSON.stringify(ACTIVITY));
   renderActivity();
 }
 function deleteActivity(id){
@@ -6886,11 +6971,11 @@ function deleteActivity(id){
   if(!item) return;
   if(item.minutes && item.type==='focus'){
     FOCUS_TODAY_MIN = Math.max(0, FOCUS_TODAY_MIN - item.minutes);
-    localStorage.setItem('devflow_focus_today', String(FOCUS_TODAY_MIN));
+    lsSet('focus_today', String(FOCUS_TODAY_MIN));
   }
   if(idx>=0) ACTIVITY.splice(idx,1);
   else ACTIVITY.splice(id,1);
-  localStorage.setItem('devflow_activity', JSON.stringify(ACTIVITY));
+  lsSet('activity', JSON.stringify(ACTIVITY));
   renderActivity();
   updateStats();
 }
@@ -6925,14 +7010,14 @@ function addCertificate(e){
   const year=document.getElementById('cert-year').value.trim();
   if(!title) return;
   CERTIFICATES.unshift({title,issuer,year});
-  localStorage.setItem('devflow_certs', JSON.stringify(CERTIFICATES));
+  lsSet('certs', JSON.stringify(CERTIFICATES));
   document.getElementById('form-cert')?.reset();
   renderCertificates();
   addCoins(15,'Certificate added');
 }
 function removeCert(i){
   CERTIFICATES.splice(i,1);
-  localStorage.setItem('devflow_certs', JSON.stringify(CERTIFICATES));
+  lsSet('certs', JSON.stringify(CERTIFICATES));
   renderCertificates();
 }
 
@@ -6997,30 +7082,30 @@ function startUserDocSync() {
     if (typeof d.coins === 'number' && d.coins !== COINS) {
       window._coinsSyncLock = true;
       COINS = d.coins;
-      localStorage.setItem('devflow_coins', String(COINS));
+      lsSet('coins', String(COINS));
       updateCoinsUI();
       window._coinsSyncLock = false;
     }
     // nitro stripped remotely
     if (d.nitro === null || d.nitro === undefined) {
-      if (localStorage.getItem('devflow_nitro')) {
-        localStorage.removeItem('devflow_nitro');
+      if (lsGet('nitro', null)) {
+        lsDel('nitro');
         if (typeof applyNitroUI === 'function') applyNitroUI();
   if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
       }
     } else if (d.nitro && d.nitro.expiresAt) {
-      localStorage.setItem('devflow_nitro', JSON.stringify(d.nitro));
+      lsSet('nitro', JSON.stringify(d.nitro));
       if (typeof applyNitroUI === 'function') applyNitroUI();
   if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
     }
     if (typeof d.privateAccount === 'boolean') {
       IS_PRIVATE_ACCOUNT = d.privateAccount;
-      localStorage.setItem('devflow_private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
+      lsSet('private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
       if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
     }
     if (Array.isArray(d.blocked)) {
       BLOCKED = d.blocked;
-      localStorage.setItem('devflow_blocked', JSON.stringify(BLOCKED));
+      lsSet('blocked', JSON.stringify(BLOCKED));
     }
     if (Array.isArray(d.friends)) {
       // merge cloud friends
@@ -7296,7 +7381,7 @@ function applyTerminalPref(){
 }
 function toggleTerminalPref(checked){
   TERMINAL_ENABLED=!!checked;
-  localStorage.setItem('devflow_terminal', TERMINAL_ENABLED?'true':'false');
+  lsSet('terminal', TERMINAL_ENABLED?'true':'false');
   applyTerminalPref();
   showToast(TERMINAL_ENABLED?'Terminal on':'Terminal off', TERMINAL_ENABLED?'Type help':'Classic UI only');
 }
@@ -7321,26 +7406,26 @@ function runTerminalCommand(raw){
 
 
 /* ========== Privacy / Friends / Block ========== */
-let IS_PRIVATE_ACCOUNT = localStorage.getItem('devflow_private') === 'true';
+let IS_PRIVATE_ACCOUNT = lsGet('private', '') === 'true';
 let BLOCKED = [];
-try { BLOCKED = JSON.parse(localStorage.getItem('devflow_blocked') || '[]'); } catch (e) { BLOCKED = []; }
+try { BLOCKED = JSON.parse(lsGet('blocked', '[]')); } catch (e) { BLOCKED = []; }
 // FRIENDS is const array - mutate in place
 let PENDING_FRIEND_OUT = [];
-try { PENDING_FRIEND_OUT = JSON.parse(localStorage.getItem('devflow_friend_out') || '[]'); } catch (e) { PENDING_FRIEND_OUT = []; }
+try { PENDING_FRIEND_OUT = JSON.parse(lsGet('friend_out', '[]')); } catch (e) { PENDING_FRIEND_OUT = []; }
 let viewingProfilePeer = null;
 let unsubFriendRequests = null;
 
 function saveBlocked() {
-  localStorage.setItem('devflow_blocked', JSON.stringify(BLOCKED));
+  lsSet('blocked', JSON.stringify(BLOCKED));
   syncPrivacyToCloud();
 }
 function savePrivateFlag() {
-  localStorage.setItem('devflow_private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
+  lsSet('private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
   syncPrivacyToCloud();
   applyOwnPrivacyUI();
 }
 function saveFriendOut() {
-  localStorage.setItem('devflow_friend_out', JSON.stringify(PENDING_FRIEND_OUT));
+  lsSet('friend_out', JSON.stringify(PENDING_FRIEND_OUT));
 }
 function isFriendWith(handle) {
   handle = String(handle || '').replace(/^@/, '').toLowerCase();
@@ -7611,20 +7696,20 @@ const DEFAULT_BANNER_THEME_BOTTOM = '#4752C4';
 
 function loadNitro() {
   try {
-    const raw = localStorage.getItem('devflow_nitro');
+    const raw = lsGet('nitro', null);
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (!data || !data.expiresAt) return null;
     if (Date.now() > data.expiresAt) {
-      localStorage.removeItem('devflow_nitro');
+      lsDel('nitro');
       return null;
     }
     return data;
   } catch (e) { return null; }
 }
 function saveNitro(data) {
-  if (!data) localStorage.removeItem('devflow_nitro');
-  else localStorage.setItem('devflow_nitro', JSON.stringify(data));
+  if (!data) lsDel('nitro');
+  else lsSet('nitro', JSON.stringify(data));
   if (currentUser) {
     currentUser.nitro = data;
     localStorage.setItem('devflow_user', JSON.stringify(currentUser));
@@ -7781,8 +7866,8 @@ function getSavedThemeColors() {
     top = currentUser.profileThemeTop || currentUser.profileThemeColor || null;
     bottom = currentUser.profileThemeBottom || null;
   }
-  top = normalizeHexColor(top) || normalizeHexColor(localStorage.getItem('devflow_theme_top')) || DEFAULT_BANNER_THEME_TOP;
-  bottom = normalizeHexColor(bottom) || normalizeHexColor(localStorage.getItem('devflow_theme_bottom')) || DEFAULT_BANNER_THEME_BOTTOM;
+  top = normalizeHexColor(top) || normalizeHexColor(lsGet('theme_top', '')) || DEFAULT_BANNER_THEME_TOP;
+  bottom = normalizeHexColor(bottom) || normalizeHexColor(lsGet('theme_bottom', '')) || DEFAULT_BANNER_THEME_BOTTOM;
   return { top: top, bottom: bottom };
 }
 function getSavedThemeColor() {
@@ -7791,9 +7876,9 @@ function getSavedThemeColor() {
 function saveThemeColors(top, bottom) {
   top = normalizeHexColor(top) || DEFAULT_BANNER_THEME_TOP;
   bottom = normalizeHexColor(bottom) || DEFAULT_BANNER_THEME_BOTTOM;
-  localStorage.setItem('devflow_theme_top', top);
-  localStorage.setItem('devflow_theme_bottom', bottom);
-  localStorage.setItem('devflow_profile_theme_color', top); // legacy
+  lsSet('theme_top', top);
+  lsSet('theme_bottom', bottom);
+  lsSet('profile_theme_color', top); // legacy
   if (currentUser) {
     currentUser.profileThemeTop = top;
     currentUser.profileThemeBottom = bottom;
@@ -7884,14 +7969,14 @@ let pendingNameStyle = Object.assign({}, DEFAULT_NAME_STYLE);
 function loadNameStyle() {
   try {
     if (currentUser && currentUser.nameStyle) return Object.assign({}, DEFAULT_NAME_STYLE, currentUser.nameStyle);
-    const raw = localStorage.getItem('devflow_name_style');
+    const raw = lsGet('name_style', null);
     if (raw) return Object.assign({}, DEFAULT_NAME_STYLE, JSON.parse(raw));
   } catch (e) {}
   return Object.assign({}, DEFAULT_NAME_STYLE);
 }
 function saveNameStyle(style) {
   style = Object.assign({}, DEFAULT_NAME_STYLE, style || {});
-  localStorage.setItem('devflow_name_style', JSON.stringify(style));
+  lsSet('name_style', JSON.stringify(style));
   if (currentUser) {
     currentUser.nameStyle = style;
     localStorage.setItem('devflow_user', JSON.stringify(currentUser));
@@ -8311,10 +8396,10 @@ function renderNitroGrid() {
 }
 
 function loadStoreFlags() {
-  try { return JSON.parse(localStorage.getItem('devflow_store_flags') || '{}'); } catch (e) { return {}; }
+  try { return JSON.parse(lsGet('store_flags', '{}')); } catch (e) { return {}; }
 }
 function saveStoreFlags(flags) {
-  localStorage.setItem('devflow_store_flags', JSON.stringify(flags || {}));
+  lsSet('store_flags', JSON.stringify(flags || {}));
 }
 
 function buyStoreItem(id) {
@@ -8389,7 +8474,17 @@ const _addCoinsOrig = typeof addCoins === 'function' ? null : null;
 /* Init */
 document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem('devflow_user');
-  if(isLoggedIn&&saved){ currentUser=JSON.parse(saved); updateUserUI(); showApp(); }
+  if(isLoggedIn&&saved){
+    try {
+      currentUser=JSON.parse(saved);
+      if (currentUser && currentUser.uid) loadAccountLocalState(currentUser.uid);
+      updateUserUI();
+      showApp();
+    } catch(e) {
+      isLoggedIn=false;
+      showLanding();
+    }
+  }
   else showLanding();
   restoreTimer();
   if(typeof refreshStreakOnLoad==='function') refreshStreakOnLoad();
