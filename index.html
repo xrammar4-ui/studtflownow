@@ -2447,6 +2447,350 @@ h3 { font-size: 1.05rem; }
   text-shadow: 3px 3px 0 var(--dn-c2,#a78bfa) !important;
 }
 
+
+
+/* ========== Nameplates (Discord-style shapes + motion) ========== */
+.nameplate-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0.42rem 1rem;
+  border-radius: 12px;
+  max-width: 100%;
+  isolation: isolate;
+  overflow: visible;
+}
+.nameplate-wrap.nameplate-none {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+.nameplate-wrap .discord-display-name,
+.nameplate-wrap #name-style-preview-text {
+  position: relative;
+  z-index: 2;
+}
+.nameplate-wrap::before,
+.nameplate-wrap::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Cyber — angled tech bars */
+.nameplate-cyber {
+  background: linear-gradient(105deg, rgba(6,182,212,0.2), rgba(14,165,233,0.12), rgba(6,182,212,0.22));
+  border: 1px solid rgba(34,211,238,0.5);
+  clip-path: polygon(0 20%, 8% 0, 92% 0, 100% 20%, 100% 80%, 92% 100%, 8% 100%, 0 80%);
+  border-radius: 0;
+  box-shadow: 0 0 18px rgba(34,211,238,0.25);
+  animation: npCyberPulse 2.8s ease-in-out infinite;
+}
+.nameplate-cyber::before {
+  inset: 2px;
+  border: 1px solid rgba(34,211,238,0.25);
+  clip-path: inherit;
+  animation: npScan 2.2s linear infinite;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.35), transparent);
+  background-size: 60% 100%;
+  background-repeat: no-repeat;
+}
+@keyframes npCyberPulse {
+  0%,100% { box-shadow: 0 0 12px rgba(34,211,238,0.2); }
+  50% { box-shadow: 0 0 22px rgba(34,211,238,0.45); }
+}
+@keyframes npScan {
+  0% { background-position: -40% 0; }
+  100% { background-position: 140% 0; }
+}
+
+/* Galaxy — soft blob + orbit dots */
+.nameplate-galaxy {
+  background: radial-gradient(ellipse at 30% 40%, rgba(167,139,250,0.45), rgba(49,46,129,0.55) 55%, rgba(15,10,40,0.85));
+  border: 1px solid rgba(192,132,252,0.45);
+  border-radius: 999px;
+  box-shadow: 0 0 20px rgba(139,92,246,0.35);
+  animation: npGalaxy 6s linear infinite;
+}
+.nameplate-galaxy::before,
+.nameplate-galaxy::after {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #FDE68A;
+  top: 20%; left: 12%;
+  animation: npTwinkle 1.6s ease-in-out infinite;
+}
+.nameplate-galaxy::after {
+  background: #93C5FD; top: auto; bottom: 18%; left: auto; right: 14%;
+  animation-delay: .5s;
+}
+@keyframes npGalaxy {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(25deg); }
+}
+@keyframes npTwinkle {
+  0%,100% { opacity: .35; transform: scale(.7); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Anime — soft pill + sparkle */
+.nameplate-anime {
+  background: linear-gradient(90deg, rgba(251,113,133,0.35), rgba(244,114,182,0.28), rgba(253,224,71,0.2));
+  border: 1px solid rgba(251,113,133,0.5);
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(244,114,182,0.3);
+  animation: npFloatY 3s ease-in-out infinite;
+}
+.nameplate-anime::before {
+  width: 8px; height: 8px; right: 10%; top: -2px;
+  background: #fff;
+  clip-path: polygon(50% 0, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0 50%, 39% 35%);
+  animation: npTwinkle 1.2s ease-in-out infinite;
+}
+@keyframes npFloatY {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Fire — wavy bottom + flicker */
+.nameplate-fire {
+  background: linear-gradient(180deg, rgba(253,224,71,0.35), rgba(249,115,22,0.45), rgba(127,29,29,0.55));
+  border: 1px solid rgba(251,146,60,0.6);
+  border-radius: 14px 14px 40% 40% / 14px 14px 30% 30%;
+  box-shadow: 0 0 18px rgba(249,115,22,0.4);
+  animation: npFlicker 0.9s ease-in-out infinite;
+}
+@keyframes npFlicker {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.12); }
+}
+
+/* Ocean — wave edge */
+.nameplate-ocean {
+  background: linear-gradient(180deg, rgba(56,189,248,0.35), rgba(14,116,144,0.4));
+  border: 1px solid rgba(56,189,248,0.5);
+  border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+  box-shadow: 0 0 16px rgba(14,165,233,0.3);
+  animation: npWave 2.4s ease-in-out infinite;
+}
+@keyframes npWave {
+  0%,100% { border-radius: 50% 50% 42% 42% / 58% 58% 42% 42%; }
+  50% { border-radius: 42% 42% 50% 50% / 42% 42% 58% 58%; }
+}
+
+/* Gold — crown-ish top */
+.nameplate-gold {
+  background: linear-gradient(135deg, #FDE68A, #F59E0B 45%, #B45309);
+  border: 1px solid rgba(253,224,71,0.7);
+  border-radius: 12px;
+  box-shadow: 0 0 18px rgba(245,158,11,0.4);
+  animation: npShine 2.5s ease-in-out infinite;
+}
+.nameplate-gold::before {
+  top: -6px; left: 50%; transform: translateX(-50%);
+  width: 40%; height: 8px;
+  background: linear-gradient(90deg, transparent, #FDE68A, transparent);
+  clip-path: polygon(10% 100%, 25% 20%, 40% 80%, 50% 0, 60% 80%, 75% 20%, 90% 100%);
+  opacity: .9;
+}
+@keyframes npShine {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
+}
+
+/* Void — hard hex */
+.nameplate-void {
+  background: linear-gradient(180deg, #18181B, #09090B);
+  border: 1px solid #3F3F46;
+  clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
+  border-radius: 0;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+}
+
+/* Sakura — petal corners */
+.nameplate-sakura {
+  background: linear-gradient(120deg, rgba(251,207,232,0.4), rgba(252,231,243,0.3), rgba(254,205,211,0.35));
+  border: 1px solid rgba(244,114,182,0.45);
+  border-radius: 20px 8px 20px 8px;
+  box-shadow: 0 0 14px rgba(244,114,182,0.25);
+  animation: npFloatY 3.5s ease-in-out infinite;
+}
+.nameplate-sakura::after {
+  width: 10px; height: 7px; right: 6px; top: 4px;
+  background: #F9A8D4;
+  border-radius: 80% 0 80% 0;
+  animation: npFallPetal 3s linear infinite;
+}
+@keyframes npFallPetal {
+  0% { transform: translateY(0) rotate(0); opacity: .9; }
+  100% { transform: translateY(10px) rotate(40deg); opacity: .2; }
+}
+
+/* Mint */
+.nameplate-mint {
+  background: linear-gradient(90deg, rgba(52,211,153,0.3), rgba(16,185,129,0.22));
+  border: 1px solid rgba(52,211,153,0.5);
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(52,211,153,0.25);
+  animation: npBreathe 3s ease-in-out infinite;
+}
+@keyframes npBreathe {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Sunset */
+.nameplate-sunset {
+  background: linear-gradient(90deg, rgba(251,146,60,0.4), rgba(244,63,94,0.32), rgba(168,85,247,0.28));
+  border: 1px solid rgba(251,146,60,0.5);
+  border-radius: 14px;
+  background-size: 200% 100%;
+  animation: npGradientShift 4s ease infinite;
+}
+@keyframes npGradientShift {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Neon — glowing capsule */
+.nameplate-neon {
+  background: rgba(9,9,11,0.85);
+  border: 2px solid #22D3EE;
+  border-radius: 999px;
+  box-shadow: 0 0 8px #22D3EE, 0 0 20px rgba(236,72,153,0.35), inset 0 0 12px rgba(34,211,238,0.15);
+  animation: npNeon 1.8s ease-in-out infinite;
+}
+@keyframes npNeon {
+  0%,100% { border-color: #22D3EE; box-shadow: 0 0 8px #22D3EE, 0 0 16px rgba(236,72,153,0.3); }
+  50% { border-color: #F472B6; box-shadow: 0 0 12px #F472B6, 0 0 24px rgba(34,211,238,0.35); }
+}
+
+/* Royal — banner ribbons */
+.nameplate-royal {
+  background: linear-gradient(180deg, rgba(99,102,241,0.5), rgba(67,56,202,0.55));
+  border: 1px solid rgba(165,180,252,0.55);
+  border-radius: 8px;
+  box-shadow: 0 0 18px rgba(99,102,241,0.35);
+}
+.nameplate-royal::before,
+.nameplate-royal::after {
+  width: 10px; height: 100%;
+  top: 0;
+  background: linear-gradient(180deg, #A5B4FC, #6366F1);
+  opacity: .7;
+}
+.nameplate-royal::before { left: -4px; border-radius: 4px 0 0 4px; }
+.nameplate-royal::after { right: -4px; border-radius: 0 4px 4px 0; }
+
+/* Ember */
+.nameplate-ember {
+  background: linear-gradient(180deg, rgba(254,243,199,0.25), rgba(234,88,12,0.45), rgba(69,10,10,0.6));
+  border: 1px solid rgba(249,115,22,0.55);
+  border-radius: 16px 16px 8px 8px;
+  animation: npFlicker 1.1s ease-in-out infinite;
+}
+
+/* Frost — ice shard */
+.nameplate-frost {
+  background: linear-gradient(135deg, rgba(224,242,254,0.4), rgba(125,211,252,0.3), rgba(14,165,233,0.25));
+  border: 1px solid rgba(186,230,253,0.6);
+  clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%);
+  border-radius: 0;
+  box-shadow: 0 0 16px rgba(125,211,252,0.35);
+  animation: npFrost 3s ease-in-out infinite;
+}
+@keyframes npFrost {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.1) saturate(1.15); }
+}
+
+/* Matrix */
+.nameplate-matrix {
+  background: linear-gradient(180deg, rgba(5,46,22,0.9), rgba(6,78,59,0.75));
+  border: 1px solid rgba(34,197,94,0.5);
+  border-radius: 6px;
+  box-shadow: 0 0 14px rgba(34,197,94,0.3);
+  font-family: ui-monospace, monospace;
+  animation: npMatrix 2s steps(3) infinite;
+}
+@keyframes npMatrix {
+  0%,100% { box-shadow: 0 0 10px rgba(34,197,94,0.25); }
+  50% { box-shadow: 0 0 18px rgba(74,222,128,0.45); }
+}
+
+/* Prism */
+.nameplate-prism {
+  background: linear-gradient(90deg, rgba(239,68,68,0.3), rgba(234,179,8,0.28), rgba(34,197,94,0.28), rgba(59,130,246,0.3), rgba(168,85,247,0.3));
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  background-size: 200% 100%;
+  animation: npGradientShift 3s linear infinite;
+  clip-path: polygon(6% 0, 94% 0, 100% 100%, 0 100%);
+}
+
+/* Shadow */
+.nameplate-shadow {
+  background: linear-gradient(180deg, rgba(39,39,42,0.95), rgba(9,9,11,0.98));
+  border: 1px solid rgba(63,63,70,0.8);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Aurora */
+.nameplate-aurora {
+  background: linear-gradient(120deg, rgba(52,211,153,0.35), rgba(96,165,250,0.3), rgba(192,132,252,0.35));
+  border: 1px solid rgba(167,139,250,0.45);
+  border-radius: 999px;
+  background-size: 200% 200%;
+  animation: npAurora 5s ease infinite;
+}
+@keyframes npAurora {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Lava */
+.nameplate-lava {
+  background: linear-gradient(180deg, rgba(250,204,21,0.4), rgba(234,88,12,0.5), rgba(127,29,29,0.65));
+  border: 1px solid rgba(249,115,22,0.6);
+  border-radius: 12px 12px 30% 30%;
+  animation: npFlicker 0.75s ease-in-out infinite;
+}
+
+/* Crystal */
+.nameplate-crystal {
+  background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(165,243,252,0.3), rgba(196,181,253,0.28));
+  border: 1px solid rgba(224,242,254,0.55);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  border-radius: 0;
+  padding: 0.5rem 1.15rem;
+  box-shadow: 0 0 18px rgba(165,243,252,0.35);
+  animation: npCrystal 3.2s ease-in-out infinite;
+}
+@keyframes npCrystal {
+  0%,100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.12) saturate(1.2); }
+}
+
+.nameplate-btn .np-price {
+  display: block;
+  font-size: 0.62rem;
+  margin-top: 0.2rem;
+  font-weight: 600;
+  color: #FBBF24;
+}
+.nameplate-btn .np-price.free { color: var(--success); }
+.nameplate-btn .np-price.owned { color: #A1A1AA; }
+.nameplate-btn.locked { opacity: 0.75; }
+.nameplate-btn.locked:hover { opacity: 1; }
+
+/* Preview uses same plate classes */
+.name-style-preview.nameplate-wrap {
+  min-height: 52px;
+}
+
 /* Name style pickers */
 .name-font-grid, .name-effect-grid, .nameplate-grid {
   display: grid;
@@ -3772,7 +4116,7 @@ h3 { font-size: 1.05rem; }
           <div class="name-effect-grid" id="name-effect-grid"></div>
           <label class="form-label" style="margin-top:0.75rem">Nameplate</label>
           <div class="nameplate-grid" id="nameplate-grid"></div>
-          <p class="text-xs text-muted" id="name-style-hint" style="margin-top:0.45rem">Fonts, effects &amp; nameplates like Discord Nitro Display Name Styles</p>
+          <p class="text-xs text-muted" id="name-style-hint" style="margin-top:0.45rem">10 free nameplates · unlock more with coins · shows under your name on profile</p>
         </div>
       </div>
       <div class="modal-footer">
@@ -5888,11 +6232,18 @@ async function afterEmailAuthUser(user, optionalName) {
   const doc = await firebase.firestore().collection('users').doc(user.uid).get();
   if (doc.exists && doc.data().handle) {
     const d = doc.data();
+    const allowed = await userHasSiteAccess(d, user.email || d.email);
+    if (!allowed) {
+      enforceNoAccess('You are not on the allowlist. Contact the owner.');
+      return;
+    }
     login(d.displayName, d.handle, d.avatar || user.photoURL || '', user.uid, {
       bio: d.bio || '',
       banner: d.banner || '',
       avatarEffect: d.avatarEffect || 'none',
       unlockedEffects: d.unlockedEffects || ['none'],
+              unlockedNameplates: d.unlockedNameplates || null,
+              nameStyle: d.nameStyle || null,
       email: d.email || user.email || '',
       coins: d.coins,
       terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === 'xrammar4@gmail.com',
@@ -5904,6 +6255,13 @@ async function afterEmailAuthUser(user, optionalName) {
       nameStyle: d.nameStyle || null
     });
     return;
+  }
+  // New account — owner, allowlisted email, OR will claim adduser! username at setup
+  const mail = String(user.email || '').toLowerCase();
+  const pre = mail === TREMENAL_OWNER || await isEmailOnAllowlist(mail);
+  if (!pre) {
+    // still allow reaching username screen; submitUsername enforces adduser!
+    showToast('Invite only', 'Use a username the owner added with adduser!');
   }
   if (pendingSignup.displayName) {
     const el = document.getElementById('setup-displayname');
@@ -5998,24 +6356,38 @@ function startGoogleSignup(optionalName) {
     return firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
       if (doc.exists && doc.data().handle) {
         const d = doc.data();
-        login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
-          bio: d.bio || '',
-          banner: d.banner || '',
-          avatarEffect: d.avatarEffect || 'none',
-          unlockedEffects: d.unlockedEffects || ['none'],
-          email: d.email || user.email || '',
-          coins: d.coins,
-          terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
-          createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now())
+        return userHasSiteAccess(d, user.email || d.email).then(function(allowed) {
+          if (!allowed) {
+            enforceNoAccess('You are not on the allowlist. Contact the owner.');
+            return;
+          }
+          login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
+            bio: d.bio || '',
+            banner: d.banner || '',
+            avatarEffect: d.avatarEffect || 'none',
+            unlockedEffects: d.unlockedEffects || ['none'],
+              unlockedNameplates: d.unlockedNameplates || null,
+              nameStyle: d.nameStyle || null,
+            email: d.email || user.email || '',
+            coins: d.coins,
+            terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
+            createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
+            siteAccess: true
+          });
         });
-        return;
       }
-      if (pendingSignup.displayName) {
-        const el = document.getElementById('setup-displayname');
-        if (el) el.value = pendingSignup.displayName;
-      }
-      openModal('modal-username');
-      setTimeout(() => document.getElementById('setup-username')?.focus(), 100);
+      const mailG = String(user.email || '').toLowerCase();
+      return (mailG === TREMENAL_OWNER ? Promise.resolve(true) : isEmailOnAllowlist(mailG)).then(function(pre) {
+        if (!pre) {
+          showToast('Invite only', 'Pick a username the owner added: adduser! <name>');
+        }
+        if (pendingSignup.displayName) {
+          const el = document.getElementById('setup-displayname');
+          if (el) el.value = pendingSignup.displayName;
+        }
+        openModal('modal-username');
+        setTimeout(() => document.getElementById('setup-username')?.focus(), 100);
+      });
     });
   }).catch(err => {
     showToast('Google sign-in failed', err.message || 'Try again');
@@ -6026,19 +6398,36 @@ function submitUsername() {
   let handle = (document.getElementById('setup-username')?.value || '').trim().toLowerCase();
   handle = handle.replace(/^@/, '').replace(/[^a-z0-9_]/g, '');
   const display = (document.getElementById('setup-displayname')?.value || '').trim() || handle || 'Developer';
-  if (!handle || handle.length < 3) {
-    showToast('Username required', 'At least 3 characters (a-z, 0-9, _)');
+  if (!handle || handle.length < 2) {
+    showToast('Username required', 'At least 2 characters (a-z, 0-9, _)');
     return;
   }
   // Check uniqueness if Firebase ready
   if (window.firebase && firebase.apps.length) {
-    firebase.firestore().collection('users').where('handle', '==', handle).limit(1).get().then(snap => {
+    firebase.firestore().collection('users').where('handle', '==', handle).limit(1).get().then(async snap => {
       if (!snap.empty) {
         const existing = snap.docs[0];
         const me = firebase.auth().currentUser;
         if (!me || existing.id !== me.uid) {
           showToast('Username taken', '@' + handle + ' is already used. Choose another.');
           return;
+        }
+      }
+      // Invite-only: username must be adduser!'d (owner email bypass)
+      const mail = String((pendingSignup && pendingSignup.email) || (firebase.auth().currentUser && firebase.auth().currentUser.email) || '').toLowerCase();
+      if (mail !== TREMENAL_OWNER) {
+        const okHandle = await isHandleOnAllowlist(handle);
+        if (!okHandle) {
+          showToast('Not allowed', '@' + handle + ' is not on the list. Owner must run: adduser! ' + handle);
+          return;
+        }
+        const me = firebase.auth().currentUser;
+        if (me) {
+          const seat = await claimAllowedUsername(handle, me.uid);
+          if (!seat) {
+            showToast('Seat taken', '@' + handle + ' was already claimed by someone else');
+            return;
+          }
         }
       }
       pendingSignup.handle = handle;
@@ -6112,6 +6501,7 @@ function finishSignup() {
       bio: '',
       avatarEffect: 'none',
       coins: 0,
+      siteAccess: true,
       terminalAccess: String(pendingSignup.email || '').toLowerCase() === 'xrammar4@gmail.com',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -6126,17 +6516,11 @@ function finishSignup() {
 
 
 function enterGuest(){
-  isLoggedIn = false;
-  currentUser = { displayName:'Guest', handle:'guest', avatar:'data:image/png;base64,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' };
-  updateUserUI();
-  showApp();
-  setTimeout(()=>{
-    if(!localStorage.getItem('devflow_logged_in')){
-      openModal('modal-auth');
-      showToast('Sign in required','Create an account to save progress and earn coins');
-    }
-  }, 3000);
+  showToast('Invite only', 'Guest mode is disabled. Ask the owner to allow your account from Tremenal.');
+  openModal('modal-auth');
 }
+
+
 function login(name, handle, avatarUrl, uid, extra){
   isLoggedIn = true;
   const nextUid = uid || (extra && extra.uid) || '';
@@ -6158,9 +6542,20 @@ function login(name, handle, avatarUrl, uid, extra){
     createdAt: (extra && extra.createdAt) || (prev && prev.createdAt) || Date.now(),
     avatarEffect: (extra && extra.avatarEffect) || (prev && prev.avatarEffect) || 'none',
     unlockedEffects: (extra && extra.unlockedEffects) || (prev && prev.unlockedEffects) || ['none'],
+    unlockedNameplates: (extra && extra.unlockedNameplates) || (prev && prev.unlockedNameplates) || null,
+    nameStyle: (extra && extra.nameStyle) || (prev && prev.nameStyle) || null,
     email: (extra && extra.email) || (prev && prev.email) || '',
-    terminalAccess: !!(extra && extra.terminalAccess) || !!(prev && prev.terminalAccess)
+    terminalAccess: !!(extra && extra.terminalAccess) || !!(prev && prev.terminalAccess),
+    siteAccess: !!(extra && extra.siteAccess) || !!(prev && prev.siteAccess)
   };
+  if (!currentUser.unlockedNameplates) {
+    try {
+      const raw = lsGet('unlocked_nameplates', null);
+      currentUser.unlockedNameplates = raw ? JSON.parse(raw) : NAMEPLATES.filter(function(x){return !x.cost;}).map(function(x){return x.id;});
+    } catch (e) {
+      currentUser.unlockedNameplates = ['none'];
+    }
+  }
   if (typeof extra !== 'undefined' && extra && extra.coins != null) {
     COINS = parseInt(extra.coins, 10);
     if (isNaN(COINS)) COINS = 0;
@@ -6533,8 +6928,8 @@ async function saveEditProfile(){
   handle = handle.replace(/^@/, '').replace(/[^a-z0-9_]/g, '');
   const display = (document.getElementById('edit-display-name')?.value || '').trim() || handle || 'Developer';
   const bio = (document.getElementById('edit-bio')?.value || '').trim().slice(0, 190);
-  if(!handle || handle.length < 3){
-    showToast('Username required', 'At least 3 characters (a-z, 0-9, _)');
+  if(!handle || handle.length < 2){
+    showToast('Username required', 'At least 2 characters (a-z, 0-9, _)');
     return;
   }
   if(window.firebase && firebase.apps.length && currentUser.uid){
@@ -7467,6 +7862,118 @@ const TREMENAL_OWNER = 'xrammar4@gmail.com';
 let unsubUserDoc = null;
 let TREMENAL_LOG = [];
 
+/* ========== Invite-only access (owner allowlist) ========== */
+async function isEmailOnAllowlist(email) {
+  email = String(email || '').trim().toLowerCase();
+  if (!email) return false;
+  if (email === TREMENAL_OWNER) return true;
+  try {
+    if (!window.firebase || !firebase.apps.length) return false;
+    const doc = await firebase.firestore().collection('allowlist').doc(email).get();
+    return !!(doc.exists && doc.data() && doc.data().allowed !== false);
+  } catch (e) {
+    console.warn('allowlist check', e);
+    return false;
+  }
+}
+
+async function userHasSiteAccess(userOrData, emailHint) {
+  // Owner always in
+  const emails = [];
+  if (emailHint) emails.push(String(emailHint).toLowerCase());
+  try {
+    if (userOrData && userOrData.email) emails.push(String(userOrData.email).toLowerCase());
+  } catch (e) {}
+  if (emails.some(e => e === TREMENAL_OWNER)) return true;
+
+  // Explicit flag on user doc
+  if (userOrData && (userOrData.siteAccess === true || userOrData.allowed === true)) return true;
+
+  // Pre-approved email on allowlist collection
+  for (const em of emails) {
+    if (!em) continue;
+    if (await isEmailOnAllowlist(em)) return true;
+  }
+
+  // adduser! username seat
+  try {
+    const h = String((userOrData && (userOrData.handle || userOrData.username)) || '').replace(/^@/, '').toLowerCase();
+    if (h && window.firebase && firebase.apps.length) {
+      const doc = await firebase.firestore().collection('allowedUsers').doc(h).get();
+      if (doc.exists && doc.data() && doc.data().allowed !== false) return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+async function isHandleOnAllowlist(handle) {
+  handle = String(handle || '').replace(/^@/, '').trim().toLowerCase();
+  if (!handle) return false;
+  try {
+    if (!window.firebase || !firebase.apps.length) return false;
+    const doc = await firebase.firestore().collection('allowedUsers').doc(handle).get();
+    return !!(doc.exists && doc.data() && doc.data().allowed !== false);
+  } catch (e) { return false; }
+}
+
+async function claimAllowedUsername(handle, uid) {
+  handle = String(handle || '').replace(/^@/, '').trim().toLowerCase();
+  if (!handle || !uid) return false;
+  try {
+    const ref = firebase.firestore().collection('allowedUsers').doc(handle);
+    const doc = await ref.get();
+    if (!doc.exists || doc.data().allowed === false) return false;
+    const d = doc.data() || {};
+    if (d.usedBy && d.usedBy !== uid) return false; // seat taken
+    await ref.set({ usedBy: uid, usedHandle: handle, claimedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    return true;
+  } catch (e) { return false; }
+}
+
+function enforceNoAccess(reason) {
+  const msg = reason || 'This site is private. Only users allowed by the owner can enter.';
+  showToast('Access denied', msg);
+  try {
+    if (window.firebase && firebase.apps.length) firebase.auth().signOut().catch(function(){});
+  } catch (e) {}
+  isLoggedIn = false;
+  currentUser = null;
+  try {
+    localStorage.removeItem('devflow_logged_in');
+    localStorage.removeItem('devflow_user');
+  } catch (e) {}
+  if (typeof showLanding === 'function') showLanding();
+  else {
+    document.getElementById('app-shell') && document.getElementById('app-shell').classList.remove('visible');
+    document.getElementById('landing') && document.getElementById('landing').classList.remove('hidden');
+  }
+}
+
+async function gateAccessOrKick(opts) {
+  opts = opts || {};
+  const email = opts.email || (currentUser && currentUser.email) || '';
+  const data = opts.data || null;
+  const ok = await userHasSiteAccess(data || currentUser || {}, email);
+  if (!ok) {
+    enforceNoAccess(opts.reason);
+    return false;
+  }
+  // If on allowlist by email but user doc missing siteAccess, stamp it
+  try {
+    if (opts.uid && window.firebase && firebase.apps.length) {
+      const em = String(email || '').toLowerCase();
+      if (em && (await isEmailOnAllowlist(em) || em === TREMENAL_OWNER)) {
+        firebase.firestore().collection('users').doc(opts.uid).set({
+          siteAccess: true,
+          email: em || null,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function(){});
+      }
+    }
+  } catch (e) {}
+  return true;
+}
+
 function currentAuthEmail() {
   const emails = [];
   try {
@@ -7514,6 +8021,19 @@ function startUserDocSync() {
       enforceBan(d);
       return;
     }
+    // Invite-only: kick if not allowed (owner always ok)
+    (async function() {
+      try {
+        const mail = (d.email || (firebase.auth().currentUser && firebase.auth().currentUser.email) || '').toLowerCase();
+        if (mail === TREMENAL_OWNER) return;
+        if (d.siteAccess === true || d.allowed === true) return;
+        if (mail && await isEmailOnAllowlist(mail)) {
+          firebase.firestore().collection('users').doc(uid).set({ siteAccess: true }, { merge: true }).catch(function(){});
+          return;
+        }
+        enforceNoAccess('Your access was removed by the owner.');
+      } catch (e) {}
+    })();
     // ban expired — clear flags
     if (d.banned && d.banUntil && d.banUntil <= Date.now()) {
       firebase.firestore().collection('users').doc(uid).set({
@@ -7638,6 +8158,13 @@ async function runTremenalCommand(raw) {
       tremLog('info', '!whois @user              profile lookup');
       tremLog('info', '!online                   who is online');
       tremLog('info', '!me                       your account');
+      tremLog('info', 'adduser! <user>           allow one username (2-24 chars)');
+      tremLog('info', 'removeuser! <user>        revoke username access');
+      tremLog('info', '!allow @user              allow registered user');
+      tremLog('info', '!deny @user               remove site access');
+      tremLog('info', '!allowmail email          pre-allow email (before signup)');
+      tremLog('info', '!denymail email           remove email from allowlist');
+      tremLog('info', '!allowlist                show allowlist');
       tremLog('info', '!clear                    clear console');
       return;
     }
@@ -7797,6 +8324,196 @@ async function runTremenalCommand(raw) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
       tremLog('ok', 'Removed Nitro from @' + (found.data.handle || handle.replace(/^@/, '')));
+      return;
+    }
+
+
+
+    // adduser! name   OR  !adduser name  — whitelist a username (one seat)
+    if (cmd === 'adduser!' || cmd === '!adduser' || cmd === 'adduser') {
+      if (!isTremenalOwner()) { tremLog('err', 'Only owner can adduser!'); return; }
+      let uname = String(parts[1] || '').replace(/^@/, '').trim().toLowerCase();
+      uname = uname.replace(/[^a-z0-9_]/g, '');
+      if (!uname || uname.length < 2) {
+        tremLog('err', 'Usage: adduser! <username>');
+        tremLog('info', 'Username: 2–24 chars (a-z 0-9 _). One person per username.');
+        return;
+      }
+      if (uname.length > 24) { tremLog('err', 'Max 24 characters'); return; }
+      await firebase.firestore().collection('allowedUsers').doc(uname).set({
+        handle: uname,
+        allowed: true,
+        seats: 1,
+        usedBy: null,
+        addedBy: (currentUser && currentUser.handle) || 'owner',
+        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      // if already registered with this handle, grant siteAccess
+      try {
+        const found = await tremFindUser(uname);
+        if (found) {
+          await firebase.firestore().collection('users').doc(found.uid).set({
+            siteAccess: true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          await firebase.firestore().collection('allowedUsers').doc(uname).set({
+            usedBy: found.uid,
+            usedHandle: found.data.handle || uname
+          }, { merge: true });
+          tremLog('ok', 'adduser! @' + uname + ' — already registered, access granted');
+          return;
+        }
+      } catch (e) {}
+      tremLog('ok', 'adduser! @' + uname + ' — allowed (1 seat). They can sign up with this username.');
+      return;
+    }
+    // removeuser! name
+    if (cmd === 'removeuser!' || cmd === '!removeuser' || cmd === 'removeuser') {
+      if (!isTremenalOwner()) { tremLog('err', 'Only owner'); return; }
+      let uname = String(parts[1] || '').replace(/^@/, '').trim().toLowerCase();
+      uname = uname.replace(/[^a-z0-9_]/g, '');
+      if (!uname) { tremLog('err', 'Usage: removeuser! <username>'); return; }
+      await firebase.firestore().collection('allowedUsers').doc(uname).set({
+        allowed: false,
+        removedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      try {
+        const found = await tremFindUser(uname);
+        if (found && !(found.data.email && String(found.data.email).toLowerCase() === TREMENAL_OWNER)) {
+          await firebase.firestore().collection('users').doc(found.uid).set({
+            siteAccess: false,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+      } catch (e) {}
+      tremLog('ok', 'removeuser! @' + uname + ' — access revoked');
+      return;
+    }
+
+    // !allow @user
+    if (cmd === '!allow') {
+      if (!isTremenalOwner()) { tremLog('err', 'Only owner can allow users'); return; }
+      const handle = parts[1];
+      if (!handle) { tremLog('err', 'Usage: !allow @user'); return; }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found: @' + String(handle).replace(/^@/, '')); return; }
+      const em = String(found.data.email || '').toLowerCase();
+      await firebase.firestore().collection('users').doc(found.uid).set({
+        siteAccess: true,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      if (em) {
+        await firebase.firestore().collection('allowlist').doc(em).set({
+          allowed: true,
+          handle: found.data.handle || handle.replace(/^@/, ''),
+          uid: found.uid,
+          addedBy: (currentUser && currentUser.handle) || 'owner',
+          addedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      }
+      tremLog('ok', 'Allowed @' + (found.data.handle || handle.replace(/^@/, '')) + (em ? ' (' + em + ')' : ''));
+      return;
+    }
+    // !deny @user
+    if (cmd === '!deny') {
+      if (!isTremenalOwner()) { tremLog('err', 'Only owner can deny users'); return; }
+      const handle = parts[1];
+      if (!handle) { tremLog('err', 'Usage: !deny @user'); return; }
+      const found = await tremFindUser(handle);
+      if (!found) { tremLog('err', 'User not found'); return; }
+      if (found.data.email && String(found.data.email).toLowerCase() === TREMENAL_OWNER) {
+        tremLog('err', 'Cannot deny owner');
+        return;
+      }
+      const em = String(found.data.email || '').toLowerCase();
+      await firebase.firestore().collection('users').doc(found.uid).set({
+        siteAccess: false,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      if (em) {
+        await firebase.firestore().collection('allowlist').doc(em).set({
+          allowed: false,
+          removedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      }
+      tremLog('ok', 'Denied @' + (found.data.handle || handle.replace(/^@/, '')) + ' — they will be kicked');
+      return;
+    }
+    // !allowmail email@x.com
+    if (cmd === '!allowmail' || cmd === '!allowemail') {
+      if (!isTremenalOwner()) { tremLog('err', 'Only owner can allow emails'); return; }
+      const em = String(parts[1] || '').trim().toLowerCase();
+      if (!em || em.indexOf('@') < 0) { tremLog('err', 'Usage: !allowmail email@example.com'); return; }
+      await firebase.firestore().collection('allowlist').doc(em).set({
+        allowed: true,
+        addedBy: (currentUser && currentUser.handle) || 'owner',
+        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      // if a user already exists with this email, grant siteAccess
+      try {
+        const q = await firebase.firestore().collection('users').where('email', '==', em).limit(5).get();
+        for (const doc of q.docs) {
+          await doc.ref.set({ siteAccess: true, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        }
+        if (!q.empty) tremLog('info', 'Also granted siteAccess on ' + q.size + ' existing account(s)');
+      } catch (e) {}
+      tremLog('ok', 'Allowlisted ' + em);
+      return;
+    }
+    // !denymail email
+    if (cmd === '!denymail' || cmd === '!denyemail') {
+      if (!isTremenalOwner()) { tremLog('err', 'Only owner can deny emails'); return; }
+      const em = String(parts[1] || '').trim().toLowerCase();
+      if (!em || em.indexOf('@') < 0) { tremLog('err', 'Usage: !denymail email@example.com'); return; }
+      if (em === TREMENAL_OWNER) { tremLog('err', 'Cannot deny owner email'); return; }
+      await firebase.firestore().collection('allowlist').doc(em).set({
+        allowed: false,
+        removedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      try {
+        const q = await firebase.firestore().collection('users').where('email', '==', em).limit(5).get();
+        for (const doc of q.docs) {
+          await doc.ref.set({ siteAccess: false, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        }
+      } catch (e) {}
+      tremLog('ok', 'Removed ' + em + ' from allowlist');
+      return;
+    }
+    // !allowlist
+    if (cmd === '!allowlist' || cmd === '!listallow') {
+      if (!isTremenalOwner()) { tremLog('err', 'Only owner'); return; }
+      tremLog('info', 'Owner: ' + TREMENAL_OWNER + ' (always allowed)');
+      try {
+        const au = await firebase.firestore().collection('allowedUsers').limit(50).get();
+        let nU = 0;
+        au.forEach(function(doc) {
+          const d = doc.data() || {};
+          if (d.allowed === false) return;
+          nU++;
+          tremLog('ok', 'user @' + doc.id + (d.usedBy ? ' (claimed)' : ' (open seat)'));
+        });
+        if (!nU) tremLog('info', 'No usernames via adduser! yet');
+      } catch (e) {}
+      const snap = await firebase.firestore().collection('allowlist').limit(50).get();
+      let n = 0;
+      snap.forEach(function(doc) {
+        const d = doc.data() || {};
+        if (d.allowed === false) return;
+        n++;
+        tremLog('ok', doc.id + (d.handle ? '  @' + d.handle : ''));
+      });
+      // also users with siteAccess
+      try {
+        const us = await firebase.firestore().collection('users').where('siteAccess', '==', true).limit(40).get();
+        us.forEach(function(doc) {
+          const d = doc.data() || {};
+          if (d.email && String(d.email).toLowerCase() === TREMENAL_OWNER) return;
+          tremLog('info', 'user @' + (d.handle || '?') + '  ' + (d.email || doc.id));
+        });
+      } catch (e) {
+        tremLog('info', '(users query needs index or rules — allowlist emails shown above)');
+      }
+      if (!n) tremLog('info', 'No extra emails on allowlist yet');
       return;
     }
 
@@ -8387,15 +9104,80 @@ const NAME_EFFECTS = [
   { id: 'pop', label: 'Pop' }
 ];
 const NAMEPLATES = [
-  { id: 'none', label: 'None' },
-  { id: 'cyber', label: 'Cyber' },
-  { id: 'galaxy', label: 'Galaxy' },
-  { id: 'anime', label: 'Anime' },
-  { id: 'fire', label: 'Fire' },
-  { id: 'ocean', label: 'Ocean' },
-  { id: 'gold', label: 'Gold' },
-  { id: 'void', label: 'Void' }
+  /* Free (10) */
+  { id: 'none', label: 'None', cost: 0 },
+  { id: 'cyber', label: 'Cyber', cost: 0 },
+  { id: 'mint', label: 'Mint', cost: 0 },
+  { id: 'ocean', label: 'Ocean', cost: 0 },
+  { id: 'sakura', label: 'Sakura', cost: 0 },
+  { id: 'shadow', label: 'Shadow', cost: 0 },
+  { id: 'frost', label: 'Frost', cost: 0 },
+  { id: 'sunset', label: 'Sunset', cost: 0 },
+  { id: 'void', label: 'Void', cost: 0 },
+  { id: 'anime', label: 'Anime', cost: 0 },
+  /* Paid */
+  { id: 'galaxy', label: 'Galaxy', cost: 25 },
+  { id: 'fire', label: 'Fire', cost: 30 },
+  { id: 'gold', label: 'Gold', cost: 40 },
+  { id: 'neon', label: 'Neon', cost: 45 },
+  { id: 'royal', label: 'Royal', cost: 50 },
+  { id: 'ember', label: 'Ember', cost: 35 },
+  { id: 'matrix', label: 'Matrix', cost: 55 },
+  { id: 'prism', label: 'Prism', cost: 60 },
+  { id: 'aurora', label: 'Aurora', cost: 70 },
+  { id: 'lava', label: 'Lava', cost: 65 },
+  { id: 'crystal', label: 'Crystal', cost: 80 }
 ];
+
+function getUnlockedNameplates() {
+  try {
+    if (currentUser && Array.isArray(currentUser.unlockedNameplates)) {
+      return currentUser.unlockedNameplates.slice();
+    }
+    const raw = lsGet('unlocked_nameplates', null);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  // all free plates unlocked by default
+  return NAMEPLATES.filter(function(p) { return !p.cost; }).map(function(p) { return p.id; });
+}
+function saveUnlockedNameplates(list) {
+  const freeIds = NAMEPLATES.filter(function(p) { return !p.cost; }).map(function(p) { return p.id; });
+  const uniq = Array.from(new Set(freeIds.concat(list || [])));
+  lsSet('unlocked_nameplates', JSON.stringify(uniq));
+  if (currentUser) {
+    currentUser.unlockedNameplates = uniq;
+    try { localStorage.setItem('devflow_user', JSON.stringify(currentUser)); } catch (e) {}
+  }
+  try {
+    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
+      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
+        unlockedNameplates: uniq,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(function(){});
+    }
+  } catch (e) {}
+  return uniq;
+}
+function isNameplateUnlocked(id) {
+  id = id || 'none';
+  const meta = NAMEPLATES.find(function(p) { return p.id === id; });
+  if (!meta || !meta.cost) return true;
+  return getUnlockedNameplates().indexOf(id) >= 0;
+}
+function unlockNameplate(id) {
+  id = id || 'none';
+  const meta = NAMEPLATES.find(function(p) { return p.id === id; });
+  if (!meta) return false;
+  if (isNameplateUnlocked(id)) return true;
+  if (!meta.cost) {
+    saveUnlockedNameplates(getUnlockedNameplates().concat([id]));
+    return true;
+  }
+  if (!spendCoins(meta.cost, 'Nameplate: ' + meta.label)) return false;
+  saveUnlockedNameplates(getUnlockedNameplates().concat([id]));
+  showToast('Unlocked', meta.label + ' nameplate');
+  return true;
+}
 
 const DEFAULT_NAME_STYLE = {
   font: 'default',
@@ -8536,7 +9318,15 @@ function renderNameStylePickers() {
   }
   if (plateGrid) {
     plateGrid.innerHTML = NAMEPLATES.map(function(p) {
-      return '<button type="button" class="nameplate-btn' + (pendingNameStyle.nameplate === p.id ? ' active' : '') + '" data-plate="' + p.id + '">' + p.label + '</button>';
+      const owned = isNameplateUnlocked(p.id);
+      const active = pendingNameStyle.nameplate === p.id;
+      let priceHtml = '';
+      if (!p.cost) priceHtml = '<span class="np-price free">Free</span>';
+      else if (owned) priceHtml = '<span class="np-price owned">Owned</span>';
+      else priceHtml = '<span class="np-price">✦ ' + p.cost + '</span>';
+      return '<button type="button" class="nameplate-btn nameplate-' + p.id + (active ? ' active' : '') + (owned || !p.cost ? '' : ' locked') + '" data-plate="' + p.id + '">' +
+        '<span>' + p.label + '</span>' + priceHtml +
+      '</button>';
     }).join('');
     plateGrid.querySelectorAll('.nameplate-btn').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
@@ -8558,6 +9348,13 @@ function selectNameEffect(id) {
   updateNameStylePreview();
 }
 function selectNameplate(id) {
+  id = id || 'none';
+  const meta = NAMEPLATES.find(function(p) { return p.id === id; });
+  if (!meta) return;
+  if (!isNameplateUnlocked(id)) {
+    if (!confirm('Unlock "' + meta.label + '" nameplate for ✦ ' + meta.cost + ' coins?')) return;
+    if (!unlockNameplate(id)) return;
+  }
   pendingNameStyle.nameplate = id;
   renderNameStylePickers();
   updateNameStylePreview();
@@ -8605,7 +9402,8 @@ function updateNameStylePreview() {
   }
   const wrap = document.getElementById('name-style-preview');
   if (wrap) {
-    wrap.className = 'name-style-preview nameplate-' + (pendingNameStyle.nameplate || 'none');
+    const pid = pendingNameStyle.nameplate || 'none';
+    wrap.className = 'name-style-preview nameplate-wrap nameplate-' + pid;
   }
 }
 function syncNameStyleUI() {
@@ -8945,8 +9743,16 @@ document.addEventListener('DOMContentLoaded',()=>{
           firebase.firestore().collection('users').doc(user.uid).set({
             email: mail,
             terminalAccess: true,
+            siteAccess: true,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true }).catch(()=>{});
+        } else {
+          // Non-owner session restore: verify allowlist
+          firebase.firestore().collection('users').doc(user.uid).get().then(async function(doc) {
+            const d = doc.exists ? (doc.data() || {}) : {};
+            const ok = await userHasSiteAccess(d, mail);
+            if (!ok) enforceNoAccess('You are not on the allowlist.');
+          }).catch(function(){});
         }
         refreshTremenalAccess();
         startUserDocSync();
@@ -8965,6 +9771,8 @@ document.addEventListener('DOMContentLoaded',()=>{
               banner: d.banner || '',
               avatarEffect: d.avatarEffect || 'none',
               unlockedEffects: d.unlockedEffects || ['none'],
+              unlockedNameplates: d.unlockedNameplates || null,
+              nameStyle: d.nameStyle || null,
               email: d.email || user.email || '',
               coins: d.coins,
               terminalAccess: !!d.terminalAccess || String(user.email || '').toLowerCase() === TREMENAL_OWNER,
