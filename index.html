@@ -3904,7 +3904,7 @@ h3 { font-size: 1.05rem; }
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-onboarding'); localStorage.setItem('devflow_onboarding','true');">Skip</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-onboarding'); ONBOARDING_DONE = true; saveSkillsCloud();">Skip</button>
         <button type="button" class="btn btn-primary" onclick="submitOnboarding()">Save goals</button>
       </div>
     </div>
@@ -3951,6 +3951,9 @@ window.FIREBASE_CONFIG = {
     if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && !String(window.FIREBASE_CONFIG.apiKey).startsWith('PASTE_')) {
       try {
         if (!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
+        if (firebase.auth) {
+          firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+        }
       } catch (e) {}
     }
   </script>
@@ -4470,14 +4473,45 @@ async function sendVoiceMessage(blob, duration) {
   cancelReply();
 }
 
+function waitForAuthUser(timeoutMs) {
+  return new Promise(resolve => {
+    if (!fbReady()) { resolve(null); return; }
+    const cur = auth().currentUser;
+    if (cur) { resolve(cur); return; }
+    let done = false;
+    const finish = (u) => {
+      if (done) return;
+      done = true;
+      try { unsub(); } catch (e) {}
+      clearTimeout(t);
+      resolve(u || null);
+    };
+    const unsub = auth().onAuthStateChanged(u => { if (u) finish(u); });
+    const t = setTimeout(() => finish(auth().currentUser), timeoutMs || 4000);
+  });
+}
+
 async function renderChatList() {
   const el = document.getElementById('chat-conversations');
   if (!el) return;
-  if (!fbReady() || !auth().currentUser) {
-    el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Sign in with Google to chat</p></div>';
+  if (!fbReady()) {
+    el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Firebase not configured</p></div>';
     return;
   }
-  const me = auth().currentUser.uid;
+  let user = auth().currentUser;
+  if (!user && (isLoggedIn || currentUser)) {
+    el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">Connecting…</p></div>';
+    user = await waitForAuthUser(5000);
+  }
+  if (!user) {
+    el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem">' +
+      '<p class="text-sm">Sign in to chat</p>' +
+      '<p class="text-xs text-muted" style="margin-top:0.4rem">Email, username, or Google</p>' +
+      '<button class="btn btn-primary btn-sm" style="margin-top:0.85rem" onclick="openModal(\'modal-auth\')">Sign in</button>' +
+      '</div>';
+    return;
+  }
+  const me = user.uid;
   try {
     const q = await db().collection('chats').where('members', 'array-contains', me).get();
     if (q.empty) {
@@ -4548,22 +4582,23 @@ function startChatEngine() {
     if (u) {
       beatPresence();
       startInboxListener();
+      if (typeof renderChatList === 'function') renderChatList();
     } else {
       setOffline();
       stopInboxListener();
     }
   });
-  if (auth().currentUser) startInboxListener();
+  if (auth().currentUser) {
+    startInboxListener();
+    if (typeof renderChatList === 'function') renderChatList();
+  }
 }
 
 /* ========== Realtime inbox + message popups ========== */
 let unsubInbox = null;
 let inboxBootstrapped = false;
 const inboxKnownUpdated = {}; // chatId -> millis
-function saveUnreadChatIds() {
-  localStorage.setItem('devflow_unread_ids', JSON.stringify(UNREAD_CHAT_IDS));
-  setUnreadChats(UNREAD_CHAT_IDS.length);
-}
+/* saveUnreadChatIds defined in cloud layer */
 
 function markChatUnread(chatId) {
   chatId = String(chatId || '');
@@ -5145,29 +5180,36 @@ window.cancelReply = cancelReply;
 /* ========== APP.JS ========== */
 /* DevFlow — Core Logic */
 
-let isLoggedIn = localStorage.getItem('devflow_logged_in') === 'true';
+let isLoggedIn = false;
 let currentUser = null;
-let USER_STATUS = localStorage.getItem('devflow_status') || 'online';
-let TASKS = JSON.parse(localStorage.getItem('devflow_tasks') || '[]');
-let NOTIFICATIONS = JSON.parse(localStorage.getItem('devflow_notifs') || '[]');
+let USER_STATUS = 'online';
+let TASKS = [];
+let NOTIFICATIONS = [];
 let ACTIVE_TIMER = null;
 let UNREAD_CHAT_IDS = [];
-try { UNREAD_CHAT_IDS = JSON.parse(localStorage.getItem('devflow_unread_ids') || '[]'); if (!Array.isArray(UNREAD_CHAT_IDS)) UNREAD_CHAT_IDS = []; } catch (e) { UNREAD_CHAT_IDS = []; }
-let UNREAD_CHATS = UNREAD_CHAT_IDS.length || parseInt(localStorage.getItem('devflow_unread_chats') || '0', 10);
-let ACTIVITY = JSON.parse(localStorage.getItem('devflow_activity') || '[]');
-let FOCUS_TODAY_MIN = parseInt(localStorage.getItem('devflow_focus_today') || '0', 10);
-let COINS = parseInt(localStorage.getItem('devflow_coins') || '0', 10);
-let SKILLS_LEARNED = JSON.parse(localStorage.getItem('devflow_skills_learned') || '[]');
-let SKILLS_LEARNING = JSON.parse(localStorage.getItem('devflow_skills_learning') || '[]');
-let CERTIFICATES = JSON.parse(localStorage.getItem('devflow_certs') || '[]');
-let ONBOARDING_DONE = localStorage.getItem('devflow_onboarding') === 'true';
-let TERMINAL_ENABLED = localStorage.getItem('devflow_terminal') === 'true';
+let UNREAD_CHATS = 0;
+let ACTIVITY = [];
+let FOCUS_TODAY_MIN = 0;
+let FOCUS_TODAY_DATE = '';
+let COINS = 0;
+let SKILLS_LEARNED = [];
+let SKILLS_LEARNING = [];
+let CERTIFICATES = [];
+let ONBOARDING_DONE = false;
+let TERMINAL_ENABLED = false;
 let timerInterval = null;
 let remainingSeconds = 0;
 let pendingSignup = { displayName: '', handle: '', avatar: '' };
 let pendingAvatarData = '';
+let STORE_FLAGS = {};
+let FRIENDS = [];
+let IS_PRIVATE_ACCOUNT = false;
+let BLOCKED = [];
+let PENDING_FRIEND_OUT = [];
+let cloudSyncReady = false;
+let _cloudSaveTimer = null;
+let _coinsSyncLock = false;
 
-const FRIENDS = JSON.parse(localStorage.getItem('devflow_friends') || '[]');
 const SKILL_CATALOG = [
   'HTML','CSS','JavaScript','TypeScript','Python','Java','C','C++','C#','PHP',
   'SQL','Kotlin','Swift','Go','Rust','Ruby','R','Scala','Perl','Dart','Lua',
@@ -5183,26 +5225,198 @@ const SKILL_CATALOG = [
   'Algorithms','Data Structures','System Design','Cybersecurity','Networking'
 ];
 
-let STREAK = parseInt(localStorage.getItem('devflow_streak') || '0', 10);
-let LAST_FOCUS_DAY = localStorage.getItem('devflow_last_focus_day') || '';
+let STREAK = 0;
+let LAST_FOCUS_DAY = '';
 let pendingStartTaskId = null;
 
-function saveTasks(){ localStorage.setItem('devflow_tasks', JSON.stringify(TASKS)); }
-function saveNotifs(){ localStorage.setItem('devflow_notifs', JSON.stringify(NOTIFICATIONS)); }
-function saveFriends(){ localStorage.setItem('devflow_friends', JSON.stringify(FRIENDS)); }
-function saveCoins(){
-  localStorage.setItem('devflow_coins', String(COINS));
-  updateCoinsUI();
-  if (window._coinsSyncLock) return;
+
+/* ========== Cloud-only state (no localStorage) ========== */
+function clearDevflowLocalStorage() {
   try {
-    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
-      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
-        coins: COINS,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(()=>{});
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf('devflow_') === 0) keys.push(k);
     }
+    keys.forEach(k => localStorage.removeItem(k));
   } catch (e) {}
 }
+
+function uidOrNull() {
+  try {
+    if (window.firebase && firebase.apps.length && firebase.auth().currentUser)
+      return firebase.auth().currentUser.uid;
+  } catch (e) {}
+  return (currentUser && currentUser.uid) || null;
+}
+
+function cloudUserRef() {
+  const uid = uidOrNull();
+  if (!uid || !window.firebase || !firebase.apps.length) return null;
+  return firebase.firestore().collection('users').doc(uid);
+}
+
+function scheduleCloudSave(patch) {
+  if (!patch || typeof patch !== 'object') return;
+  if (!uidOrNull()) return;
+  // merge into pending
+  scheduleCloudSave._pending = Object.assign(scheduleCloudSave._pending || {}, patch);
+  if (_cloudSaveTimer) clearTimeout(_cloudSaveTimer);
+  _cloudSaveTimer = setTimeout(flushCloudSave, 280);
+}
+scheduleCloudSave._pending = null;
+
+async function flushCloudSave() {
+  const ref = cloudUserRef();
+  const pending = scheduleCloudSave._pending;
+  scheduleCloudSave._pending = null;
+  _cloudSaveTimer = null;
+  if (!ref || !pending) return;
+  try {
+    pending.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+    await ref.set(pending, { merge: true });
+  } catch (e) {
+    console.warn('cloud save failed', e);
+  }
+}
+
+function saveTasks() {
+  scheduleCloudSave({ tasks: TASKS });
+}
+function saveNotifs() {
+  scheduleCloudSave({ notifications: NOTIFICATIONS });
+}
+function saveFriends() {
+  scheduleCloudSave({ friends: FRIENDS });
+}
+function saveCoins() {
+  if (_coinsSyncLock) return;
+  scheduleCloudSave({ coins: COINS });
+}
+function saveUnreadChatIds() {
+  UNREAD_CHATS = UNREAD_CHAT_IDS.length;
+  scheduleCloudSave({ unreadChatIds: UNREAD_CHAT_IDS });
+  updateMsgBadge();
+}
+function saveBlocked() {
+  scheduleCloudSave({ blocked: BLOCKED });
+}
+function savePrivateFlag() {
+  scheduleCloudSave({ privateAccount: !!IS_PRIVATE_ACCOUNT });
+  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
+}
+function saveFriendOut() {
+  scheduleCloudSave({ pendingFriendOut: PENDING_FRIEND_OUT });
+}
+function saveUnlockedEffects(list) {
+  const arr = Array.isArray(list) ? list : [];
+  if (currentUser) currentUser.unlockedEffects = arr;
+  scheduleCloudSave({ unlockedEffects: arr });
+  if (typeof applyAvatarEffectsUI === 'function') applyAvatarEffectsUI();
+}
+function saveNitro(data) {
+  if (currentUser) currentUser.nitro = data || null;
+  scheduleCloudSave({ nitro: data || null });
+}
+function saveNameStyle(style) {
+  style = Object.assign({}, typeof DEFAULT_NAME_STYLE !== 'undefined' ? DEFAULT_NAME_STYLE : {}, style || {});
+  if (currentUser) currentUser.nameStyle = style;
+  scheduleCloudSave({ nameStyle: style });
+  return style;
+}
+function saveThemeColors(top, bottom) {
+  top = (typeof normalizeHexColor === 'function' ? normalizeHexColor(top) : top) || '#5865F2';
+  bottom = (typeof normalizeHexColor === 'function' ? normalizeHexColor(bottom) : bottom) || '#4752C4';
+  if (currentUser) {
+    currentUser.profileThemeTop = top;
+    currentUser.profileThemeBottom = bottom;
+    currentUser.profileThemeColor = top;
+  }
+  scheduleCloudSave({ profileThemeTop: top, profileThemeBottom: bottom, profileThemeColor: top });
+  return { top: top, bottom: bottom };
+}
+function saveStoreFlags(flags) {
+  STORE_FLAGS = flags || {};
+  scheduleCloudSave({ storeFlags: STORE_FLAGS });
+}
+function loadStoreFlags() {
+  return STORE_FLAGS || {};
+}
+function saveStreakCloud() {
+  scheduleCloudSave({ streak: STREAK, lastFocusDay: LAST_FOCUS_DAY, focusTodayMin: FOCUS_TODAY_MIN, focusTodayDate: FOCUS_TODAY_DATE });
+}
+function saveActivityCloud() {
+  scheduleCloudSave({ activity: ACTIVITY.slice(0, 30) });
+}
+function saveCertsCloud() {
+  scheduleCloudSave({ certificates: CERTIFICATES });
+}
+function saveSkillsCloud() {
+  scheduleCloudSave({ skillsLearned: SKILLS_LEARNED, skillsLearning: SKILLS_LEARNING, onboardingDone: !!ONBOARDING_DONE });
+}
+function saveStatusCloud() {
+  scheduleCloudSave({ status: USER_STATUS });
+}
+function saveTerminalPrefCloud() {
+  scheduleCloudSave({ terminalEnabled: !!TERMINAL_ENABLED });
+}
+
+function applyCloudUserData(d) {
+  if (!d) return;
+  if (typeof d.coins === 'number') COINS = d.coins;
+  if (Array.isArray(d.tasks)) TASKS = d.tasks;
+  if (Array.isArray(d.notifications)) NOTIFICATIONS = d.notifications;
+  if (Array.isArray(d.friends)) {
+    FRIENDS.length = 0;
+    d.friends.forEach(f => FRIENDS.push(f));
+  }
+  if (Array.isArray(d.blocked)) BLOCKED = d.blocked;
+  if (Array.isArray(d.pendingFriendOut)) PENDING_FRIEND_OUT = d.pendingFriendOut;
+  if (Array.isArray(d.unreadChatIds)) {
+    UNREAD_CHAT_IDS = d.unreadChatIds;
+    UNREAD_CHATS = UNREAD_CHAT_IDS.length;
+  }
+  if (Array.isArray(d.activity)) ACTIVITY = d.activity;
+  if (Array.isArray(d.certificates)) CERTIFICATES = d.certificates;
+  if (Array.isArray(d.skillsLearned)) SKILLS_LEARNED = d.skillsLearned;
+  if (Array.isArray(d.skillsLearning)) SKILLS_LEARNING = d.skillsLearning;
+  if (typeof d.streak === 'number') STREAK = d.streak;
+  if (d.lastFocusDay) LAST_FOCUS_DAY = d.lastFocusDay;
+  if (typeof d.focusTodayMin === 'number') {
+    // reset if different day
+    const today = new Date().toDateString();
+    if (d.focusTodayDate && d.focusTodayDate !== today) {
+      FOCUS_TODAY_MIN = 0;
+      FOCUS_TODAY_DATE = today;
+    } else {
+      FOCUS_TODAY_MIN = d.focusTodayMin;
+      FOCUS_TODAY_DATE = d.focusTodayDate || today;
+    }
+  }
+  if (typeof d.onboardingDone === 'boolean') ONBOARDING_DONE = d.onboardingDone;
+  if (typeof d.terminalEnabled === 'boolean') TERMINAL_ENABLED = d.terminalEnabled;
+  if (typeof d.privateAccount === 'boolean') IS_PRIVATE_ACCOUNT = d.privateAccount;
+  if (d.status) USER_STATUS = d.status;
+  if (d.storeFlags && typeof d.storeFlags === 'object') STORE_FLAGS = d.storeFlags;
+  if (d.nitro) {
+    if (d.nitro.expiresAt && d.nitro.expiresAt > Date.now()) { /* keep */ }
+    else d.nitro = null;
+  }
+  cloudSyncReady = true;
+  if (typeof updateCoinsUI === 'function') updateCoinsUI();
+  if (typeof updateStats === 'function') updateStats();
+  if (typeof updateMsgBadge === 'function') updateMsgBadge();
+  if (typeof updateNotifBadge === 'function') updateNotifBadge();
+  if (typeof renderTasks === 'function') renderTasks();
+  if (typeof renderActivity === 'function') renderActivity();
+  if (typeof renderCertificates === 'function') renderCertificates();
+  if (typeof renderSkillsOnDashboard === 'function') renderSkillsOnDashboard();
+  if (typeof applyTerminalPref === 'function') applyTerminalPref();
+  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
+  if (typeof applyUserStatusUI === 'function') applyUserStatusUI();
+  if (typeof applyNitroUI === 'function') applyNitroUI();
+}
+
 
 function addCoins(n, reason){
   n = Math.max(0, parseInt(n, 10) || 0);
@@ -5210,11 +5424,11 @@ function addCoins(n, reason){
     n = Math.round(n * 1.1);
   }
   try {
-    const flags = JSON.parse(localStorage.getItem('devflow_store_flags') || '{}');
+    const flags = loadStoreFlags();
     if (flags.focus_boost_left > 0 && reason && /focus|session|Focus/i.test(reason)) {
       n = Math.round(n * 1.25);
       flags.focus_boost_left -= 1;
-      localStorage.setItem('devflow_store_flags', JSON.stringify(flags));
+      saveStoreFlags(flags);
     }
   } catch (e) {}
   COINS += n;
@@ -5605,7 +5819,7 @@ function enterGuest(){
   updateUserUI();
   showApp();
   setTimeout(()=>{
-    if(!localStorage.getItem('devflow_logged_in')){
+    if(!isLoggedIn){
       openModal('modal-auth');
       showToast('Sign in required','Create an account to save progress and earn coins');
     }
@@ -5613,7 +5827,7 @@ function enterGuest(){
 }
 function login(name, handle, avatarUrl, uid, extra){
   isLoggedIn = true;
-  const prev = (() => { try { return JSON.parse(localStorage.getItem('devflow_user')||'null'); } catch(e){ return null; } })();
+  const prev = currentUser;
   currentUser = {
     uid: uid || null,
     displayName: name || 'Developer',
@@ -5629,16 +5843,16 @@ function login(name, handle, avatarUrl, uid, extra){
   };
   if (typeof extra !== 'undefined' && extra && extra.coins != null) {
     COINS = parseInt(extra.coins, 10) || COINS;
-    localStorage.setItem('devflow_coins', String(COINS));
+    saveCoins();
   }
   if (currentUser.avatarEffect && currentUser.avatarEffect !== 'none') {
     const u = currentUser.unlockedEffects || [];
     if (!u.includes(currentUser.avatarEffect)) u.push(currentUser.avatarEffect);
     currentUser.unlockedEffects = u;
-    localStorage.setItem('devflow_unlocked_fx', JSON.stringify(u));
+    /* unlocked effects on cloud via user doc */
   }
   if (extra && extra.nitro && extra.nitro.expiresAt && extra.nitro.expiresAt > Date.now()) {
-    localStorage.setItem('devflow_nitro', JSON.stringify(extra.nitro));
+    saveNitro(extra.nitro);
   }
   if (extra && (extra.profileThemeTop || extra.profileThemeColor || extra.profileThemeBottom)) {
     const t = extra.profileThemeTop || extra.profileThemeColor || DEFAULT_BANNER_THEME_TOP;
@@ -5646,16 +5860,26 @@ function login(name, handle, avatarUrl, uid, extra){
     currentUser.profileThemeTop = t;
     currentUser.profileThemeBottom = b;
     currentUser.profileThemeColor = t;
-    localStorage.setItem('devflow_theme_top', t);
-    localStorage.setItem('devflow_theme_bottom', b);
-    localStorage.setItem('devflow_profile_theme_color', t);
+    /* theme cloud */
+    /* theme cloud */
+    /* theme cloud */
   }
-  localStorage.setItem('devflow_logged_in','true');
-  localStorage.setItem('devflow_user', JSON.stringify(currentUser));
   updateUserUI();
   showApp();
   showToast('Welcome', 'Signed in as @'+currentUser.handle);
   if (typeof startChatEngine === 'function') startChatEngine();
+  if (typeof startUserDocSync === 'function') startUserDocSync();
+  // ensure core profile fields exist on cloud
+  scheduleCloudSave({
+    handle: currentUser.handle,
+    displayName: currentUser.displayName,
+    avatar: currentUser.avatar,
+    email: currentUser.email || '',
+    bio: currentUser.bio || '',
+    banner: currentUser.banner || '',
+    avatarEffect: currentUser.avatarEffect || 'none',
+    unlockedEffects: currentUser.unlockedEffects || ['none']
+  });
 }
 function logout(){
   if (unsubUserDoc) { try { unsubUserDoc(); } catch (e) {} unsubUserDoc = null; }
@@ -5665,8 +5889,10 @@ function logout(){
   }
   isLoggedIn = false;
   currentUser = null;
-  localStorage.removeItem('devflow_logged_in');
-  localStorage.removeItem('devflow_user');
+  TASKS = []; NOTIFICATIONS = []; ACTIVITY = []; FRIENDS = []; BLOCKED = [];
+  UNREAD_CHAT_IDS = []; UNREAD_CHATS = 0; COINS = 0; CERTIFICATES = [];
+  SKILLS_LEARNED = []; SKILLS_LEARNING = []; STORE_FLAGS = {};
+  STREAK = 0; FOCUS_TODAY_MIN = 0; ONBOARDING_DONE = false; cloudSyncReady = false;
   showLanding();
 }
 function updateUserUI(){
@@ -5727,7 +5953,7 @@ function applyUserStatusUI(){
 function setUserStatus(status){
   if(!['online','idle','dnd','invisible'].includes(status)) status = 'online';
   USER_STATUS = status;
-  localStorage.setItem('devflow_status', status);
+  saveStatusCloud();
   applyUserStatusUI();
   closeStatusMenu();
   if(typeof beatPresence === 'function') beatPresence();
@@ -5787,7 +6013,7 @@ const AVATAR_EFFECTS = [
 
 function loadUnlockedEffects() {
   let list = [];
-  try { list = JSON.parse(localStorage.getItem('devflow_unlocked_fx') || '[]'); } catch (e) { list = []; }
+  list = (currentUser && currentUser.unlockedEffects) || [];
   if (currentUser && Array.isArray(currentUser.unlockedEffects)) {
     list = [...new Set(list.concat(currentUser.unlockedEffects))];
   }
@@ -5796,11 +6022,9 @@ function loadUnlockedEffects() {
 }
 function saveUnlockedEffects(list) {
   const uniq = [...new Set(['none'].concat(list || []))];
-  localStorage.setItem('devflow_unlocked_fx', JSON.stringify(uniq));
-  if (currentUser) {
-    currentUser.unlockedEffects = uniq;
-    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
-  }
+  if (currentUser) currentUser.unlockedEffects = uniq;
+  scheduleCloudSave({ unlockedEffects: uniq });
+  if (typeof applyAvatarEffectsUI === 'function') applyAvatarEffectsUI();
 }
 function isEffectUnlocked(id) {
   const fx = validAvatarEffect(id);
@@ -6035,7 +6259,7 @@ async function saveEditProfile(){
   setTimeout(function(){ if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle(); }, 30);
   setTimeout(function(){ if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle(); }, 150);
   if(!currentUser.createdAt) currentUser.createdAt = Date.now();
-  localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  /* profile via Firestore */
   updateUserUI();
   renderDiscordProfile();
   if (typeof applyProfileTheme === 'function') applyProfileTheme();
@@ -6093,10 +6317,9 @@ function submitOnboarding(){
   const learning = [...document.querySelectorAll('#skills-learning .skill-chip.selected')].map(b=>b.dataset.skill);
   SKILLS_LEARNED = learned;
   SKILLS_LEARNING = learning;
-  localStorage.setItem('devflow_skills_learned', JSON.stringify(learned));
-  localStorage.setItem('devflow_skills_learning', JSON.stringify(learning));
+  SKILLS_LEARNED = learned; SKILLS_LEARNING = learning; saveSkillsCloud();
   ONBOARDING_DONE = true;
-  localStorage.setItem('devflow_onboarding','true');
+  ONBOARDING_DONE = true; saveSkillsCloud();
   learning.forEach(skill=>{
     if(TASKS.some(t=>t.isLearningGoal && t.title.includes(skill))) return;
     TASKS.unshift({
@@ -6347,25 +6570,21 @@ function updateTimerDisplay(){
 
 function persistTimer() {
   if (ACTIVE_TIMER && remainingSeconds > 0) {
-    localStorage.setItem('devflow_active_timer', JSON.stringify({
-      ...ACTIVE_TIMER,
-      remaining: remainingSeconds,
-      savedAt: Date.now()
-    }));
+    /* active timer is session-only in memory */
   } else {
-    localStorage.removeItem('devflow_active_timer');
+    /* */
   }
 }
 
 function restoreTimer() {
   try {
-    const raw = localStorage.getItem('devflow_active_timer');
+    const raw = null; // no device persistence
     if (!raw) return;
     const data = JSON.parse(raw);
     const elapsed = Math.floor((Date.now() - data.savedAt) / 1000);
     const left = (data.remaining || 0) - elapsed;
     if (left <= 0) {
-      localStorage.removeItem('devflow_active_timer');
+      /* */
       return;
     }
     ACTIVE_TIMER = {
@@ -6437,15 +6656,14 @@ function touchStreak(){
   const yesterday = dayKey(-1);
   STREAK = LAST_FOCUS_DAY === yesterday ? STREAK + 1 : 1;
   LAST_FOCUS_DAY = today;
-  localStorage.setItem('devflow_streak', String(STREAK));
-  localStorage.setItem('devflow_last_focus_day', LAST_FOCUS_DAY);
+  saveStreakCloud();
 }
 function refreshStreakOnLoad(){
   const today = dayKey(0);
   const yesterday = dayKey(-1);
   if(LAST_FOCUS_DAY && LAST_FOCUS_DAY !== today && LAST_FOCUS_DAY !== yesterday){
     STREAK = 0;
-    localStorage.setItem('devflow_streak', '0');
+    STREAK=0; saveStreakCloud();
   }
 }
 function finishSession(completeTask){
@@ -6455,7 +6673,7 @@ function finishSession(completeTask){
   const task = ACTIVE_TIMER.taskId ? TASKS.find(t=>t.id===ACTIVE_TIMER.taskId) : null;
   const spent = Math.max(1, Math.round((ACTIVE_TIMER.totalSeconds - remainingSeconds)/60));
   FOCUS_TODAY_MIN += spent;
-  localStorage.setItem('devflow_focus_today', String(FOCUS_TODAY_MIN));
+  FOCUS_TODAY_DATE = new Date().toDateString(); saveStreakCloud();
   touchStreak();
   if(task){
     task.sessions = task.sessions || [];
@@ -6480,7 +6698,7 @@ function finishSession(completeTask){
   }
   ACTIVE_TIMER = null;
   remainingSeconds = 0;
-  localStorage.removeItem('devflow_active_timer');
+  /* */
   renderTasks();
   updateStats();
   initTimerUI();
@@ -6567,7 +6785,7 @@ function updateMsgBadge(){
   if(UNREAD_CHATS>0){ badge.textContent=UNREAD_CHATS>9?'9+':String(UNREAD_CHATS); badge.classList.remove('hidden'); }
   else badge.classList.add('hidden');
 }
-function setUnreadChats(n){ UNREAD_CHATS=Math.max(0,n); localStorage.setItem('devflow_unread_chats',String(UNREAD_CHATS)); updateMsgBadge(); }
+function setUnreadChats(n){ UNREAD_CHATS=Math.max(0,n); updateMsgBadge(); }
 function simulateIncomingMessage(){ setUnreadChats(UNREAD_CHATS+1); showToast('New message','You have '+UNREAD_CHATS+' unread chat'+(UNREAD_CHATS>1?'s':'')); }
 
 /* Search / empty pages */
@@ -6863,7 +7081,7 @@ function updateNextUp(){
 function addActivity(text, type, minutes){
   ACTIVITY.unshift({id:'a'+Date.now(), text, type:type||'done', time:Date.now(), minutes: minutes||0});
   if(ACTIVITY.length>20) ACTIVITY=ACTIVITY.slice(0,20);
-  localStorage.setItem('devflow_activity', JSON.stringify(ACTIVITY));
+  saveActivityCloud();
   renderActivity();
 }
 function deleteActivity(id){
@@ -6872,11 +7090,11 @@ function deleteActivity(id){
   if(!item) return;
   if(item.minutes && item.type==='focus'){
     FOCUS_TODAY_MIN = Math.max(0, FOCUS_TODAY_MIN - item.minutes);
-    localStorage.setItem('devflow_focus_today', String(FOCUS_TODAY_MIN));
+    FOCUS_TODAY_DATE = new Date().toDateString(); saveStreakCloud();
   }
   if(idx>=0) ACTIVITY.splice(idx,1);
   else ACTIVITY.splice(id,1);
-  localStorage.setItem('devflow_activity', JSON.stringify(ACTIVITY));
+  saveActivityCloud();
   renderActivity();
   updateStats();
 }
@@ -6911,14 +7129,14 @@ function addCertificate(e){
   const year=document.getElementById('cert-year').value.trim();
   if(!title) return;
   CERTIFICATES.unshift({title,issuer,year});
-  localStorage.setItem('devflow_certs', JSON.stringify(CERTIFICATES));
+  saveCertsCloud();
   document.getElementById('form-cert')?.reset();
   renderCertificates();
   addCoins(15,'Certificate added');
 }
 function removeCert(i){
   CERTIFICATES.splice(i,1);
-  localStorage.setItem('devflow_certs', JSON.stringify(CERTIFICATES));
+  saveCertsCloud();
   renderCertificates();
 }
 
@@ -6966,62 +7184,37 @@ function startUserDocSync() {
   const uid = firebase.auth().currentUser.uid;
   unsubUserDoc = firebase.firestore().collection('users').doc(uid).onSnapshot(snap => {
     const d = snap.data() || {};
-    if (d.banned && d.banUntil && d.banUntil > Date.now()) {
+    if (d.banned && (!d.banUntil || d.banUntil > Date.now())) {
       enforceBan(d);
       return;
     }
-    if (d.banned && !d.banUntil) {
-      enforceBan(d);
-      return;
-    }
-    // ban expired — clear flags
     if (d.banned && d.banUntil && d.banUntil <= Date.now()) {
       firebase.firestore().collection('users').doc(uid).set({
         banned: false, banUntil: null, banReason: null
       }, { merge: true }).catch(()=>{});
     }
-    if (typeof d.coins === 'number' && d.coins !== COINS) {
-      window._coinsSyncLock = true;
-      COINS = d.coins;
-      localStorage.setItem('devflow_coins', String(COINS));
-      updateCoinsUI();
-      window._coinsSyncLock = false;
-    }
-    // nitro stripped remotely
-    if (d.nitro === null || d.nitro === undefined) {
-      if (localStorage.getItem('devflow_nitro')) {
-        localStorage.removeItem('devflow_nitro');
-        if (typeof applyNitroUI === 'function') applyNitroUI();
-  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
-      }
-    } else if (d.nitro && d.nitro.expiresAt) {
-      localStorage.setItem('devflow_nitro', JSON.stringify(d.nitro));
-      if (typeof applyNitroUI === 'function') applyNitroUI();
-  if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
-    }
-    if (typeof d.privateAccount === 'boolean') {
-      IS_PRIVATE_ACCOUNT = d.privateAccount;
-      localStorage.setItem('devflow_private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
-      if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
-    }
-    if (Array.isArray(d.blocked)) {
-      BLOCKED = d.blocked;
-      localStorage.setItem('devflow_blocked', JSON.stringify(BLOCKED));
-    }
-    if (Array.isArray(d.friends)) {
-      // merge cloud friends
-      d.friends.forEach(f => {
-        if (f && f.handle && !FRIENDS.some(x => String(x.handle).toLowerCase() === String(f.handle).toLowerCase())) {
-          FRIENDS.push(f);
-        }
-      });
-      if (typeof saveFriends === 'function') saveFriends();
-    }
+    window._coinsSyncLock = true;
+    applyCloudUserData(d);
+    window._coinsSyncLock = false;
     if (currentUser) {
-      currentUser.email = d.email || currentUser.email || currentAuthEmail();
-      currentUser.terminalAccess = !!d.terminalAccess || isTremenalOwner();
+      currentUser.email = d.email || currentUser.email || (typeof currentAuthEmail === 'function' ? (currentAuthEmail()[0] || '') : '');
+      currentUser.terminalAccess = !!d.terminalAccess || (typeof isTremenalOwner === 'function' && isTremenalOwner());
       currentUser.privateAccount = IS_PRIVATE_ACCOUNT;
-      localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+      currentUser.displayName = d.displayName || currentUser.displayName;
+      currentUser.handle = d.handle || currentUser.handle;
+      currentUser.avatar = d.avatar || currentUser.avatar;
+      currentUser.bio = d.bio != null ? d.bio : currentUser.bio;
+      currentUser.banner = d.banner != null ? d.banner : currentUser.banner;
+      currentUser.avatarEffect = d.avatarEffect || currentUser.avatarEffect;
+      currentUser.unlockedEffects = d.unlockedEffects || currentUser.unlockedEffects;
+      currentUser.nitro = d.nitro || null;
+      currentUser.nameStyle = d.nameStyle || currentUser.nameStyle;
+      currentUser.profileThemeTop = d.profileThemeTop || currentUser.profileThemeTop;
+      currentUser.profileThemeBottom = d.profileThemeBottom || currentUser.profileThemeBottom;
+      currentUser.profileThemeColor = d.profileThemeColor || currentUser.profileThemeColor;
+      if (typeof updateUserUI === 'function') updateUserUI();
+      if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
+      if (typeof applyProfileTheme === 'function') applyProfileTheme();
     }
     refreshTremenalAccess();
   }, () => refreshTremenalAccess());
@@ -7038,8 +7231,8 @@ function enforceBan(data) {
   } catch (e) {}
   isLoggedIn = false;
   currentUser = null;
-  localStorage.removeItem('devflow_logged_in');
-  localStorage.removeItem('devflow_user');
+  /* */
+  /* */
   if (typeof showLanding === 'function') showLanding();
   else {
     document.getElementById('app-shell')?.classList.remove('visible');
@@ -7282,7 +7475,7 @@ function applyTerminalPref(){
 }
 function toggleTerminalPref(checked){
   TERMINAL_ENABLED=!!checked;
-  localStorage.setItem('devflow_terminal', TERMINAL_ENABLED?'true':'false');
+  saveTerminalPrefCloud();
   applyTerminalPref();
   showToast(TERMINAL_ENABLED?'Terminal on':'Terminal off', TERMINAL_ENABLED?'Type help':'Classic UI only');
 }
@@ -7307,26 +7500,21 @@ function runTerminalCommand(raw){
 
 
 /* ========== Privacy / Friends / Block ========== */
-let IS_PRIVATE_ACCOUNT = localStorage.getItem('devflow_private') === 'true';
-let BLOCKED = [];
-try { BLOCKED = JSON.parse(localStorage.getItem('devflow_blocked') || '[]'); } catch (e) { BLOCKED = []; }
-// FRIENDS is const array - mutate in place
-let PENDING_FRIEND_OUT = [];
-try { PENDING_FRIEND_OUT = JSON.parse(localStorage.getItem('devflow_friend_out') || '[]'); } catch (e) { PENDING_FRIEND_OUT = []; }
+/* IS_PRIVATE_ACCOUNT, BLOCKED, PENDING_FRIEND_OUT — cloud-backed globals */
 let viewingProfilePeer = null;
 let unsubFriendRequests = null;
 
 function saveBlocked() {
-  localStorage.setItem('devflow_blocked', JSON.stringify(BLOCKED));
+  /* */
   syncPrivacyToCloud();
 }
 function savePrivateFlag() {
-  localStorage.setItem('devflow_private', IS_PRIVATE_ACCOUNT ? 'true' : 'false');
+  /* */
   syncPrivacyToCloud();
   applyOwnPrivacyUI();
 }
 function saveFriendOut() {
-  localStorage.setItem('devflow_friend_out', JSON.stringify(PENDING_FRIEND_OUT));
+  /* */
 }
 function isFriendWith(handle) {
   handle = String(handle || '').replace(/^@/, '').toLowerCase();
@@ -7597,33 +7785,13 @@ const DEFAULT_BANNER_THEME_BOTTOM = '#4752C4';
 
 function loadNitro() {
   try {
-    const raw = localStorage.getItem('devflow_nitro');
-    if (!raw) return null;
-    const data = JSON.parse(raw);
+    const data = (currentUser && currentUser.nitro) || null;
     if (!data || !data.expiresAt) return null;
-    if (Date.now() > data.expiresAt) {
-      localStorage.removeItem('devflow_nitro');
-      return null;
-    }
+    if (Date.now() > data.expiresAt) return null;
     return data;
   } catch (e) { return null; }
 }
-function saveNitro(data) {
-  if (!data) localStorage.removeItem('devflow_nitro');
-  else localStorage.setItem('devflow_nitro', JSON.stringify(data));
-  if (currentUser) {
-    currentUser.nitro = data;
-    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
-  }
-  try {
-    if (window.firebase && firebase.apps.length && firebase.auth().currentUser && data) {
-      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
-        nitro: data,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(()=>{});
-    }
-  } catch (e) {}
-}
+/* saveNitro in cloud layer */
 function hasActiveNitro() {
   return !!loadNitro();
 }
@@ -7767,38 +7935,14 @@ function getSavedThemeColors() {
     top = currentUser.profileThemeTop || currentUser.profileThemeColor || null;
     bottom = currentUser.profileThemeBottom || null;
   }
-  top = normalizeHexColor(top) || normalizeHexColor(localStorage.getItem('devflow_theme_top')) || DEFAULT_BANNER_THEME_TOP;
-  bottom = normalizeHexColor(bottom) || normalizeHexColor(localStorage.getItem('devflow_theme_bottom')) || DEFAULT_BANNER_THEME_BOTTOM;
+  top = normalizeHexColor(top) || DEFAULT_BANNER_THEME_TOP;
+  bottom = normalizeHexColor(bottom) || DEFAULT_BANNER_THEME_BOTTOM;
   return { top: top, bottom: bottom };
 }
 function getSavedThemeColor() {
   return getSavedThemeColors().top;
 }
-function saveThemeColors(top, bottom) {
-  top = normalizeHexColor(top) || DEFAULT_BANNER_THEME_TOP;
-  bottom = normalizeHexColor(bottom) || DEFAULT_BANNER_THEME_BOTTOM;
-  localStorage.setItem('devflow_theme_top', top);
-  localStorage.setItem('devflow_theme_bottom', bottom);
-  localStorage.setItem('devflow_profile_theme_color', top); // legacy
-  if (currentUser) {
-    currentUser.profileThemeTop = top;
-    currentUser.profileThemeBottom = bottom;
-    currentUser.profileThemeColor = top;
-    delete currentUser.profileTheme;
-    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
-  }
-  try {
-    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
-      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
-        profileThemeTop: top,
-        profileThemeBottom: bottom,
-        profileThemeColor: top,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(()=>{});
-    }
-  } catch (e) {}
-  return { top: top, bottom: bottom };
-}
+/* saveThemeColors in cloud layer */
 function saveThemeColor(hex) {
   const cur = getSavedThemeColors();
   return saveThemeColors(hex, cur.bottom);
@@ -7870,28 +8014,11 @@ let pendingNameStyle = Object.assign({}, DEFAULT_NAME_STYLE);
 function loadNameStyle() {
   try {
     if (currentUser && currentUser.nameStyle) return Object.assign({}, DEFAULT_NAME_STYLE, currentUser.nameStyle);
-    const raw = localStorage.getItem('devflow_name_style');
-    if (raw) return Object.assign({}, DEFAULT_NAME_STYLE, JSON.parse(raw));
+    /* nameStyle from currentUser / cloud only */
   } catch (e) {}
   return Object.assign({}, DEFAULT_NAME_STYLE);
 }
-function saveNameStyle(style) {
-  style = Object.assign({}, DEFAULT_NAME_STYLE, style || {});
-  localStorage.setItem('devflow_name_style', JSON.stringify(style));
-  if (currentUser) {
-    currentUser.nameStyle = style;
-    localStorage.setItem('devflow_user', JSON.stringify(currentUser));
-  }
-  try {
-    if (window.firebase && firebase.apps.length && firebase.auth().currentUser) {
-      firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
-        nameStyle: style,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(()=>{});
-    }
-  } catch (e) {}
-  return style;
-}
+/* saveNameStyle in cloud layer */
 
 function applyNameStyleToEl(el, style, nameplateEl) {
   if (!el) return;
@@ -8296,12 +8423,7 @@ function renderNitroGrid() {
   }).join('');
 }
 
-function loadStoreFlags() {
-  try { return JSON.parse(localStorage.getItem('devflow_store_flags') || '{}'); } catch (e) { return {}; }
-}
-function saveStoreFlags(flags) {
-  localStorage.setItem('devflow_store_flags', JSON.stringify(flags || {}));
-}
+/* loadStoreFlags/saveStoreFlags in cloud layer */
 
 function buyStoreItem(id) {
   if (!isLoggedIn && !currentUser) { openModal('modal-auth'); return; }
@@ -8374,9 +8496,8 @@ const _addCoinsOrig = typeof addCoins === 'function' ? null : null;
 
 /* Init */
 document.addEventListener('DOMContentLoaded',()=>{
-  const saved=localStorage.getItem('devflow_user');
-  if(isLoggedIn&&saved){ currentUser=JSON.parse(saved); updateUserUI(); showApp(); }
-  else showLanding();
+  clearDevflowLocalStorage();
+  showLanding();
   restoreTimer();
   if(typeof refreshStreakOnLoad==='function') refreshStreakOnLoad();
   renderSkillsOnDashboard();
@@ -8389,7 +8510,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         if (currentUser) {
           currentUser.email = mail || currentUser.email || '';
           if (mail === TREMENAL_OWNER) currentUser.terminalAccess = true;
-          localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+          /* profile via Firestore */
         }
         if (mail === TREMENAL_OWNER) {
           firebase.firestore().collection('users').doc(user.uid).set({
@@ -8401,6 +8522,12 @@ document.addEventListener('DOMContentLoaded',()=>{
         refreshTremenalAccess();
         startUserDocSync();
         if (typeof startFriendRequestListener === 'function') startFriendRequestListener();
+        if (typeof startChatEngine === 'function') startChatEngine();
+        if (typeof renderChatList === 'function') renderChatList();
+        const msgPage = document.getElementById('page-messages');
+        if (msgPage && !msgPage.classList.contains('hidden') && typeof renderMessagesPage === 'function') {
+          renderMessagesPage();
+        }
       }
       if (user && !isLoggedIn) {
         firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
