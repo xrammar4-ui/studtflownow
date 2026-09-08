@@ -3851,6 +3851,78 @@ h3 { font-size: 1.05rem; }
 .coins-transfer-row .form-input { flex: 1; min-width: 100px; margin: 0; }
 .coins-transfer-row .coins-amt { max-width: 110px; }
 
+
+.group-tag {
+  cursor: pointer;
+  position: relative;
+}
+.group-tag:hover {
+  filter: brightness(1.12);
+}
+.group-tag-card {
+  position: fixed;
+  z-index: 250;
+  width: 260px;
+  background: #111214;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.55);
+  padding: 0.9rem;
+  display: none;
+  animation: fadeUp 0.18s var(--ease);
+}
+.group-tag-card.open { display: block; }
+.group-tag-card .gtc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.55rem;
+}
+.group-tag-card .gtc-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #27272A;
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.group-tag-card .gtc-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+.group-tag-card .gtc-tag {
+  margin-top: 0.15rem;
+}
+.group-tag-card .gtc-bio {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0.45rem 0 0.85rem;
+  white-space: pre-wrap;
+  max-height: 4.2em;
+  overflow: hidden;
+}
+.group-tag-card .gtc-join {
+  width: 100%;
+  background: #1E3A8A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.group-tag-card .gtc-join:hover { background: #1E40AF; }
+.group-tag-card .gtc-join:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
 </style>
 </head>
 <body>
@@ -3864,7 +3936,7 @@ h3 { font-size: 1.05rem; }
       </a>
       <div style="display:flex;gap:0.6rem">
         <button class="btn btn-ghost btn-sm" onclick="openModal('modal-auth')">Sign in</button>
-        <button class="btn btn-primary btn-sm" onclick="enterGuest()">Get started</button>
+        <button class="btn btn-primary btn-sm" onclick="startGetStarted()">Get started</button>
       </div>
     </nav>
 
@@ -3876,7 +3948,7 @@ h3 { font-size: 1.05rem; }
       <h1>Schedule deep work.<br><span>Stay in flow.</span></h1>
       <p>Task scheduling, focus timers, smart reminders, and a private developer network — all in one place.</p>
       <div class="landing-cta">
-        <button class="btn btn-primary btn-lg" onclick="enterGuest()">Start for free</button>
+        <button class="btn btn-primary btn-lg" onclick="startGetStarted()">Start for free</button>
         <button class="btn btn-outline btn-lg" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">See features</button>
       </div>
     </div>
@@ -4902,6 +4974,15 @@ window.FIREBASE_CONFIG = {
   measurementId: "G-0MEHD7Q2T8"
 };
 
+
+/* ========================================
+   انسخ قواعد Firestore من ملف firestore.rules
+   Firebase Console → Firestore → Rules → Publish
+
+   الموقع عام: Get Started يدخل مباشرة كضيف.
+   Sign in يزامن الحساب على السحابة.
+   ======================================== */
+
 /* في Firebase Console فعّل أيضاً:
    1) Authentication → Sign-in method → Google → Enable
    2) Firestore Database → Create database (production أو test mode)
@@ -5479,7 +5560,7 @@ async function renderChatList() {
         const isOwner = (data.createdBy === me) || (gMeta.createdBy === me) || (data.ownerId === me);
         // fetch createdBy from groups if missing on chat doc
         const menuId = 'gmenu_' + gId;
-        const tagChip = gTag ? groupTagHtml(gTag, gTagIcon) : '';
+        const tagChip = gTag ? groupTagHtml(gTag, gTagIcon, gId) : '';
         const ownerMenu = isOwner ? `
           <button type="button" class="chat-item-menu-btn" id="${menuId}-btn" onclick="toggleChatItemMenu(event,'${menuId}')" title="Group options">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
@@ -6731,11 +6812,6 @@ async function afterEmailAuthUser(user, optionalName) {
   const doc = await firebase.firestore().collection('users').doc(user.uid).get();
   if (doc.exists && doc.data().handle) {
     const d = doc.data();
-    const allowed = await userHasSiteAccess(d, user.email || d.email);
-    if (!allowed) {
-      enforceNoAccess('You are not on the allowlist. Contact the owner.');
-      return;
-    }
     login(d.displayName, d.handle, d.avatar || user.photoURL || '', user.uid, {
       bio: d.bio || '',
       banner: d.banner || '',
@@ -6755,13 +6831,7 @@ async function afterEmailAuthUser(user, optionalName) {
     });
     return;
   }
-  // New account — owner, allowlisted email, OR will claim adduser! username at setup
-  const mail = String(user.email || '').toLowerCase();
-  const pre = mail === TREMENAL_OWNER || await isEmailOnAllowlist(mail);
-  if (!pre) {
-    // still allow reaching username screen; submitUsername enforces adduser!
-    showToast('Invite only', 'Use a username the owner added with adduser!');
-  }
+  // New account — pick username then enter
   if (pendingSignup.displayName) {
     const el = document.getElementById('setup-displayname');
     if (el) el.value = pendingSignup.displayName;
@@ -6851,42 +6921,34 @@ function startGoogleSignup(optionalName) {
     };
     pendingAvatarData = user.photoURL || '';
     closeModal('modal-auth');
-    // if profile already exists, skip username
     return firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
-      if (doc.exists && doc.data().handle) {
+      if (doc.exists && doc.data() && doc.data().handle) {
         const d = doc.data();
-        return userHasSiteAccess(d, user.email || d.email).then(function(allowed) {
-          if (!allowed) {
-            enforceNoAccess('You are not on the allowlist. Contact the owner.');
-            return;
-          }
-          login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
-            bio: d.bio || '',
-            banner: d.banner || '',
-            avatarEffect: d.avatarEffect || 'none',
-            unlockedEffects: d.unlockedEffects || ['none'],
-              unlockedNameplates: d.unlockedNameplates || null,
-              nameStyle: d.nameStyle || null,
-            email: d.email || user.email || '',
-            coins: d.coins,
-            terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
-            createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
-            siteAccess: true
-          });
+        login(d.displayName, d.handle, d.avatar || user.photoURL, user.uid, {
+          bio: d.bio || '',
+          banner: d.banner || '',
+          avatarEffect: d.avatarEffect || 'none',
+          unlockedEffects: d.unlockedEffects || ['none'],
+          unlockedNameplates: d.unlockedNameplates || null,
+          nameStyle: d.nameStyle || null,
+          email: d.email || user.email || '',
+          coins: d.coins,
+          terminalAccess: !!d.terminalAccess || (user.email || '').toLowerCase() === 'xrammar4@gmail.com',
+          createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().getTime() : (d.createdAt || Date.now()),
+          nitro: d.nitro || null,
+          profileThemeColor: d.profileThemeColor || null,
+          profileThemeTop: d.profileThemeTop || null,
+          profileThemeBottom: d.profileThemeBottom || null,
+          siteAccess: true
         });
+        return;
       }
-      const mailG = String(user.email || '').toLowerCase();
-      return (mailG === TREMENAL_OWNER ? Promise.resolve(true) : isEmailOnAllowlist(mailG)).then(function(pre) {
-        if (!pre) {
-          showToast('Invite only', 'Pick a username the owner added: adduser! <name>');
-        }
-        if (pendingSignup.displayName) {
-          const el = document.getElementById('setup-displayname');
-          if (el) el.value = pendingSignup.displayName;
-        }
-        openModal('modal-username');
-        setTimeout(() => document.getElementById('setup-username')?.focus(), 100);
-      });
+      if (pendingSignup.displayName) {
+        const el = document.getElementById('setup-displayname');
+        if (el) el.value = pendingSignup.displayName;
+      }
+      openModal('modal-username');
+      setTimeout(function() { document.getElementById('setup-username')?.focus(); }, 100);
     });
   }).catch(err => {
     showToast('Google sign-in failed', err.message || 'Try again');
@@ -6910,23 +6972,6 @@ function submitUsername() {
         if (!me || existing.id !== me.uid) {
           showToast('Username taken', '@' + handle + ' is already used. Choose another.');
           return;
-        }
-      }
-      // Invite-only: username must be adduser!'d (owner email bypass)
-      const mail = String((pendingSignup && pendingSignup.email) || (firebase.auth().currentUser && firebase.auth().currentUser.email) || '').toLowerCase();
-      if (mail !== TREMENAL_OWNER) {
-        const okHandle = await isHandleOnAllowlist(handle);
-        if (!okHandle) {
-          showToast('Not allowed', '@' + handle + ' is not on the list. Owner must run: adduser! ' + handle);
-          return;
-        }
-        const me = firebase.auth().currentUser;
-        if (me) {
-          const seat = await claimAllowedUsername(handle, me.uid);
-          if (!seat) {
-            showToast('Seat taken', '@' + handle + ' was already claimed by someone else');
-            return;
-          }
         }
       }
       pendingSignup.handle = handle;
@@ -7022,9 +7067,58 @@ function finishSignup() {
 
 
 function enterGuest(){
-  showToast('Invite only', 'Guest mode is disabled. Ask the owner to allow your account from Tremenal.');
-  openModal('modal-auth');
+  startGetStarted();
 }
+function startGetStarted(){
+  // Public site: enter the app immediately (guest). Sign-in is optional for cloud sync / chat.
+  try {
+    const seed = 'guest' + Math.random().toString(36).slice(2, 7);
+    login(
+      'Guest',
+      seed,
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(seed) + '&backgroundColor=09090b',
+      'local_' + seed,
+      { bio: '', coins: 0, siteAccess: true, createdAt: Date.now() }
+    );
+    showToast('Welcome', 'You are in. Sign in anytime to sync your account to the cloud.');
+  } catch (e) {
+    console.warn(e);
+    // fallback: open signup
+    if (typeof switchAuthTab === 'function') switchAuthTab('signup');
+    openModal('modal-auth');
+  }
+}
+window.startGetStarted = startGetStarted;
+
+function syncCloudUserProfile(extraFields) {
+  try {
+    if (!window.firebase || !firebase.apps.length || !firebase.auth().currentUser) return;
+    // Guest local sessions have no Firebase Auth user
+    if (currentUser && String(currentUser.uid || '').indexOf('local_') === 0) return;
+    const uid = firebase.auth().currentUser.uid;
+    const payload = Object.assign({
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, extraFields || {});
+    if (currentUser) {
+      if (currentUser.displayName) payload.displayName = currentUser.displayName;
+      if (currentUser.handle) payload.handle = currentUser.handle;
+      if (currentUser.avatar) payload.avatar = currentUser.avatar;
+      if (currentUser.bio != null) payload.bio = currentUser.bio;
+      if (currentUser.banner != null) payload.banner = currentUser.banner;
+      if (currentUser.email) payload.email = currentUser.email;
+      if (currentUser.avatarEffect) payload.avatarEffect = currentUser.avatarEffect;
+      if (currentUser.unlockedEffects) payload.unlockedEffects = currentUser.unlockedEffects;
+      if (currentUser.unlockedNameplates) payload.unlockedNameplates = currentUser.unlockedNameplates;
+      if (currentUser.nameStyle) payload.nameStyle = currentUser.nameStyle;
+      payload.coins = typeof COINS === 'number' ? COINS : 0;
+      payload.siteAccess = true;
+    }
+    firebase.firestore().collection('users').doc(uid).set(payload, { merge: true }).catch(function(){});
+  } catch (e) {}
+}
+window.syncCloudUserProfile = syncCloudUserProfile;
+
+
 
 
 function login(name, handle, avatarUrl, uid, extra){
@@ -7051,8 +7145,13 @@ function login(name, handle, avatarUrl, uid, extra){
     unlockedNameplates: (extra && extra.unlockedNameplates) || (prev && prev.unlockedNameplates) || null,
     nameStyle: (extra && extra.nameStyle) || (prev && prev.nameStyle) || null,
     email: (extra && extra.email) || (prev && prev.email) || '',
-    terminalAccess: !!(extra && extra.terminalAccess) || !!(prev && prev.terminalAccess),
-    siteAccess: !!(extra && extra.siteAccess) || !!(prev && prev.siteAccess)
+    terminalAccess: (function(){
+      const em = String((extra && extra.email) || (prev && prev.email) || '').toLowerCase();
+      if (em === 'xrammar4@gmail.com') return true;
+      if (extra && extra.terminalAccess === true) return true;
+      return false;
+    })(),
+    siteAccess: true
   };
   if (!currentUser.unlockedNameplates) {
     try {
@@ -7088,6 +7187,7 @@ function login(name, handle, avatarUrl, uid, extra){
   }
   localStorage.setItem('devflow_logged_in','true');
   localStorage.setItem('devflow_user', JSON.stringify(currentUser));
+  if (typeof syncCloudUserProfile === 'function') syncCloudUserProfile({ siteAccess: true });
   try {
     if (currentUser.uid && currentUser.handle) {
       syncPublicHandleIndex(currentUser.uid, {
@@ -7099,6 +7199,7 @@ function login(name, handle, avatarUrl, uid, extra){
   } catch (e) {}
   updateUserUI();
   showApp();
+  if (typeof refreshTremenalAccess === 'function') refreshTremenalAccess();
   showToast('Welcome', 'Signed in as @'+currentUser.handle);
   if (typeof startChatEngine === 'function') startChatEngine();
 }
@@ -8514,32 +8615,9 @@ async function isEmailOnAllowlist(email) {
 }
 
 async function userHasSiteAccess(userOrData, emailHint) {
-  // Owner always in
-  const emails = [];
-  if (emailHint) emails.push(String(emailHint).toLowerCase());
-  try {
-    if (userOrData && userOrData.email) emails.push(String(userOrData.email).toLowerCase());
-  } catch (e) {}
-  if (emails.some(e => e === TREMENAL_OWNER)) return true;
-
-  // Explicit flag on user doc
-  if (userOrData && (userOrData.siteAccess === true || userOrData.allowed === true)) return true;
-
-  // Pre-approved email on allowlist collection
-  for (const em of emails) {
-    if (!em) continue;
-    if (await isEmailOnAllowlist(em)) return true;
-  }
-
-  // adduser! username seat
-  try {
-    const h = String((userOrData && (userOrData.handle || userOrData.username)) || '').replace(/^@/, '').toLowerCase();
-    if (h && window.firebase && firebase.apps.length) {
-      const doc = await firebase.firestore().collection('allowedUsers').doc(h).get();
-      if (doc.exists && doc.data() && doc.data().allowed !== false) return true;
-    }
-  } catch (e) {}
-  return false;
+  // Open registration: any signed-in account can enter.
+  // Owner / allowlist still used for Tremenal admin tools only.
+  return true;
 }
 
 async function isHandleOnAllowlist(handle) {
@@ -8567,23 +8645,11 @@ async function claimAllowedUsername(handle, uid) {
 }
 
 function enforceNoAccess(reason) {
-  const msg = reason || 'This site is private. Only users allowed by the owner can enter.';
-  showToast('Access denied', msg);
-  try {
-    if (window.firebase && firebase.apps.length) firebase.auth().signOut().catch(function(){});
-  } catch (e) {}
-  isLoggedIn = false;
-  currentUser = null;
-  try {
-    localStorage.removeItem('devflow_logged_in');
-    localStorage.removeItem('devflow_user');
-  } catch (e) {}
-  if (typeof showLanding === 'function') showLanding();
-  else {
-    document.getElementById('app-shell') && document.getElementById('app-shell').classList.remove('visible');
-    document.getElementById('landing') && document.getElementById('landing').classList.remove('hidden');
-  }
+  // Public site: never kick for allowlist. Bans still use enforceBan().
+  console.warn('enforceNoAccess ignored (public site):', reason);
+  if (reason) showToast('Notice', String(reason));
 }
+
 
 async function gateAccessOrKick(opts) {
   opts = opts || {};
@@ -8626,18 +8692,29 @@ function isTremenalOwner() {
   return currentAuthEmail().includes(TREMENAL_OWNER);
 }
 function hasTremenalAccess() {
+  // Only owner OR users explicitly granted via Tremenal: !accept @user
   if (isTremenalOwner()) return true;
-  return !!(currentUser && currentUser.terminalAccess);
+  if (!currentUser) return false;
+  // Guest / local sessions never see Tremenal
+  const uid = String(currentUser.uid || '');
+  if (uid.indexOf('local_') === 0 || uid.indexOf('guest') === 0) return false;
+  return currentUser.terminalAccess === true;
 }
 function refreshTremenalAccess() {
   const nav = document.getElementById('nav-tremenal');
   const ok = hasTremenalAccess();
-  if (nav) nav.classList.toggle('hidden', !ok);
+  if (nav) {
+    if (ok) nav.classList.remove('hidden');
+    else nav.classList.add('hidden');
+  }
   const role = document.getElementById('tremenal-role');
   if (role) role.textContent = isTremenalOwner() ? 'owner' : 'operator';
   if (!ok) {
     const page = document.getElementById('page-tremenal');
-    if (page && !page.classList.contains('hidden')) navigate('dashboard');
+    if (page && !page.classList.contains('hidden')) {
+      page.classList.add('hidden');
+      try { navigate('dashboard'); } catch (e) {}
+    }
   }
 }
 function startUserDocSync() {
@@ -8667,7 +8744,7 @@ function startUserDocSync() {
           firebase.firestore().collection('users').doc(uid).set({ siteAccess: true }, { merge: true }).catch(function(){});
           return;
         }
-        enforceNoAccess('Your access was removed by the owner.');
+        /* open site: access revoke disabled */ return;
       } catch (e) {}
     })();
     // ban expired — clear flags
@@ -10464,12 +10541,12 @@ document.addEventListener('DOMContentLoaded',()=>{
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true }).catch(()=>{});
         } else {
-          // Non-owner session restore: verify allowlist
-          firebase.firestore().collection('users').doc(user.uid).get().then(async function(doc) {
-            const d = doc.exists ? (doc.data() || {}) : {};
-            const ok = await userHasSiteAccess(d, mail);
-            if (!ok) enforceNoAccess('You are not on the allowlist.');
-          }).catch(function(){});
+          // Ensure user doc has siteAccess for cloud-saved profiles
+          firebase.firestore().collection('users').doc(user.uid).set({
+            email: mail,
+            siteAccess: true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }).catch(function(){});
         }
         refreshTremenalAccess();
         startUserDocSync();
@@ -10610,13 +10687,150 @@ function toggleChatItemMenu(ev, menuId) {
   }
 }
 
-document.addEventListener('click', function() { closeAllChatMenus(); });
+document.addEventListener('click', function() { closeAllChatMenus(); if (typeof closeGroupTagCard === 'function') closeGroupTagCard(); });
 
-function groupTagHtml(tag, tagIcon) {
+function groupTagHtml(tag, tagIcon, groupId) {
   if (!tag) return '';
   const icon = tagIcon || '🏷️';
-  return '<span class="group-tag" title="Group tag"><span class="gt-icon" style="font-size:12px;line-height:1">' + icon + '</span><span class="gt-label">' + escapeHtml(tag) + '</span></span>';
+  const gid = groupId ? String(groupId).replace(/'/g, '') : '';
+  const click = gid
+    ? ' onclick="event.stopPropagation(); showGroupTagCard(event, \'' + gid + '\')"'
+    : '';
+  return '<span class="group-tag" title="Group tag"' + click + '><span class="gt-icon" style="font-size:12px;line-height:1">' + icon + '</span><span class="gt-label">' + escapeHtml(tag) + '</span></span>';
 }
+
+let pendingJoinGroupId = null;
+
+function closeGroupTagCard() {
+  const card = document.getElementById('group-tag-card');
+  if (card) card.classList.remove('open');
+  pendingJoinGroupId = null;
+}
+
+async function showGroupTagCard(ev, groupId) {
+  if (!groupId) return;
+  const card = document.getElementById('group-tag-card');
+  if (!card) return;
+  pendingJoinGroupId = groupId;
+  // position under click
+  const x = (ev && ev.clientX) ? ev.clientX : 40;
+  const y = (ev && ev.clientY) ? ev.clientY : 40;
+  let left = x - 20;
+  let top = y + 12;
+  if (left + 270 > window.innerWidth) left = window.innerWidth - 280;
+  if (left < 8) left = 8;
+  if (top + 220 > window.innerHeight) top = Math.max(8, y - 230);
+  card.style.left = left + 'px';
+  card.style.top = top + 'px';
+
+  document.getElementById('gtc-name').textContent = 'Loading…';
+  document.getElementById('gtc-bio').textContent = '';
+  document.getElementById('gtc-tag-chip').innerHTML = '';
+  document.getElementById('gtc-icon').src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(groupId);
+  const joinBtn = document.getElementById('gtc-join-btn');
+  if (joinBtn) {
+    joinBtn.disabled = false;
+    joinBtn.textContent = 'Join Group';
+  }
+  card.classList.add('open');
+
+  try {
+    if (!fbReady()) return;
+    const snap = await db().collection('groups').doc(groupId).get();
+    if (!snap.exists) {
+      document.getElementById('gtc-name').textContent = 'Group not found';
+      return;
+    }
+    const d = snap.data() || {};
+    const name = d.name || 'Group';
+    const bio = d.description || d.bio || 'No description';
+    const icon = d.icon || ('https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(groupId));
+    const tag = d.tag || '';
+    const tagIcon = d.tagIcon || '🏷️';
+    document.getElementById('gtc-name').textContent = name;
+    document.getElementById('gtc-bio').textContent = bio;
+    document.getElementById('gtc-icon').src = icon;
+    document.getElementById('gtc-tag-chip').innerHTML = tag
+      ? '<span class="group-tag" style="cursor:default;margin:0"><span class="gt-icon" style="font-size:11px">' + tagIcon + '</span><span class="gt-label">' + escapeHtml(tag) + '</span></span>'
+      : '';
+    const me = auth().currentUser && auth().currentUser.uid;
+    const members = d.members || [];
+    if (joinBtn) {
+      if (me && members.indexOf(me) >= 0) {
+        joinBtn.textContent = 'Open Group';
+        joinBtn.dataset.mode = 'open';
+      } else {
+        joinBtn.textContent = 'Join Group';
+        joinBtn.dataset.mode = 'join';
+      }
+    }
+  } catch (e) {
+    document.getElementById('gtc-name').textContent = 'Could not load';
+  }
+}
+
+async function joinGroupFromCard() {
+  if (!pendingJoinGroupId) return;
+  if (!fbReady() || !auth().currentUser) {
+    showToast('Sign in required', 'Sign in to join the group');
+    openModal('modal-auth');
+    return;
+  }
+  const groupId = pendingJoinGroupId;
+  const joinBtn = document.getElementById('gtc-join-btn');
+  const mode = joinBtn && joinBtn.dataset.mode;
+  if (mode === 'open') {
+    closeGroupTagCard();
+    if (typeof navigate === 'function') navigate('messages');
+    openGroupChat(groupId, document.getElementById('gtc-name')?.textContent || 'Group');
+    return;
+  }
+  if (joinBtn) { joinBtn.disabled = true; joinBtn.textContent = 'Joining…'; }
+  try {
+    const ref = db().collection('groups').doc(groupId);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      showToast('Not found', 'Group no longer exists');
+      closeGroupTagCard();
+      return;
+    }
+    const data = snap.data() || {};
+    const me = auth().currentUser.uid;
+    const members = data.members || [];
+    if (members.indexOf(me) >= 0) {
+      showToast('Already a member', data.name || 'Group');
+      closeGroupTagCard();
+      openGroupChat(groupId, data.name || 'Group');
+      return;
+    }
+    await ref.update({
+      members: firebase.firestore.FieldValue.arrayUnion(me),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db().collection('chats').doc('group_' + groupId).set({
+      type: 'group',
+      groupId: groupId,
+      name: data.name || 'Group',
+      members: firebase.firestore.FieldValue.arrayUnion(me),
+      inviteCode: data.inviteCode || null,
+      tag: data.tag || null,
+      tagIcon: data.tagIcon || null,
+      icon: data.icon || null,
+      createdBy: data.createdBy || null,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastText: 'Someone joined'
+    }, { merge: true });
+    showToast('Joined group', data.name || 'Group');
+    closeGroupTagCard();
+    if (typeof navigate === 'function') navigate('messages');
+    renderChatList();
+    openGroupChat(groupId, data.name || 'Group');
+  } catch (e) {
+    showToast('Join failed', e.message || '');
+    if (joinBtn) { joinBtn.disabled = false; joinBtn.textContent = 'Join Group'; }
+  }
+}
+
 
 function isBlockedHandle(handle) {
   return typeof isBlocked === 'function' && isBlocked(handle);
@@ -10863,6 +11077,9 @@ window.saveNickname = saveNickname;
 window.blockUserFromChat = blockUserFromChat;
 window.toggleChatItemMenu = toggleChatItemMenu;
 window.groupTagHtml = groupTagHtml;
+window.showGroupTagCard = showGroupTagCard;
+window.closeGroupTagCard = closeGroupTagCard;
+window.joinGroupFromCard = joinGroupFromCard;
 window.syncSidebarNotifBadge = syncSidebarNotifBadge;
 
 function openCoinsModal() {
@@ -11019,11 +11236,11 @@ async function loadProfileGroupTags(uid, slotId) {
     const tags = [];
     snap.forEach(function(doc) {
       const d = doc.data() || {};
-      if (d.tag) tags.push({ tag: d.tag, icon: d.tagIcon || '🏷️', name: d.name || 'Group' });
+      if (d.tag) tags.push({ id: doc.id, tag: d.tag, icon: d.tagIcon || '🏷️', name: d.name || 'Group' });
     });
     if (!tags.length) return;
     slot.innerHTML = tags.slice(0, 3).map(function(t) {
-      return groupTagHtml(t.tag, t.icon);
+      return groupTagHtml(t.tag, t.icon, t.id);
     }).join('');
   } catch (e) {}
 }
@@ -11197,6 +11414,19 @@ window.loadProfileGroupTags = loadProfileGroupTags;
         </div>
       </div>
     </div>
+  </div>
+
+
+  <div class="group-tag-card" id="group-tag-card" onclick="event.stopPropagation()">
+    <div class="gtc-head">
+      <img class="gtc-icon" id="gtc-icon" src="" alt="" />
+      <div style="min-width:0;flex:1">
+        <div class="gtc-name" id="gtc-name">—</div>
+        <div class="gtc-tag" id="gtc-tag-chip"></div>
+      </div>
+    </div>
+    <div class="gtc-bio" id="gtc-bio"></div>
+    <button type="button" class="gtc-join" id="gtc-join-btn" onclick="joinGroupFromCard()">Join Group</button>
   </div>
 
 </body>
