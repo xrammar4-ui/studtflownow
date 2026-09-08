@@ -3609,6 +3609,248 @@ h3 { font-size: 1.05rem; }
 /* Blocked chat appearance */
 .chat-item.blocked-peer .avatar { filter: grayscale(0.3); opacity: 0.85; }
 
+
+/* Edit Profile accordion sections */
+.edit-acc {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-deep);
+  margin-bottom: 0.55rem;
+  overflow: hidden;
+}
+.edit-acc-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.edit-acc-head:hover { background: rgba(255,255,255,0.03); }
+.edit-acc-head .acc-chevron {
+  width: 18px; height: 18px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.edit-acc.open .acc-chevron { transform: rotate(180deg); }
+.edit-acc-body {
+  display: none;
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+.edit-acc.open .edit-acc-body { display: block; padding-top: 0.85rem; }
+.edit-acc-head .acc-label {
+  flex: 1;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+.edit-acc-head .acc-side {
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* Discord-like nameplate picker layout */
+.np-picker-layout {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 0.75rem;
+  align-items: start;
+}
+.np-list-col {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-right: 0.2rem;
+}
+.np-preview-col {
+  position: sticky;
+  top: 0;
+  background: #0b0b0e;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.75rem 0.55rem;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+.np-preview-col .np-live-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #E4E4E7;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.np-row-btn {
+  appearance: none;
+  width: 100%;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius: 10px;
+  padding: 0.35rem 0.45rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text-primary);
+  position: relative;
+  min-height: 44px;
+  overflow: hidden;
+}
+.np-row-btn:hover { border-color: rgba(129,140,248,0.45); }
+.np-row-btn.active {
+  border-color: #818CF8;
+  box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
+}
+.np-row-btn.locked { opacity: 0.75; }
+.np-row-btn .np-banner-thumb {
+  flex: 1;
+  height: 36px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+.np-row-btn .np-lock {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 0.7rem;
+}
+.np-row-meta {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 42px;
+  text-align: right;
+}
+.np-row-meta.free { color: #4ADE80; }
+.np-row-meta.owned { color: #A1A1AA; }
+.np-row-meta.price { color: #FBBF24; font-weight: 700; }
+
+/* Rich animated nameplate banners (Discord-style) */
+.nameplate-wrap {
+  width: 96px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+}
+.nameplate-wrap .np-art {
+  border-radius: 10px;
+  overflow: hidden;
+}
+.np-banner-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+}
+.np-banner-shine {
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.22) 48%, transparent 62%);
+  animation: npShine 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes npShine {
+  0% { transform: translateX(-30%) rotate(8deg); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateX(30%) rotate(8deg); opacity: 0; }
+}
+@keyframes npDrift {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes npGlowPulse {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.18); }
+}
+.np-b-cyber .np-banner-bg { background: linear-gradient(90deg,#0ea5e9cc,#22d3ee99,#6366f1aa); background-size: 200% 100%; animation: npDrift 4s ease infinite; }
+.np-b-galaxy .np-banner-bg { background: radial-gradient(circle at 20% 40%, #a78bfacc, transparent 50%), radial-gradient(circle at 80% 60%, #6366f1aa, #0f0f12); animation: npGlowPulse 3s ease infinite; }
+.np-b-anime .np-banner-bg { background: linear-gradient(110deg,#fb7185cc,#f9a8d4aa,#c084fc99); background-size: 200% 100%; animation: npDrift 5s ease infinite; }
+.np-b-fire .np-banner-bg { background: linear-gradient(90deg,#ea580ccc,#f59e0baa,#fde68a88); background-size: 200% 100%; animation: npDrift 2.8s ease infinite; }
+.np-b-ocean .np-banner-bg { background: linear-gradient(90deg,#0ea5e9bb,#38bdf8aa,#7dd3fc88); background-size: 200% 100%; animation: npDrift 4.5s ease infinite; }
+.np-b-gold .np-banner-bg { background: linear-gradient(90deg,#f59e0bcc,#fde68aaa,#fbbf2499); background-size: 200% 100%; animation: npDrift 3.5s ease infinite; }
+.np-b-void .np-banner-bg { background: linear-gradient(135deg,#18181bcc,#3f3f46aa,#09090b); }
+.np-b-sakura .np-banner-bg { background: linear-gradient(90deg,#f9a8d4bb,#fb7185aa,#fce7f399); background-size: 200% 100%; animation: npDrift 5s ease infinite; }
+.np-b-mint .np-banner-bg { background: linear-gradient(90deg,#34d399bb,#6ee7b7aa,#a7f3d088); background-size: 200% 100%; animation: npDrift 4s ease infinite; }
+.np-b-sunset .np-banner-bg { background: linear-gradient(90deg,#f97316bb,#e11d48aa,#a855f799); background-size: 200% 100%; animation: npDrift 4s ease infinite; }
+.np-b-neon .np-banner-bg { background: linear-gradient(90deg,#22d3eebb,#f472b6aa,#a855f799); background-size: 200% 100%; animation: npDrift 2.5s ease infinite; box-shadow: inset 0 0 12px rgba(34,211,238,0.35); }
+.np-b-royal .np-banner-bg { background: linear-gradient(90deg,#6366f1bb,#818cf8aa,#4f46e599); background-size: 200% 100%; animation: npDrift 4s ease infinite; }
+.np-b-ember .np-banner-bg { background: linear-gradient(90deg,#9a3412cc,#ea580caa,#fbbf2488); background-size: 200% 100%; animation: npDrift 2.6s ease infinite; }
+.np-b-frost .np-banner-bg { background: linear-gradient(90deg,#7dd3fcbb,#e0f2feaa,#bae6fd88); background-size: 200% 100%; animation: npDrift 5s ease infinite; }
+.np-b-matrix .np-banner-bg { background: linear-gradient(180deg,#052e16cc,#14532daa,#22c55e66); }
+.np-b-prism .np-banner-bg { background: linear-gradient(90deg,#ef4444aa,#eab308aa,#22c55eaa,#3b82f6aa,#a855f7aa); background-size: 300% 100%; animation: npDrift 3s linear infinite; }
+.np-b-shadow .np-banner-bg { background: linear-gradient(90deg,#27272acc,#52525b88,#18181b); }
+.np-b-aurora .np-banner-bg { background: linear-gradient(90deg,#34d399aa,#60a5faaa,#c084fcaa); background-size: 200% 100%; animation: npDrift 4s ease infinite; }
+.np-b-lava .np-banner-bg { background: linear-gradient(90deg,#7f1d1dcc,#ea580caa,#facc1588); background-size: 200% 100%; animation: npDrift 2.4s ease infinite; }
+.np-b-crystal .np-banner-bg { background: linear-gradient(135deg,#a5f3fcbb,#c4b5fdaa,#e0f2fe99); background-size: 200% 100%; animation: npDrift 4s ease infinite; }
+
+@media (max-width: 520px) {
+  .np-picker-layout { grid-template-columns: 1fr; }
+  .np-preview-col { position: relative; }
+}
+
+
+.coin-badge { cursor: pointer; }
+.coin-badge:hover { border-color: rgba(251,191,36,0.55); background: rgba(234,179,8,0.18); }
+.coins-balance-big {
+  text-align: center;
+  padding: 1.1rem 0.5rem 0.85rem;
+}
+.coins-balance-big .cb-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.35rem;
+}
+.coins-balance-big .cb-value {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #FBBF24;
+  letter-spacing: -0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.coins-transfer-box {
+  margin-top: 0.35rem;
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+.coins-transfer-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.coins-transfer-row .form-input { flex: 1; min-width: 100px; margin: 0; }
+.coins-transfer-row .coins-amt { max-width: 110px; }
+
 </style>
 </head>
 <body>
@@ -3758,14 +4000,14 @@ h3 { font-size: 1.05rem; }
           <span style="margin-left:auto;font-size:0.72rem;opacity:0.5">⌘K</span>
         </div>
         <div class="topbar-actions">
-          <div class="coin-badge" title="Coins">
+          <button type="button" class="coin-badge" title="Coins" onclick="openCoinsModal()" style="cursor:pointer;font-family:inherit">
             <svg class="coin-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="10" fill="#FBBF24" stroke="#F59E0B" stroke-width="1.5"/>
               <circle cx="12" cy="12" r="7" fill="none" stroke="#B45309" stroke-width="1" opacity="0.5"/>
               <text x="12" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="#78350F" font-family="system-ui">$</text>
             </svg>
             <span class="coin-value">0</span>
-          </div>
+          </button>
           <div class="relative">
             <button class="icon-btn" id="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
@@ -4146,98 +4388,154 @@ h3 { font-size: 1.05rem; }
         </button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Banner (supports GIF)</label>
-          <div id="edit-banner-preview" style="height:90px;border-radius:10px;background:linear-gradient(135deg,#5865F2,#4752C4);background-size:cover;background-position:center;position:relative;overflow:hidden;border:1px solid var(--border)">
-            <label for="edit-banner-input" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.25);opacity:0;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0" title="Change banner">
-              <span class="btn btn-sm btn-primary">Change banner</span>
-            </label>
-            <input type="file" id="edit-banner-input" accept="image/*,image/gif" style="display:none" onchange="onEditBannerSelected(event)" />
-          </div>
-          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.45rem;flex-wrap:wrap">
-            <p class="text-xs text-muted" style="margin:0">JPG, PNG or animated GIF · max 800KB</p>
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-banner" onclick="clearEditBanner()">Remove image</button>
-          </div>
-        </div>
-        <div class="form-group" id="edit-theme-group">
-          <label class="form-label">Profile background <span class="text-xs text-muted">(Nitro · top &amp; bottom)</span></label>
-          <div class="theme-colors-grid">
-            <div class="theme-color-field">
-              <span class="text-xs text-muted">Top</span>
-              <div class="theme-color-row">
-                <input type="color" id="edit-theme-color-top" value="#5865F2" class="theme-color-input" oninput="onEditThemePairInput()" />
-                <input type="text" id="edit-theme-hex-top" class="form-input theme-hex-input" value="#5865F2" maxlength="7" placeholder="#5865F2" oninput="onEditThemePairInput()" />
-              </div>
+
+        <div class="edit-acc" id="acc-banner">
+          <button type="button" class="edit-acc-head" onclick="toggleEditAcc('acc-banner')">
+            <span class="acc-side"></span>
+            <span class="acc-label">Banner</span>
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="edit-acc-body">
+            <div id="edit-banner-preview" style="height:90px;border-radius:10px;background:linear-gradient(135deg,#5865F2,#4752C4);background-size:cover;background-position:center;position:relative;overflow:hidden;border:1px solid var(--border)">
+              <label for="edit-banner-input" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.25);opacity:0;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0" title="Change banner">
+                <span class="btn btn-sm btn-primary">Change banner</span>
+              </label>
+              <input type="file" id="edit-banner-input" accept="image/*,image/gif" style="display:none" onchange="onEditBannerSelected(event)" />
             </div>
-            <div class="theme-color-field">
-              <span class="text-xs text-muted">Bottom</span>
-              <div class="theme-color-row">
-                <input type="color" id="edit-theme-color-bottom" value="#4752C4" class="theme-color-input" oninput="onEditThemePairInput()" />
-                <input type="text" id="edit-theme-hex-bottom" class="form-input theme-hex-input" value="#4752C4" maxlength="7" placeholder="#4752C4" oninput="onEditThemePairInput()" />
-              </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.45rem;flex-wrap:wrap">
+              <p class="text-xs text-muted" style="margin:0">JPG, PNG or animated GIF · max 800KB</p>
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-banner" onclick="clearEditBanner()">Remove image</button>
             </div>
-            <button type="button" class="btn btn-ghost btn-sm theme-reset-btn" onclick="resetEditThemeColor()">Reset</button>
           </div>
-          <div class="theme-preview-bar" id="edit-theme-preview-bar"></div>
-          <p class="text-xs text-muted" id="edit-theme-hint" style="margin-top:0.35rem">Two colors like Discord — applied to the profile card background</p>
-        </div>
-        <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
-          <div class="avatar-fx fx-none edit-avatar-fx" id="edit-avatar-fx" style="position:relative">
-            <span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-            <img id="edit-avatar-preview" src="" alt="" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--bg-elevated)" />
-            <label for="edit-avatar-input" style="position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card);z-index:2" title="Change avatar (GIF ok)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </label>
-            <input type="file" id="edit-avatar-input" accept="image/*,image/gif" style="display:none" onchange="onEditAvatarSelected(event)" />
-          </div>
-        </div>
-        <p class="text-xs text-muted" style="text-align:center;margin-top:-0.75rem;margin-bottom:0.85rem">Avatar supports animated GIF · max 800KB</p>
-        <div class="form-group">
-          <button type="button" class="btn btn-outline w-full" onclick="toggleAvatarEffectPanel()">Avatar effects</button>
-          <div id="avatar-fx-panel" class="hidden">
-            <p class="text-xs text-muted" style="margin-top:0.65rem">Buy decorations with coins. Unlock once, use anytime.</p>
-            <p class="text-xs" id="avatar-fx-hint" style="margin-top:0.35rem;color:#FBBF24">Balance: 0 coins</p>
-            <div class="fx-picker" id="avatar-fx-picker"></div>
-          </div>
-        </div>
-        <div class="edit-section-title">Identity</div>
-        <div class="form-group">
-          <label class="form-label">Display Name</label>
-          <input class="form-input" id="edit-display-name" placeholder="Your name" maxlength="32" oninput="updateNameStylePreview()" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Username (handle)</label>
-          <input class="form-input" id="edit-handle" placeholder="username" maxlength="20" />
-          <p class="text-xs text-muted" style="margin-top:0.3rem">Letters, numbers, underscore only</p>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Bio</label>
-          <textarea class="form-textarea" id="edit-bio" placeholder="Tell people about yourself..." maxlength="190" rows="3"></textarea>
         </div>
 
-        <div class="edit-section-title" id="name-style-section-title">Display Name Style <span class="text-xs" style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-muted)">(Nitro)</span></div>
-        <div class="form-group" id="edit-name-style-group">
-          <div class="name-style-preview nameplate-preview-row" id="name-style-preview">
-            <span class="np-preview-name name-styled" id="name-style-preview-text">Preview</span>
-            <span class="nameplate-wrap nameplate-none" id="edit-nameplate-preview" aria-hidden="true"></span>
+        <div class="edit-acc" id="acc-theme">
+          <button type="button" class="edit-acc-head" onclick="toggleEditAcc('acc-theme')">
+            <span class="acc-side"></span>
+            <span class="acc-label">Profile background</span>
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="edit-acc-body">
+            <div class="form-group" id="edit-theme-group" style="margin-bottom:0">
+              <p class="text-xs text-muted" id="edit-theme-hint" style="margin-bottom:0.55rem">Nitro · top &amp; bottom colors</p>
+              <div class="theme-colors-grid">
+                <div class="theme-color-field">
+                  <span class="text-xs text-muted">Top</span>
+                  <div class="theme-color-row">
+                    <input type="color" id="edit-theme-color-top" value="#5865F2" class="theme-color-input" oninput="onEditThemePairInput()" />
+                    <input type="text" id="edit-theme-hex-top" class="form-input theme-hex-input" value="#5865F2" maxlength="7" placeholder="#5865F2" oninput="onEditThemePairInput()" />
+                  </div>
+                </div>
+                <div class="theme-color-field">
+                  <span class="text-xs text-muted">Bottom</span>
+                  <div class="theme-color-row">
+                    <input type="color" id="edit-theme-color-bottom" value="#4752C4" class="theme-color-input" oninput="onEditThemePairInput()" />
+                    <input type="text" id="edit-theme-hex-bottom" class="form-input theme-hex-input" value="#4752C4" maxlength="7" placeholder="#4752C4" oninput="onEditThemePairInput()" />
+                  </div>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm theme-reset-btn" onclick="resetEditThemeColor()">Reset</button>
+              </div>
+              <div class="theme-preview-bar" id="edit-theme-preview-bar"></div>
+            </div>
           </div>
-          <p class="text-xs text-muted" style="margin-top:-0.35rem;margin-bottom:0.65rem">Nameplate = shape on the right of your name (Discord-style)</p>
-          <label class="form-label">Name color</label>
-          <div class="theme-color-row" style="margin-bottom:0.65rem">
-            <input type="color" id="edit-name-color-1" value="#FFFFFF" class="theme-color-input" oninput="onNameStyleInput()" />
-            <input type="text" id="edit-name-hex-1" class="form-input theme-hex-input" value="#FFFFFF" maxlength="7" oninput="onNameStyleInput()" />
-            <span class="text-xs text-muted" style="margin-left:0.25rem">+ 2nd for gradient</span>
-            <input type="color" id="edit-name-color-2" value="#A78BFA" class="theme-color-input" oninput="onNameStyleInput()" />
-            <input type="text" id="edit-name-hex-2" class="form-input theme-hex-input" value="#A78BFA" maxlength="7" oninput="onNameStyleInput()" />
-          </div>
-          <label class="form-label">Font</label>
-          <div class="name-font-grid" id="name-font-grid"></div>
-          <label class="form-label" style="margin-top:0.75rem">Effect</label>
-          <div class="name-effect-grid" id="name-effect-grid"></div>
-          <label class="form-label" style="margin-top:0.75rem">Nameplate (banner behind name)</label>
-          <div class="nameplate-grid" id="nameplate-grid"></div>
-          <p class="text-xs text-muted" id="name-style-hint" style="margin-top:0.45rem">10 free nameplates · unlock more with coins · shows under your name on profile</p>
         </div>
+
+        <div class="edit-acc" id="acc-avatar">
+          <button type="button" class="edit-acc-head" onclick="toggleEditAcc('acc-avatar')">
+            <span class="acc-side"></span>
+            <span class="acc-label">Avatar</span>
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="edit-acc-body">
+            <div class="avatar-picker" id="edit-avatar-picker" onclick="document.getElementById('edit-avatar-input').click()">
+              <img class="avatar-picker-img" id="edit-avatar-preview" src="" alt="" style="display:none" />
+              <div class="avatar-picker-placeholder" id="edit-avatar-placeholder">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <span class="avatar-picker-plus">+</span>
+            </div>
+            <input type="file" id="edit-avatar-input" accept="image/*,image/gif" style="display:none" onchange="onEditAvatarSelected(event)" />
+            <p class="text-xs text-muted" style="text-align:center;margin-top:0.55rem">Avatar supports animated GIF · max 800KB</p>
+            <button type="button" class="btn btn-outline w-full" style="margin-top:0.65rem" onclick="toggleAvatarEffectPanel()">Avatar effects</button>
+            <div id="avatar-fx-panel" class="hidden">
+              <p class="text-xs text-muted" style="margin-top:0.65rem">Buy decorations with coins. Unlock once, use anytime.</p>
+              <p class="text-xs" id="avatar-fx-hint" style="margin-top:0.35rem;color:#FBBF24">Balance: 0 coins</p>
+              <div class="fx-picker" id="avatar-fx-picker"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="edit-acc open" id="acc-identity">
+          <button type="button" class="edit-acc-head" onclick="toggleEditAcc('acc-identity')">
+            <span class="acc-side"></span>
+            <span class="acc-label">Identity</span>
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="edit-acc-body">
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input class="form-input" id="edit-display-name" placeholder="Your name" maxlength="32" oninput="updateNameStylePreview()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Username (handle)</label>
+              <input class="form-input" id="edit-handle" placeholder="username" maxlength="20" />
+              <p class="text-xs text-muted" style="margin-top:0.3rem">Letters, numbers, underscore only</p>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Bio</label>
+              <textarea class="form-textarea" id="edit-bio" placeholder="Tell people about yourself..." maxlength="190" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="edit-acc" id="acc-name-style">
+          <button type="button" class="edit-acc-head" onclick="toggleEditAcc('acc-name-style')">
+            <span class="acc-side"></span>
+            <span class="acc-label">Display Name Style</span>
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="edit-acc-body">
+            <div class="form-group" id="edit-name-style-group" style="margin-bottom:0">
+              <div class="name-style-preview nameplate-preview-row" id="name-style-preview">
+                <span class="np-preview-name name-styled" id="name-style-preview-text">Preview</span>
+                <span class="nameplate-wrap nameplate-none" id="edit-nameplate-preview" aria-hidden="true"></span>
+              </div>
+              <label class="form-label">Name color</label>
+              <div class="theme-color-row" style="margin-bottom:0.65rem">
+                <input type="color" id="edit-name-color-1" value="#FFFFFF" class="theme-color-input" oninput="onNameStyleInput()" />
+                <input type="text" id="edit-name-hex-1" class="form-input theme-hex-input" value="#FFFFFF" maxlength="7" oninput="onNameStyleInput()" />
+                <span class="text-xs text-muted" style="margin-left:0.25rem">+ 2nd for gradient</span>
+                <input type="color" id="edit-name-color-2" value="#A78BFA" class="theme-color-input" oninput="onNameStyleInput()" />
+                <input type="text" id="edit-name-hex-2" class="form-input theme-hex-input" value="#A78BFA" maxlength="7" oninput="onNameStyleInput()" />
+              </div>
+              <label class="form-label">Font</label>
+              <div class="name-font-grid" id="name-font-grid"></div>
+              <label class="form-label" style="margin-top:0.75rem">Effect</label>
+              <div class="name-effect-grid" id="name-effect-grid"></div>
+              <p class="text-xs text-muted" id="name-style-hint" style="margin-top:0.45rem">Fonts &amp; effects style your display name</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="edit-acc" id="acc-nameplate">
+          <button type="button" class="edit-acc-head" onclick="toggleEditAcc('acc-nameplate')">
+            <span class="acc-side"></span>
+            <span class="acc-label">Name plate</span>
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="edit-acc-body">
+            <div class="np-picker-layout">
+              <div class="np-list-col" id="nameplate-grid"></div>
+              <div class="np-preview-col">
+                <div class="np-live-name" id="np-side-preview-name">Preview</div>
+                <span class="nameplate-wrap nameplate-none" id="np-side-preview-plate" aria-hidden="true"></span>
+                <p class="text-xs text-muted" style="text-align:center;margin:0">Preview</p>
+              </div>
+            </div>
+            <p class="text-xs text-muted" style="margin-top:0.55rem">Animated plates with transparent color washes · unlock with coins</p>
+          </div>
+        </div>
+
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" type="button" onclick="closeModal('modal-edit-profile')">Cancel</button>
@@ -4246,7 +4544,7 @@ h3 { font-size: 1.05rem; }
     </div>
   </div>
 
-  <!-- Create Group Modal -->
+<!-- Create Group Modal -->
   <div class="modal-overlay" id="modal-create-group">
     <div class="modal">
       <div class="modal-header">
@@ -6286,6 +6584,9 @@ function addCoins(n, reason){
   COINS += n;
   saveCoins();
   if(reason) showToast('+' + n + ' coins', reason);
+  if (n > 0 && typeof pushAppNotification === 'function') {
+    pushAppNotification({ type: 'coins', title: '+' + n + ' coins', message: reason || 'Coins received' });
+  }
 }
 function spendCoins(n, reason){
   n = Math.max(0, parseInt(n, 10) || 0);
@@ -6300,6 +6601,8 @@ function spendCoins(n, reason){
 }
 function updateCoinsUI(){
   document.querySelectorAll('.coin-value').forEach(el => { el.textContent = COINS; });
+  const modalBal = document.getElementById('coins-modal-balance');
+  if (modalBal) modalBal.textContent = String(COINS);
 }
 
 function formatTime(seconds){
@@ -9584,11 +9887,33 @@ const NAMEPLATE_ART = {
 
 function nameplateArtHtml(id) {
   id = id || 'none';
-  const svg = NAMEPLATE_ART[id] || '';
-  if (!svg) return '';
-  return '<span class="np-art" aria-hidden="true">' + svg + '</span>';
+  if (id === 'none') return '';
+  // Rich Discord-style animated banner plates (not emoji-only)
+  const svgDecor = {
+    cyber: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><g opacity=".9"><path d="M8 20 L18 10 H42 L52 20 L42 30 H18 Z" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/><circle cx="72" cy="20" r="6" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.2"/><path d="M66 20 H78 M72 14 V26" stroke="rgba(255,255,255,.4)" stroke-width="1"/></g></svg>',
+    galaxy: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="70" cy="14" r="2" fill="#FDE68A"/><circle cx="82" cy="24" r="1.4" fill="#E9D5FF"/><circle cx="60" cy="28" r="1.1" fill="#93C5FD"/><circle cx="76" cy="30" r="0.9" fill="#fff" opacity=".7"/></svg>',
+    anime: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><ellipse cx="74" cy="20" rx="10" ry="6" fill="rgba(255,255,255,.25)"/><circle cx="74" cy="20" r="3" fill="rgba(255,255,255,.5)"/></svg>',
+    fire: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M68 32 C66 20 72 16 70 8 C76 14 76 18 80 12 C86 20 90 18 88 32 Z" fill="rgba(253,230,138,.85)"/></svg>',
+    ocean: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M4 26 Q24 16 44 26 T84 24" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/><path d="M4 32 Q28 22 48 32 T92 30" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.2"/></svg>',
+    gold: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M62 28 L68 12 L74 22 L80 10 L86 22 L92 12 L96 28 Z" fill="rgba(253,230,138,.75)"/></svg>',
+    void: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="76" cy="20" r="10" fill="rgba(0,0,0,.45)" stroke="rgba(255,255,255,.15)"/><circle cx="80" cy="16" r="4" fill="rgba(0,0,0,.5)"/></svg>',
+    sakura: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="70" cy="14" r="4" fill="rgba(255,255,255,.35)"/><circle cx="80" cy="22" r="5" fill="rgba(255,255,255,.28)"/><circle cx="64" cy="26" r="3.5" fill="rgba(255,255,255,.3)"/></svg>',
+    mint: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M72 8 C64 16 60 20 58 30 C68 26 70 22 74 32 C78 22 80 26 90 30 C88 20 80 16 72 8Z" fill="rgba(255,255,255,.35)"/></svg>',
+    sunset: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="78" cy="16" r="9" fill="rgba(253,230,138,.55)"/></svg>',
+    neon: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><rect x="58" y="10" width="30" height="20" rx="8" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.4"/></svg>',
+    royal: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M62 28 L68 12 L74 22 L80 10 L86 22 L92 12 L96 28 Z" fill="rgba(224,231,255,.55)"/></svg>',
+    ember: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M70 32 C66 20 72 16 68 8 C76 14 76 18 80 12 C88 20 92 16 88 32 Z" fill="rgba(253,186,116,.75)"/></svg>',
+    frost: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M76 6 V34 M62 12 L90 28 M90 12 L62 28" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/></svg>',
+    matrix: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><text x="58" y="16" fill="rgba(134,239,172,.8)" font-size="8" font-family="monospace">01</text><text x="70" y="28" fill="rgba(74,222,128,.7)" font-size="9" font-family="monospace">10</text></svg>',
+    prism: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M76 6 L92 34 H60 Z" fill="rgba(255,255,255,.25)"/></svg>',
+    shadow: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><ellipse cx="76" cy="24" rx="14" ry="10" fill="rgba(0,0,0,.35)"/></svg>',
+    aurora: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M4 22 Q30 10 50 20 T96 14" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/></svg>',
+    lava: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M60 30 Q70 12 78 24 Q84 10 96 28 Z" fill="rgba(250,204,21,.55)"/></svg>',
+    crystal: '<svg viewBox="0 0 96 40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%"><path d="M76 4 L90 18 L84 36 H68 L62 18 Z" fill="rgba(255,255,255,.3)"/></svg>'
+  };
+  const decor = svgDecor[id] || '';
+  return '<span class="np-art np-b-' + id + '" aria-hidden="true"><span class="np-banner-bg"></span><span class="np-banner-shine"></span>' + decor + '</span>';
 }
-
 function renderNameplateEl(nameplateEl, plateId) {
   if (!nameplateEl) return;
   plateId = plateId || 'none';
@@ -9703,25 +10028,25 @@ function renderNameStylePickers() {
     plateGrid.innerHTML = NAMEPLATES.map(function(p) {
       const owned = isNameplateUnlocked(p.id);
       const active = pendingNameStyle.nameplate === p.id;
-      let priceHtml = '';
-      if (!p.cost) priceHtml = '<span class="np-price free">Free</span>';
-      else if (owned) priceHtml = '<span class="np-price owned">Owned</span>';
-      else priceHtml = '<span class="np-price">✦ ' + p.cost + ' 🔒</span>';
+      let meta = '';
+      if (!p.cost) meta = '<span class="np-row-meta free">Free</span>';
+      else if (owned) meta = '<span class="np-row-meta owned">Owned</span>';
+      else meta = '<span class="np-row-meta price">✦' + p.cost + '</span>';
+      const lock = (!owned && p.cost) ? '<span class="np-lock">🔒</span>' : '';
       const thumb = p.id === 'none'
-        ? '<div class="np-thumb" style="font-size:1.1rem;opacity:.5">⊘</div>'
-        : '<div class="np-thumb nameplate-' + p.id + '">' + nameplateArtHtml(p.id) + '</div>';
-      return '<button type="button" class="nameplate-btn' + (active ? ' active' : '') + (owned || !p.cost ? '' : ' locked') + '" data-plate="' + p.id + '">' +
-        thumb +
-        '<span class="np-shop-label">' + p.label + '</span>' +
-        priceHtml +
+        ? '<div class="np-banner-thumb" style="display:flex;align-items:center;justify-content:center;color:#71717A;font-size:0.8rem">None</div>'
+        : '<div class="np-banner-thumb nameplate-' + p.id + '" style="position:relative">' + nameplateArtHtml(p.id) + '</div>';
+      return '<button type="button" class="np-row-btn' + (active ? ' active' : '') + (owned || !p.cost ? '' : ' locked') + '" data-plate="' + p.id + '">' +
+        thumb + meta + lock +
       '</button>';
     }).join('');
-    plateGrid.querySelectorAll('.nameplate-btn').forEach(function(btn) {
+    plateGrid.querySelectorAll('.np-row-btn').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         selectNameplate(btn.getAttribute('data-plate'));
       });
     });
+  });
   }
 }
 
@@ -9790,6 +10115,10 @@ function updateNameStylePreview() {
   }
   const platePrev = document.getElementById('edit-nameplate-preview');
   if (platePrev) renderNameplateEl(platePrev, pendingNameStyle.nameplate || 'none');
+  const sideName = document.getElementById('np-side-preview-name');
+  if (sideName) sideName.textContent = text;
+  const sidePlate = document.getElementById('np-side-preview-plate');
+  if (sidePlate) renderNameplateEl(sidePlate, pendingNameStyle.nameplate || 'none');
 }
 function syncNameStyleUI() {
   pendingNameStyle = loadNameStyle();
@@ -10000,6 +10329,9 @@ function buyNitro(tierId) {
   renderStorePage();
   showToast('Nitro unlocked', tier.tagline + ' for ' + tier.label);
   addActivity('Purchased Nitro: ' + tier.label, 'done');
+  if (typeof pushAppNotification === 'function') {
+    pushAppNotification({ type: 'nitro', title: 'Nitro activated', message: (tier.tagline || 'Nitro') + ' · ' + tier.label });
+  }
 }
 
 function renderNitroGrid() {
@@ -10533,6 +10865,150 @@ window.toggleChatItemMenu = toggleChatItemMenu;
 window.groupTagHtml = groupTagHtml;
 window.syncSidebarNotifBadge = syncSidebarNotifBadge;
 
+function openCoinsModal() {
+  if (!isLoggedIn && !currentUser) {
+    openModal('modal-auth');
+    return;
+  }
+  const el = document.getElementById('coins-modal-balance');
+  if (el) el.textContent = String(COINS);
+  const h = document.getElementById('coins-transfer-handle');
+  const a = document.getElementById('coins-transfer-amount');
+  if (h) h.value = '';
+  if (a) a.value = '';
+  openModal('modal-coins');
+  setTimeout(function() { document.getElementById('coins-transfer-handle')?.focus(); }, 80);
+}
+
+async function transferCoinsToUser() {
+  if (!isLoggedIn || !currentUser) {
+    openModal('modal-auth');
+    return;
+  }
+  if (!fbReady() || !auth().currentUser) {
+    showToast('Sign in required', 'Cloud account needed to transfer');
+    return;
+  }
+  let handle = (document.getElementById('coins-transfer-handle')?.value || '').trim().replace(/^@/, '').toLowerCase();
+  handle = handle.replace(/[^a-z0-9_]/g, '');
+  const amount = parseInt(document.getElementById('coins-transfer-amount')?.value, 10);
+  if (!handle || handle.length < 2) {
+    showToast('Username required', 'Enter @username');
+    return;
+  }
+  if (!amount || amount < 1) {
+    showToast('Invalid amount', 'Enter at least 1 coin');
+    return;
+  }
+  if (handle === String(currentUser.handle || '').toLowerCase()) {
+    showToast('Invalid', 'You cannot transfer to yourself');
+    return;
+  }
+  if (COINS < amount) {
+    showToast('Not enough coins', 'You have ' + COINS + ' coins');
+    return;
+  }
+  const btn = document.getElementById('btn-transfer-coins');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  try {
+    const q = await db().collection('users').where('handle', '==', handle).limit(1).get();
+    if (q.empty) {
+      showToast('User not found', '@' + handle);
+      return;
+    }
+    const targetDoc = q.docs[0];
+    const targetUid = targetDoc.id;
+    const meUid = auth().currentUser.uid;
+    if (targetUid === meUid) {
+      showToast('Invalid', 'You cannot transfer to yourself');
+      return;
+    }
+    // Deduct locally + cloud
+    if (!spendCoins(amount, 'Transfer to @' + handle)) return;
+    // Credit target
+    try {
+      await targetDoc.ref.set({
+        coins: firebase.firestore.FieldValue.increment(amount),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      // fallback read-modify-write
+      const fresh = await targetDoc.ref.get();
+      const cur = (fresh.data() && typeof fresh.data().coins === 'number') ? fresh.data().coins : 0;
+      await targetDoc.ref.set({ coins: cur + amount, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    }
+    // Log transfer (optional)
+    try {
+      await db().collection('coinTransfers').add({
+        fromUid: meUid,
+        fromHandle: currentUser.handle || '',
+        toUid: targetUid,
+        toHandle: handle,
+        amount: amount,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) {}
+    if (typeof pushAppNotification === 'function') {
+      pushAppNotification({ type: 'coins', title: 'Transfer sent', message: 'Sent ' + amount + ' coins to @' + handle });
+    }
+    const bal = document.getElementById('coins-modal-balance');
+    if (bal) bal.textContent = String(COINS);
+    showToast('Sent', amount + ' coins → @' + handle);
+    const a = document.getElementById('coins-transfer-amount');
+    if (a) a.value = '';
+  } catch (e) {
+    showToast('Failed', e.message || 'Transfer failed');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+  }
+}
+window.openCoinsModal = openCoinsModal;
+window.transferCoinsToUser = transferCoinsToUser;
+
+
+function toggleEditAcc(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const was = el.classList.contains('open');
+  // keep multiple open allowed, or close others? user asked section opens on click - allow multiple
+  el.classList.toggle('open', !was);
+  if (id === 'acc-nameplate' && !was && typeof renderNameStylePickers === 'function') {
+    renderNameStylePickers();
+    if (typeof updateNameStylePreview === 'function') updateNameStylePreview();
+  }
+  if (id === 'acc-name-style' && !was && typeof renderNameStylePickers === 'function') {
+    renderNameStylePickers();
+  }
+}
+window.toggleEditAcc = toggleEditAcc;
+
+function pushAppNotification(opts) {
+  opts = opts || {};
+  try {
+    if (typeof NOTIFICATIONS === 'undefined') return;
+    NOTIFICATIONS.unshift({
+      id: 'n' + Date.now() + Math.random().toString(36).slice(2, 6),
+      type: opts.type || 'info',
+      title: opts.title || 'Notification',
+      message: opts.message || '',
+      read: false,
+      handled: true,
+      time: Date.now(),
+      fromName: opts.fromName || null,
+      fromHandle: opts.fromHandle || null,
+      fromAvatar: opts.fromAvatar || null,
+      fromUid: opts.fromUid || null,
+      requestId: opts.requestId || null
+    });
+    if (NOTIFICATIONS.length > 80) NOTIFICATIONS.length = 80;
+    if (typeof saveNotifs === 'function') saveNotifs();
+    if (typeof updateNotifBadge === 'function') updateNotifBadge();
+    if (typeof syncSidebarNotifBadge === 'function') syncSidebarNotifBadge();
+  } catch (e) {}
+}
+window.pushAppNotification = pushAppNotification;
+
+
 async function loadProfileGroupTags(uid, slotId) {
   const slot = document.getElementById(slotId);
   if (!slot) return;
@@ -10685,6 +11161,40 @@ window.loadProfileGroupTags = loadProfileGroupTags;
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('modal-nickname')">Cancel</button>
         <button class="btn btn-primary" onclick="saveNickname()">Save</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Coins wallet / transfer -->
+  <div class="modal-overlay" id="modal-coins">
+    <div class="modal" style="max-width:400px">
+      <div class="modal-header">
+        <h2>Coins</h2>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-coins')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="coins-balance-big">
+          <div class="cb-label">Your balance</div>
+          <div class="cb-value">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="#FBBF24" stroke="#F59E0B" stroke-width="1.5"/>
+              <text x="12" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="#78350F" font-family="system-ui">$</text>
+            </svg>
+            <span id="coins-modal-balance">0</span>
+          </div>
+        </div>
+        <div class="coins-transfer-box">
+          <div class="form-label" style="margin-bottom:0.5rem">Transfer coins</div>
+          <div class="coins-transfer-row">
+            <input class="form-input" id="coins-transfer-handle" placeholder="@username" maxlength="24" />
+            <input class="form-input coins-amt" id="coins-transfer-amount" type="number" min="1" step="1" placeholder="Amount" />
+          </div>
+          <button type="button" class="btn btn-primary w-full" style="margin-top:0.7rem" id="btn-transfer-coins" onclick="transferCoinsToUser()">Send</button>
+          <p class="text-xs text-muted" style="margin-top:0.5rem">Enter a username and amount. Coins are sent instantly.</p>
+        </div>
       </div>
     </div>
   </div>
