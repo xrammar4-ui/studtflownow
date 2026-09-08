@@ -3369,7 +3369,247 @@ h3 { font-size: 1.05rem; }
 .chat-input-area { position: relative; }
 .emoji-picker-anchor { position: relative; flex-shrink: 0; }
 
-  </style>
+  
+/* ---- Group / Chat context menus ---- */
+.chat-item { position: relative; }
+.chat-item-menu-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  padding: 0;
+  font-family: inherit;
+}
+.chat-item:hover .chat-item-menu-btn,
+.chat-item-menu-btn.open { display: inline-flex; }
+.chat-item-menu-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.chat-item-menu {
+  position: absolute;
+  right: 8px;
+  top: calc(100% - 6px);
+  min-width: 168px;
+  background: #111214;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+  z-index: 60;
+  display: none;
+  padding: 6px;
+  overflow: hidden;
+}
+.chat-item-menu.open { display: block; animation: fadeUp 0.15s var(--ease); }
+.chat-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.chat-menu-item:hover { background: rgba(255,255,255,0.06); }
+.chat-menu-item.danger { color: #EF4444; }
+.chat-menu-item.danger:hover { background: rgba(239,68,68,0.12); }
+.chat-menu-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Group tag chip (Discord-style) */
+.group-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.12rem 0.45rem 0.12rem 0.28rem;
+  border-radius: 4px;
+  background: rgba(88, 101, 242, 0.22);
+  border: 1px solid rgba(88, 101, 242, 0.35);
+  color: #C9CDFB;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: 120px;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+}
+.group-tag .gt-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+.group-tag .gt-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tag icon picker */
+.tag-icon-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.4rem;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  padding: 0.35rem;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.tag-icon-btn {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  background: #1a1a1e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  font-size: 1.1rem;
+}
+.tag-icon-btn:hover { border-color: rgba(99,102,241,0.45); background: rgba(99,102,241,0.12); }
+.tag-icon-btn.active { border-color: var(--accent); background: var(--accent-soft); }
+.tag-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.2rem 0.55rem 0.2rem 0.35rem;
+}
+.tag-name-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.tag-icon-trigger {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+}
+.tag-icon-trigger:hover { border-color: rgba(99,102,241,0.4); color: var(--accent-hover); }
+.tag-name-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  padding: 0.5rem 0.25rem;
+}
+
+/* Taller Discord-style profile card */
+.discord-profile {
+  max-width: 340px !important;
+  width: 100%;
+  margin: 0 auto !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+.discord-banner { height: 120px !important; }
+.discord-avatar-wrap {
+  margin-top: -48px !important;
+  margin-left: 16px !important;
+  width: 92px !important;
+  height: 92px !important;
+}
+.discord-avatar {
+  width: 92px !important;
+  height: 92px !important;
+  border-width: 6px !important;
+}
+.discord-body { padding: 12px 16px 16px !important; }
+.discord-display-name { font-size: 1.2rem !important; }
+#page-profile {
+  display: flex !important;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 1.5rem;
+}
+#page-profile.hidden { display: none !important; }
+
+/* Profile panel in sidebar footer (replaces Profile nav) */
+.sidebar-profile-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+  border: 1px solid transparent;
+}
+.sidebar-profile-panel:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: var(--border);
+}
+.sidebar-profile-panel .sp-info { flex: 1; min-width: 0; }
+.sidebar-profile-panel .sp-name { font-weight: 600; font-size: 0.85rem; }
+.sidebar-profile-panel .sp-handle { font-size: 0.72rem; color: var(--text-muted); }
+.sidebar-profile-notif {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.sidebar-profile-notif:hover { color: var(--accent-hover); border-color: rgba(99,102,241,0.35); }
+.sidebar-profile-notif .sp-badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  background: #EF4444;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  border-radius: 100px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 2px solid var(--bg-elevated);
+}
+.sidebar-profile-notif .sp-badge.visible { display: flex; }
+
+/* Blocked chat appearance */
+.chat-item.blocked-peer .avatar { filter: grayscale(0.3); opacity: 0.85; }
+
+</style>
 </head>
 <body>
 
@@ -3456,10 +3696,6 @@ h3 { font-size: 1.05rem; }
           Messages
           <span class="nav-badge hidden" id="msg-badge">0</span>
         </button>
-        <button class="nav-item" data-nav="profile" onclick="handleProfileClick()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Profile
-        </button>
         <button class="nav-item" data-nav="store" onclick="navigate('store')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
           Store
@@ -3496,16 +3732,20 @@ h3 { font-size: 1.05rem; }
             </span>
           </button>
         </div>
-        <div class="user-mini" onclick="toggleStatusMenu(event)">
-          <div class="user-mini-avatar-wrap avatar-fx fx-none" id="sidebar-avatar-fx">
+        <div class="sidebar-profile-panel" id="sidebar-profile-panel">
+          <div class="user-mini-avatar-wrap avatar-fx fx-none" id="sidebar-avatar-fx" onclick="toggleStatusMenu(event)" title="Change status">
             <span class="fx-layer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             <img class="avatar" id="sidebar-user-avatar" src="" alt="" />
             <span class="status-dot online" id="sidebar-status-dot" title="Online"></span>
           </div>
-          <div style="min-width:0">
-            <div class="text-sm" style="font-weight:600" id="sidebar-user-name">—</div>
-            <div class="text-xs text-muted truncate" id="sidebar-user-handle">@—</div>
+          <div class="sp-info" onclick="handleProfileClick(); return false;" title="Open profile">
+            <div class="sp-name" id="sidebar-user-name">—</div>
+            <div class="sp-handle truncate" id="sidebar-user-handle">@—</div>
           </div>
+          <button type="button" class="sidebar-profile-notif" id="sidebar-profile-notif" onclick="event.stopPropagation(); toggleNotifPanel();" title="Notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="sp-badge" id="sidebar-notif-badge">0</span>
+          </button>
         </div>
       </div>
     </aside>
@@ -3813,7 +4053,7 @@ h3 { font-size: 1.05rem; }
         <div class="store-hero">
           <div>
             <h1 style="margin-bottom:0.25rem">Store</h1>
-            <p class="text-secondary text-sm">Spend coins on Nitro, themes, and boosts</p>
+            <p class="text-secondary text-sm">Subscribe to DevFlow Nitro with coins</p>
           </div>
           <div class="store-balance">
             <svg class="coin-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="10" fill="#09090B" font-weight="700">✦</text></svg>
@@ -3834,8 +4074,8 @@ h3 { font-size: 1.05rem; }
         <div class="store-section-title">DevFlow Nitro</div>
         <div class="nitro-grid" id="nitro-grid"></div>
 
-        <div class="store-section-title">More items</div>
-        <div class="store-items-grid" id="store-items-grid"></div>
+        <!-- More items removed — Nitro only -->
+        <div class="store-items-grid hidden" id="store-items-grid"></div>
       </div>
 
       <!-- Profile (Discord-style) -->
@@ -3850,6 +4090,7 @@ h3 { font-size: 1.05rem; }
           <div class="discord-body">
             <div class="discord-name-row">
               <span class="discord-display-name" id="profile-name">—</span>
+              <span id="profile-group-tag-slot"></span>
               <span class="nameplate-wrap nameplate-none" id="profile-nameplate" aria-hidden="true"></span>
             </div>
             <div class="discord-handle-row">
@@ -4052,6 +4293,7 @@ h3 { font-size: 1.05rem; }
         <div class="discord-body">
           <div class="discord-name-row">
             <span class="discord-display-name" id="view-profile-name">—</span>
+            <span id="view-profile-group-tag-slot"></span>
             <span class="nameplate-wrap nameplate-none" id="view-profile-nameplate" aria-hidden="true"></span>
           </div>
           <div class="view-profile-handle-row">
@@ -4925,16 +5167,56 @@ async function renderChatList() {
       // Group chat
       if (data.type === 'group' || String(doc.id).startsWith('group_')) {
         const gId = data.groupId || String(doc.id).replace(/^group_/, '');
-        const gName = data.name || 'Group';
+        let gMeta = {};
+        try {
+          const gSnap = await db().collection('groups').doc(gId).get();
+          if (gSnap.exists) gMeta = gSnap.data() || {};
+        } catch (e) {}
+        const gName = data.name || gMeta.name || 'Group';
         const avatar = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(gId);
         const isUnreadG = UNREAD_CHAT_IDS.includes(doc.id);
+        const gIcon = data.icon || gMeta.icon || avatar;
+        const gTag = data.tag || gMeta.tag || '';
+        const gTagIcon = data.tagIcon || gMeta.tagIcon || '🏷️';
+        const isOwner = (data.createdBy === me) || (gMeta.createdBy === me) || (data.ownerId === me);
+        // fetch createdBy from groups if missing on chat doc
+        const menuId = 'gmenu_' + gId;
+        const tagChip = gTag ? groupTagHtml(gTag, gTagIcon) : '';
+        const ownerMenu = isOwner ? `
+          <button type="button" class="chat-item-menu-btn" id="${menuId}-btn" onclick="toggleChatItemMenu(event,'${menuId}')" title="Group options">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+          </button>
+          <div class="chat-item-menu" id="${menuId}" onclick="event.stopPropagation()">
+            <button type="button" class="chat-menu-item" onclick="openGroupSettings('${gId}','${doc.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Edit name / icon
+            </button>
+            <button type="button" class="chat-menu-item" onclick="openGroupSettings('${gId}','${doc.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              Group tag
+            </button>
+            <button type="button" class="chat-menu-item danger" onclick="deleteChatFromMenu('${doc.id}', true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              Delete
+            </button>
+          </div>` : `
+          <button type="button" class="chat-item-menu-btn" id="${menuId}-btn" onclick="toggleChatItemMenu(event,'${menuId}')" title="Options">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+          </button>
+          <div class="chat-item-menu" id="${menuId}" onclick="event.stopPropagation()">
+            <button type="button" class="chat-menu-item danger" onclick="deleteChatFromMenu('${doc.id}', true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+              Delete
+            </button>
+          </div>`;
         rows.push(`<div class="chat-item${isUnreadG ? ' has-unread' : ''}" onclick="openGroupChat('${gId}','${escapeHtml(gName).replace(/'/g, "\\'")}')">
-          <img class="avatar" src="${avatar}" alt="" />
+          <img class="avatar" src="${gIcon}" alt="" />
           <div style="min-width:0;flex:1">
-            <div style="font-weight:600;font-size:0.9rem">👥 ${escapeHtml(gName)}</div>
+            <div style="font-weight:600;font-size:0.9rem;display:flex;align-items:center;gap:0.25rem;flex-wrap:wrap">👥 ${escapeHtml(gName)}${tagChip}</div>
             <div class="text-xs text-muted truncate">${escapeHtml(data.lastText || 'Group')}</div>
           </div>
           ${isUnreadG ? '<span class="chat-item-unread-dot" title="Unread"></span>' : ''}
+          ${ownerMenu}
         </div>`);
         continue;
       }
@@ -4950,17 +5232,49 @@ async function renderChatList() {
       const avatar = u.avatar || '';
       const fx = validAvatarEffect(u.avatarEffect || 'none');
       const isUnread = UNREAD_CHAT_IDS.includes(doc.id);
-      rows.push(`<div class="chat-item${isUnread ? ' has-unread' : ''}" onclick="openChatWith('${handle}')">
-        <span class="chat-avatar-wrap avatar-fx fx-${fx}">
+      const blocked = isBlockedHandle(handle);
+      let showName = name;
+      let showAvatar = avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + handle);
+      let showFx = fx;
+      if (blocked) {
+        showName = 'Flow User';
+        showAvatar = DEFAULT_FLOW_AVATAR;
+        showFx = 'none';
+      } else {
+        const nick = CHAT_NICKNAMES[String(handle).toLowerCase()];
+        if (nick) showName = nick;
+      }
+      const menuId = 'cmenu_' + String(doc.id).replace(/[^a-zA-Z0-9]/g, '');
+      const dmMenu = `
+        <button type="button" class="chat-item-menu-btn" id="${menuId}-btn" onclick="toggleChatItemMenu(event,'${menuId}')" title="Options">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+        </button>
+        <div class="chat-item-menu" id="${menuId}" onclick="event.stopPropagation()">
+          <button type="button" class="chat-menu-item danger" onclick="deleteChatFromMenu('${doc.id}', false)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            Delete
+          </button>
+          <button type="button" class="chat-menu-item" onclick="openNicknameModal('${String(handle).replace(/'/g, "\\'")}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Nick Name
+          </button>
+          <button type="button" class="chat-menu-item danger" onclick="blockUserFromChat('${String(handle).replace(/'/g, "\\'")}','${otherUid}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
+            Block
+          </button>
+        </div>`;
+      rows.push(`<div class="chat-item${isUnread ? ' has-unread' : ''}${blocked ? ' blocked-peer' : ''}" onclick="openChatWith('${handle}')">
+        <span class="chat-avatar-wrap avatar-fx fx-${showFx}">
           ${fxLayerHtml()}
-          <img class="avatar" src="${avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + handle}" alt="" />
-          <span class="status-dot ${st}" title="${presenceLabel(st)}"></span>
+          <img class="avatar" src="${showAvatar}" alt="" />
+          <span class="status-dot ${blocked ? 'offline' : st}" title="${blocked ? 'Blocked' : presenceLabel(st)}"></span>
         </span>
         <div style="min-width:0;flex:1">
-          <div style="font-weight:600;font-size:0.9rem">${escapeHtml(name)}</div>
+          <div style="font-weight:600;font-size:0.9rem">${escapeHtml(showName)}</div>
           <div class="text-xs text-muted truncate">${escapeHtml(data.lastText || '')}</div>
         </div>
         ${isUnread ? '<span class="chat-item-unread-dot" title="Unread"></span>' : ''}
+        ${dmMenu}
       </div>`);
     }
     el.innerHTML = rows.join('') || '<div class="empty-state" style="padding:2rem 1rem"><p class="text-sm">No chats yet</p></div>';
@@ -5358,6 +5672,7 @@ async function viewUserProfile(handle) {
 
     try { await loadMutualForProfile(peer); } catch (e) { console.warn(e); }
     openModal('modal-view-profile');
+  if (typeof refreshViewProfileTags === 'function') refreshViewProfileTags();
   })().catch(err => showToast('Error', err.message || 'Could not load profile'));
 }
 
@@ -5661,6 +5976,7 @@ async function createGroupChat() {
       groupId: ref.id,
       name,
       members: [me],
+      createdBy: me,
       inviteCode,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       lastText: 'Group created'
@@ -6605,20 +6921,20 @@ function renderDiscordProfile(){
 
 const AVATAR_EFFECTS = [
   { id: 'none', label: 'None', cost: 0 },
-  { id: 'ghost', label: 'Ghost', cost: 20 },
-  { id: 'wave', label: 'Wave', cost: 25 },
-  { id: 'frost', label: 'Frost', cost: 25 },
-  { id: 'sakura', label: 'Sakura', cost: 40 },
-  { id: 'ember', label: 'Ember', cost: 45 },
-  { id: 'spark', label: 'Spark', cost: 50 },
-  { id: 'gold', label: 'Gold', cost: 60 },
-  { id: 'neon', label: 'Neon', cost: 70 },
-  { id: 'midnight', label: 'Midnight', cost: 80 },
-  { id: 'lava', label: 'Lava', cost: 85 },
-  { id: 'aurora', label: 'Aurora', cost: 90 },
-  { id: 'galaxy', label: 'Galaxy', cost: 100 },
-  { id: 'prism', label: 'Prism', cost: 110 },
-  { id: 'nitro', label: 'Nitro', cost: 150 }
+  { id: 'ghost', label: 'Ghost', cost: 80 },
+  { id: 'wave', label: 'Wave', cost: 90 },
+  { id: 'frost', label: 'Frost', cost: 90 },
+  { id: 'sakura', label: 'Sakura', cost: 120 },
+  { id: 'ember', label: 'Ember', cost: 140 },
+  { id: 'spark', label: 'Spark', cost: 150 },
+  { id: 'gold', label: 'Gold', cost: 180 },
+  { id: 'neon', label: 'Neon', cost: 200 },
+  { id: 'midnight', label: 'Midnight', cost: 220 },
+  { id: 'lava', label: 'Lava', cost: 240 },
+  { id: 'aurora', label: 'Aurora', cost: 260 },
+  { id: 'galaxy', label: 'Galaxy', cost: 300 },
+  { id: 'prism', label: 'Prism', cost: 320 },
+  { id: 'nitro', label: 'Nitro', cost: 400 }
 ];
 
 function loadUnlockedEffects() {
@@ -6977,6 +7293,11 @@ function renderSkillsOnDashboard(){
 /* Navigation */
 function navigate(page){
   if(!isLoggedIn && !currentUser && page!=='landing'){ openModal('modal-auth'); return; }
+  
+  if (page === 'profile' && currentUser && currentUser.uid && typeof loadProfileGroupTags === 'function') {
+    loadProfileGroupTags(currentUser.uid, 'profile-group-tag-slot');
+  }
+
   document.querySelectorAll('.page-view').forEach(p=>p.classList.add('hidden'));
   document.getElementById('page-'+page)?.classList.remove('hidden');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -8736,6 +9057,14 @@ async function sendFriendRequestFromView() {
   showToast('Friend request sent', 'Waiting for @' + handle);
 }
 
+async function refreshViewProfileTags() {
+  const uid = viewingProfilePeer && viewingProfilePeer.uid;
+  if (uid && typeof loadProfileGroupTags === 'function') {
+    await loadProfileGroupTags(uid, 'view-profile-group-tag-slot');
+  }
+}
+window.refreshViewProfileTags = refreshViewProfileTags;
+
 function updateViewFriendButton() {
   const btn = document.getElementById('view-profile-friend-btn');
   if (!btn || !viewingProfilePeer) return;
@@ -8803,7 +9132,7 @@ const NITRO_TIERS = [
     id: 'month',
     label: '1 Month',
     months: 1,
-    cost: 50,
+    cost: 200,
     tier: 'bronze',
     color: '#F97316',
     gradient: 'linear-gradient(135deg,#F97316,#EA580C)',
@@ -8814,38 +9143,38 @@ const NITRO_TIERS = [
     id: 'quarter',
     label: '3 Months',
     months: 3,
-    cost: 130,
+    cost: 500,
     tier: 'silver',
     color: '#D1D5DB',
     gradient: 'linear-gradient(135deg,#E5E7EB,#9CA3AF)',
     tagline: 'Silver Nitro',
     perks: ['Silver badge', 'All 1-month perks', 'Custom status longer', 'Priority in search'],
-    save: 'Save 13%'
+    save: 'Save 17%'
   },
   {
     id: 'half',
     label: '6 Months',
     months: 6,
-    cost: 240,
+    cost: 900,
     tier: 'gold',
     color: '#FBBF24',
     gradient: 'linear-gradient(135deg,#FDE68A,#F59E0B)',
     tagline: 'Gold Nitro',
     perks: ['Gold badge', 'All previous perks', 'Exclusive Gold glow', '2× streak freeze'],
-    save: 'Save 20%',
+    save: 'Save 25%',
     featured: true
   },
   {
     id: 'year',
     label: '1 Year',
     months: 12,
-    cost: 420,
-    tier: 'diamond',
-    color: '#3B82F6',
-    gradient: 'linear-gradient(135deg,#60A5FA,#2563EB)',
-    tagline: 'Diamond Nitro',
-    perks: ['Blue badge', 'All perks unlocked', 'Yearly exclusive frame', 'Founder-style boost'],
-    save: 'Save 30%'
+    cost: 1500,
+    tier: 'platinum',
+    color: '#E5E7EB',
+    gradient: 'linear-gradient(135deg,#F3F4F6,#9CA3AF)',
+    tagline: 'Platinum Nitro',
+    perks: ['Platinum badge', 'All perks unlocked', 'Yearly exclusive frame', 'Founder-style boost'],
+    save: 'Save 37%'
   }
 ];
 
@@ -9128,17 +9457,17 @@ const NAMEPLATES = [
   { id: 'void', label: 'Void', cost: 0 },
   { id: 'anime', label: 'Anime', cost: 0 },
   /* Paid */
-  { id: 'galaxy', label: 'Galaxy', cost: 25 },
-  { id: 'fire', label: 'Fire', cost: 30 },
-  { id: 'gold', label: 'Gold', cost: 40 },
-  { id: 'neon', label: 'Neon', cost: 45 },
-  { id: 'royal', label: 'Royal', cost: 50 },
-  { id: 'ember', label: 'Ember', cost: 35 },
-  { id: 'matrix', label: 'Matrix', cost: 55 },
-  { id: 'prism', label: 'Prism', cost: 60 },
-  { id: 'aurora', label: 'Aurora', cost: 70 },
-  { id: 'lava', label: 'Lava', cost: 65 },
-  { id: 'crystal', label: 'Crystal', cost: 80 }
+  { id: 'galaxy', label: 'Galaxy', cost: 120 },
+  { id: 'fire', label: 'Fire', cost: 140 },
+  { id: 'gold', label: 'Gold', cost: 180 },
+  { id: 'neon', label: 'Neon', cost: 200 },
+  { id: 'royal', label: 'Royal', cost: 220 },
+  { id: 'ember', label: 'Ember', cost: 150 },
+  { id: 'matrix', label: 'Matrix', cost: 240 },
+  { id: 'prism', label: 'Prism', cost: 260 },
+  { id: 'aurora', label: 'Aurora', cost: 280 },
+  { id: 'lava', label: 'Lava', cost: 250 },
+  { id: 'crystal', label: 'Crystal', cost: 320 }
 ];
 
 function getUnlockedNameplates() {
@@ -9649,7 +9978,7 @@ function buyNitro(tierId) {
   const base = existing && existing.expiresAt > Date.now() ? existing.expiresAt : Date.now();
   const ms = tier.months * 30 * 24 * 60 * 60 * 1000;
   // If upgrading to higher tier, use new tier; if same or lower, keep higher visual if existing is higher
-  const rank = { bronze: 1, silver: 2, gold: 3, diamond: 4 };
+  const rank = { bronze: 1, silver: 2, gold: 3, platinum: 4, diamond: 5 };
   let nextTier = tier.tier;
   if (existing && rank[existing.tier] > rank[tier.tier] && existing.expiresAt > Date.now()) {
     nextTier = existing.tier;
@@ -9861,6 +10190,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if (typeof applyNitroUI === 'function') applyNitroUI();
   if (typeof applyOwnPrivacyUI === 'function') applyOwnPrivacyUI();
   if (typeof applyOwnNameStyle === 'function') applyOwnNameStyle();
+  if (typeof syncSidebarNotifBadge === 'function') syncSidebarNotifBadge();
 });
 
 window.navigate=navigate; window.openModal=openModal; window.closeModal=closeModal;
@@ -9909,6 +10239,322 @@ window.openSettingsModal=openSettingsModal; window.togglePrivateAccount=togglePr
 window.openBlockedModal=openBlockedModal; window.unblockUser=unblockUser;
 window.sendFriendRequestFromView=sendFriendRequestFromView; window.blockUserFromView=blockUserFromView;
  window.onEditThemeColorInput=onEditThemeColorInput; window.onEditThemeHexInput=onEditThemeHexInput; window.onEditThemePairInput=onEditThemePairInput; window.resetEditThemeColor=resetEditThemeColor; window.applyProfileTheme=applyProfileTheme;
+
+/* ========== Group tags, chat menus, block display ========== */
+const GROUP_TAG_COST = 350;
+const DEFAULT_FLOW_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=FlowUser&backgroundColor=b6e3f4';
+
+const TAG_ICONS = [
+  '🏷️','⭐','🔥','💎','🚀','🎯','⚡','🌙','☀️','🌸',
+  '🍀','🎮','📚','💻','🛠️','🎨','🎵','🏆','👑','💜',
+  '💙','💚','🧡','❤️','🖤','✨','🌈','🌊','❄️','🪐',
+  '🛸','🐱','🦊','🐺','🐉','⚔️','🛡️','🔮','📌','🔔'
+];
+
+let pendingGroupEdit = null; // { groupId, chatId, name, icon, tag, tagIcon, createdBy }
+let pendingNicknamePeer = null;
+let pendingTagIcon = '🏷️';
+let CHAT_NICKNAMES = {};
+try { CHAT_NICKNAMES = JSON.parse(lsGet('chat_nicks', '{}') || '{}'); } catch(e) { CHAT_NICKNAMES = {}; }
+
+function saveChatNicks() {
+  lsSet('chat_nicks', JSON.stringify(CHAT_NICKNAMES || {}));
+}
+
+function closeAllChatMenus() {
+  document.querySelectorAll('.chat-item-menu.open').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.chat-item-menu-btn.open').forEach(b => b.classList.remove('open'));
+}
+
+function toggleChatItemMenu(ev, menuId) {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  const menu = document.getElementById(menuId);
+  const btn = document.getElementById(menuId + '-btn');
+  const wasOpen = menu && menu.classList.contains('open');
+  closeAllChatMenus();
+  if (!wasOpen && menu) {
+    menu.classList.add('open');
+    if (btn) btn.classList.add('open');
+  }
+}
+
+document.addEventListener('click', function() { closeAllChatMenus(); });
+
+function groupTagHtml(tag, tagIcon) {
+  if (!tag) return '';
+  const icon = tagIcon || '🏷️';
+  return '<span class="group-tag" title="Group tag"><span class="gt-icon" style="font-size:12px;line-height:1">' + icon + '</span><span class="gt-label">' + escapeHtml(tag) + '</span></span>';
+}
+
+function isBlockedHandle(handle) {
+  return typeof isBlocked === 'function' && isBlocked(handle);
+}
+
+function flowUserDisplay(handle) {
+  return { name: 'Flow User', avatar: DEFAULT_FLOW_AVATAR, handle: handle };
+}
+
+async function openGroupSettings(groupId, chatId) {
+  closeAllChatMenus();
+  if (!fbReady() || !auth().currentUser) return;
+  try {
+    const gDoc = await db().collection('groups').doc(groupId).get();
+    const d = gDoc.exists ? (gDoc.data() || {}) : {};
+    const me = auth().currentUser.uid;
+    if (d.createdBy && d.createdBy !== me) {
+      showToast('Owner only', 'Only the group creator can edit settings');
+      return;
+    }
+    pendingGroupEdit = {
+      groupId,
+      chatId: chatId || ('group_' + groupId),
+      name: d.name || 'Group',
+      icon: d.icon || '',
+      tag: d.tag || '',
+      tagIcon: d.tagIcon || '🏷️',
+      createdBy: d.createdBy || me
+    };
+    pendingTagIcon = pendingGroupEdit.tagIcon || '🏷️';
+    const nameIn = document.getElementById('edit-group-name-input');
+    if (nameIn) nameIn.value = pendingGroupEdit.name;
+    const tagIn = document.getElementById('edit-group-tag-input');
+    if (tagIn) tagIn.value = pendingGroupEdit.tag || '';
+    const prev = document.getElementById('edit-group-icon-preview');
+    if (prev) prev.src = pendingGroupEdit.icon || ('https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(groupId));
+    const iconBtn = document.getElementById('group-tag-icon-btn');
+    if (iconBtn) iconBtn.textContent = pendingTagIcon;
+    const picker = document.getElementById('tag-icon-picker');
+    if (picker) { picker.classList.add('hidden'); picker.innerHTML = ''; }
+    openModal('modal-group-options');
+  } catch (e) {
+    showToast('Error', e.message || 'Could not load group');
+  }
+}
+
+function toggleTagIconPicker() {
+  const picker = document.getElementById('tag-icon-picker');
+  if (!picker) return;
+  if (!picker.classList.contains('hidden')) {
+    picker.classList.add('hidden');
+    return;
+  }
+  picker.innerHTML = TAG_ICONS.map(function(ic) {
+    const active = ic === pendingTagIcon ? ' active' : '';
+    return '<button type="button" class="tag-icon-btn' + active + '" onclick="selectTagIcon(\'' + ic + '\')">' + ic + '</button>';
+  }).join('');
+  picker.classList.remove('hidden');
+}
+
+function selectTagIcon(ic) {
+  pendingTagIcon = ic;
+  const btn = document.getElementById('group-tag-icon-btn');
+  if (btn) btn.textContent = ic;
+  document.querySelectorAll('#tag-icon-picker .tag-icon-btn').forEach(function(b) {
+    b.classList.toggle('active', b.textContent === ic);
+  });
+}
+
+function onGroupIconSelected(ev) {
+  const file = ev.target && ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (file.size > 400000) {
+    showToast('Too large', 'Icon max ~400KB');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function() {
+    if (pendingGroupEdit) pendingGroupEdit.icon = reader.result;
+    const prev = document.getElementById('edit-group-icon-preview');
+    if (prev) prev.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveGroupOptions() {
+  if (!pendingGroupEdit || !fbReady() || !auth().currentUser) return;
+  const name = (document.getElementById('edit-group-name-input')?.value || '').trim();
+  const tag = (document.getElementById('edit-group-tag-input')?.value || '').trim();
+  if (!name || name.length < 2) {
+    showToast('Name required', 'Min 2 characters');
+    return;
+  }
+  const oldTag = pendingGroupEdit.tag || '';
+  const tagChanged = tag && tag !== oldTag;
+  const tagCleared = !tag && oldTag;
+  if (tagChanged) {
+    if (!spendCoins(GROUP_TAG_COST, 'Group tag: ' + tag)) return;
+  }
+  const payload = {
+    name: name,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if (pendingGroupEdit.icon) payload.icon = pendingGroupEdit.icon;
+  if (tag) {
+    payload.tag = tag;
+    payload.tagIcon = pendingTagIcon || '🏷️';
+  } else if (tagCleared) {
+    payload.tag = null;
+    payload.tagIcon = null;
+  }
+  try {
+    await db().collection('groups').doc(pendingGroupEdit.groupId).set(payload, { merge: true });
+    await db().collection('chats').doc(pendingGroupEdit.chatId).set({
+      name: name,
+      icon: pendingGroupEdit.icon || null,
+      tag: tag || null,
+      tagIcon: tag ? (pendingTagIcon || '🏷️') : null,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    closeModal('modal-group-options');
+    showToast('Group updated', name + (tag ? ' · tag ' + tag : ''));
+    renderChatList();
+    if (String(activePeerUid || '') === 'group_' + pendingGroupEdit.groupId) {
+      openGroupChat(pendingGroupEdit.groupId, name);
+    }
+  } catch (e) {
+    showToast('Failed', e.message || 'Save failed');
+  }
+}
+
+async function deleteChatFromMenu(chatId, isGroup) {
+  closeAllChatMenus();
+  if (!fbReady() || !auth().currentUser) return;
+  if (!confirm(isGroup ? 'Leave / hide this group chat from your list?' : 'Delete this chat from your list?')) return;
+  const me = auth().currentUser.uid;
+  try {
+    const ref = db().collection('chats').doc(chatId);
+    const snap = await ref.get();
+    if (snap.exists) {
+      const members = (snap.data().members || []).filter(function(id) { return id !== me; });
+      if (isGroup) {
+        await ref.set({ members: members, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        const gId = String(chatId).replace(/^group_/, '');
+        try {
+          const gRef = db().collection('groups').doc(gId);
+          const gSnap = await gRef.get();
+          if (gSnap.exists) {
+            const gm = (gSnap.data().members || []).filter(function(id) { return id !== me; });
+            await gRef.set({ members: gm }, { merge: true });
+          }
+        } catch (e) {}
+      } else {
+        // soft-delete for self: remove from members
+        await ref.set({ members: members, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+    }
+    if (String(activePeerUid || '') === chatId || (isGroup && String(activePeerUid || '') === chatId)) {
+      document.getElementById('chat-active') && (document.getElementById('chat-messages').innerHTML = '');
+    }
+    showToast('Removed', 'Chat removed from your list');
+    renderChatList();
+  } catch (e) {
+    showToast('Failed', e.message || 'Could not delete');
+  }
+}
+
+function openNicknameModal(handle) {
+  closeAllChatMenus();
+  pendingNicknamePeer = handle;
+  const inp = document.getElementById('nickname-input');
+  if (inp) inp.value = CHAT_NICKNAMES[String(handle).toLowerCase()] || '';
+  openModal('modal-nickname');
+}
+
+function saveNickname() {
+  if (!pendingNicknamePeer) return;
+  const v = (document.getElementById('nickname-input')?.value || '').trim();
+  const key = String(pendingNicknamePeer).toLowerCase();
+  if (v) CHAT_NICKNAMES[key] = v;
+  else delete CHAT_NICKNAMES[key];
+  saveChatNicks();
+  closeModal('modal-nickname');
+  showToast('Nickname', v || 'Cleared');
+  renderChatList();
+}
+
+async function blockUserFromChat(handle, uid) {
+  closeAllChatMenus();
+  if (!handle) return;
+  if (typeof isBlocked === 'function' && isBlocked(handle)) {
+    showToast('Already blocked', '@' + handle);
+    return;
+  }
+  BLOCKED.unshift({
+    handle: handle,
+    name: 'Flow User',
+    avatar: DEFAULT_FLOW_AVATAR,
+    uid: uid || null,
+    at: Date.now()
+  });
+  const fi = FRIENDS.findIndex(function(f) { return String(f.handle).toLowerCase() === String(handle).toLowerCase(); });
+  if (fi >= 0) FRIENDS.splice(fi, 1);
+  if (typeof saveFriends === 'function') saveFriends();
+  if (typeof saveBlocked === 'function') saveBlocked();
+  showToast('Blocked', 'Chat will show as Flow User');
+  renderChatList();
+}
+
+function syncSidebarNotifBadge() {
+  const badge = document.getElementById('sidebar-notif-badge');
+  const topBadge = document.querySelector('#notif-btn .badge');
+  let n = 0;
+  try {
+    if (typeof NOTIFICATIONS !== 'undefined' && Array.isArray(NOTIFICATIONS)) {
+      n = NOTIFICATIONS.filter(function(x) { return !x.read; }).length;
+    }
+  } catch (e) {}
+  if (badge) {
+    badge.textContent = String(n);
+    badge.classList.toggle('visible', n > 0);
+  }
+  if (topBadge) {
+    topBadge.textContent = String(n);
+    topBadge.style.display = n > 0 ? '' : 'none';
+  }
+}
+
+// Patch updateNotifBadge if exists
+const _origUpdateNotifBadge = typeof updateNotifBadge === 'function' ? updateNotifBadge : null;
+window.updateNotifBadge = function() {
+  if (_origUpdateNotifBadge) _origUpdateNotifBadge();
+  syncSidebarNotifBadge();
+};
+
+window.openGroupSettings = openGroupSettings;
+window.toggleTagIconPicker = toggleTagIconPicker;
+window.selectTagIcon = selectTagIcon;
+window.onGroupIconSelected = onGroupIconSelected;
+window.saveGroupOptions = saveGroupOptions;
+window.deleteChatFromMenu = deleteChatFromMenu;
+window.openNicknameModal = openNicknameModal;
+window.saveNickname = saveNickname;
+window.blockUserFromChat = blockUserFromChat;
+window.toggleChatItemMenu = toggleChatItemMenu;
+window.groupTagHtml = groupTagHtml;
+window.syncSidebarNotifBadge = syncSidebarNotifBadge;
+
+async function loadProfileGroupTags(uid, slotId) {
+  const slot = document.getElementById(slotId);
+  if (!slot) return;
+  slot.innerHTML = '';
+  if (!uid || !fbReady()) return;
+  try {
+    const snap = await db().collection('groups').where('members', 'array-contains', uid).limit(12).get();
+    const tags = [];
+    snap.forEach(function(doc) {
+      const d = doc.data() || {};
+      if (d.tag) tags.push({ tag: d.tag, icon: d.tagIcon || '🏷️', name: d.name || 'Group' });
+    });
+    if (!tags.length) return;
+    slot.innerHTML = tags.slice(0, 3).map(function(t) {
+      return groupTagHtml(t.tag, t.icon);
+    }).join('');
+  } catch (e) {}
+}
+window.loadProfileGroupTags = loadProfileGroupTags;
+
+
+
 
   </script>
 
@@ -9976,6 +10622,69 @@ window.sendFriendRequestFromView=sendFriendRequestFromView; window.blockUserFrom
       </div>
       <div class="modal-body">
         <div class="blocked-list" id="blocked-list"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Group options / edit -->
+  <div class="modal-overlay" id="modal-group-options">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <h2>Group settings</h2>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-group-options')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Group name</label>
+          <input class="form-input" id="edit-group-name-input" maxlength="40" placeholder="Group name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Group icon (image URL or upload)</label>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <img id="edit-group-icon-preview" src="" alt="" style="width:48px;height:48px;border-radius:12px;object-fit:cover;background:#27272A;border:1px solid var(--border)" />
+            <input type="file" id="edit-group-icon-input" accept="image/*" style="display:none" onchange="onGroupIconSelected(event)" />
+            <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('edit-group-icon-input').click()">Change icon</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Group tag <span class="text-xs text-muted">(✦ 350 coins · shows next to name)</span></label>
+          <div class="tag-name-row">
+            <button type="button" class="tag-icon-trigger" id="group-tag-icon-btn" onclick="toggleTagIconPicker()" title="Pick tag icon">🏷️</button>
+            <input id="edit-group-tag-input" maxlength="24" placeholder="Tag name (e.g. Core)" />
+          </div>
+          <div class="tag-icon-picker hidden" id="tag-icon-picker"></div>
+          <p class="text-xs text-muted" style="margin-top:0.45rem">Tag appears beside the group name for all members, and on profiles of members in this group.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-group-options')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveGroupOptions()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nickname modal -->
+  <div class="modal-overlay" id="modal-nickname">
+    <div class="modal" style="max-width:380px">
+      <div class="modal-header">
+        <h2>Nickname</h2>
+        <button class="icon-btn" style="width:32px;height:32px;border:none;background:transparent" onclick="closeModal('modal-nickname')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nickname for this chat</label>
+          <input class="form-input" id="nickname-input" maxlength="32" placeholder="Local nickname" />
+          <p class="text-xs text-muted" style="margin-top:0.35rem">Only you see this nickname in your chat list.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-nickname')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNickname()">Save</button>
       </div>
     </div>
   </div>
