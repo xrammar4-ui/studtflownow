@@ -995,6 +995,8 @@ h3 { font-size: 1.05rem; }
   border-radius: 50%;
   background: var(--success);
   border: 4px solid var(--bg-card);
+  box-sizing: border-box;
+  z-index: 3;
 }
 .discord-body {
   padding: 12px 22px 22px;
@@ -2157,11 +2159,95 @@ h3 { font-size: 1.05rem; }
   z-index: 3;
 }
 
-.discord-avatar-status.online { background: #23A55A; }
-.discord-avatar-status.idle { background: #F0B232; }
-.discord-avatar-status.dnd { background: #F23F43; }
+/* Discord-style status shapes (not plain dots) */
+.discord-avatar-status,
+.status-dot {
+  overflow: visible;
+  position: absolute;
+}
+.discord-avatar-status::before,
+.discord-avatar-status::after,
+.status-dot::before,
+.status-dot::after {
+  content: none;
+  pointer-events: none;
+}
+
+/* Online — solid green circle */
+.discord-avatar-status.online { background: #23A55A !important; }
+.status-dot.online { background: #23A55A !important; }
+
+/* Idle — yellow + dark crescent (moon) */
+.discord-avatar-status.idle {
+  background: #F0B232 !important;
+}
+.discord-avatar-status.idle::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-card, #18181B);
+}
+.status-dot.idle {
+  background: #F0B232 !important;
+}
+.status-dot.idle::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bg-elevated, #0F0F12);
+}
+
+/* DND — red + horizontal bar */
+.discord-avatar-status.dnd {
+  background: #F23F43 !important;
+}
+.discord-avatar-status.dnd::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 3.5px;
+  border-radius: 2px;
+  background: var(--bg-card, #18181B);
+}
+.status-dot.dnd {
+  background: #F23F43 !important;
+}
+.status-dot.dnd::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--bg-elevated, #0F0F12);
+}
+
+/* Offline / Invisible — hollow gray ring */
 .discord-avatar-status.invisible,
-.discord-avatar-status.offline { background: #80848E; }
+.discord-avatar-status.offline {
+  background: transparent !important;
+  border: 4px solid var(--bg-card, #18181B) !important;
+  box-shadow: inset 0 0 0 3px #80848E;
+}
+.status-dot.invisible,
+.status-dot.offline {
+  background: transparent !important;
+  border: 2.5px solid var(--bg-elevated, #0F0F12) !important;
+  box-shadow: inset 0 0 0 2px #80848E;
+}
 
 .status-menu {
   position: absolute;
@@ -5023,6 +5109,21 @@ function chatRoomId(a, b) {
 
 function publicPresence(d) {
   d = d || {};
+  // Treat presence as offline if heartbeat is stale (beat every ~4s)
+  var lastMs = 0;
+  if (d.lastSeen) {
+    if (typeof d.lastSeen.toDate === 'function') {
+      try { lastMs = d.lastSeen.toDate().getTime(); } catch (e) { lastMs = 0; }
+    } else if (typeof d.lastSeen.seconds === 'number') {
+      lastMs = d.lastSeen.seconds * 1000;
+    } else if (typeof d.lastSeen === 'number') {
+      lastMs = d.lastSeen;
+    } else {
+      lastMs = +new Date(d.lastSeen) || 0;
+    }
+  }
+  var STALE_MS = 25000;
+  if (!lastMs || (Date.now() - lastMs > STALE_MS)) return 'offline';
   if (d.status === 'invisible' || d.online === false) return 'offline';
   if (d.status === 'idle' || d.status === 'dnd' || d.status === 'online') return d.status;
   return d.online === true ? 'online' : 'offline';
@@ -5104,6 +5205,7 @@ async function setOffline() {
     await db().collection('presence').doc(auth().currentUser.uid).set({
       online: false,
       activeChat: null,
+      // keep chosen status in doc, but force offline flag for others
       lastSeen: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
   } catch (e) {}
@@ -5159,7 +5261,10 @@ function updatePeerStatusFromPresence(uid) {
     const d = snap.data() || {};
     const status = publicPresence(d);
     stEl.textContent = presenceLabel(status).toLowerCase();
-    stEl.className = 'text-xs ' + (status === 'online' ? 'chat-peer-online' : 'chat-peer-offline');
+    stEl.className = 'text-xs ' + ((status === 'online' || status === 'idle' || status === 'dnd') ? 'chat-peer-online' : 'chat-peer-offline');
+    if (status === 'idle') stEl.style.color = '#F0B232';
+    else if (status === 'dnd') stEl.style.color = '#F23F43';
+    else stEl.style.color = '';
     const dot = document.getElementById('chat-peer-status-dot');
     if (dot) {
       dot.className = 'status-dot ' + status;
@@ -6026,11 +6131,15 @@ async function viewUserProfile(handle) {
     try {
       if (peer.uid && typeof db === 'function') {
         const pres = await db().collection('presence').doc(peer.uid).get();
-        const online = (pres.data() || {}).online === true;
+        const st = (typeof publicPresence === 'function')
+          ? publicPresence(pres.data() || {})
+          : ((pres.data() || {}).online === true ? 'online' : 'offline');
         const dot = document.getElementById('view-profile-status-dot');
         if (dot) {
-          dot.style.background = online ? 'var(--success)' : '#71717A';
-          dot.title = online ? 'Online' : 'Offline';
+          dot.className = 'discord-avatar-status ' + st;
+          dot.style.background = '';
+          dot.style.removeProperty('background');
+          dot.title = (typeof presenceLabel === 'function') ? presenceLabel(st) : st;
         }
       }
     } catch (e) {}
@@ -7267,15 +7376,20 @@ function highlightActiveStatus(){
 }
 function applyUserStatusUI(){
   const status = USER_STATUS || 'online';
+  // Own UI: invisible shows as gray offline-style; others keep their colors
+  const visual = status === 'invisible' ? 'invisible' : status;
   const meta = STATUS_META[status] || STATUS_META.online;
   const sidebarDot = document.getElementById('sidebar-status-dot');
   if(sidebarDot){
-    sidebarDot.className = 'status-dot ' + status;
+    sidebarDot.className = 'status-dot ' + visual;
+    sidebarDot.style.background = '';
     sidebarDot.title = meta.title;
   }
   const profileDot = document.getElementById('profile-status-dot');
   if(profileDot){
-    profileDot.className = 'discord-avatar-status ' + status;
+    profileDot.className = 'discord-avatar-status ' + visual;
+    profileDot.style.background = '';
+    profileDot.style.removeProperty('background');
     profileDot.title = meta.title;
   }
   highlightActiveStatus();
