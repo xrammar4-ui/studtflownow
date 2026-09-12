@@ -1,3 +1,6 @@
-.span {
-text-align: center;
+.container {
+    display: flex;
+    justify-content: center; /* التوسيط الأفقي */
+    align-items: center;     /* التوسيط العمودي */
+    height: 100px;           /* مثال على تحديد طول المربع */
 }
